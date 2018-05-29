@@ -1,0 +1,17 @@
+<SystemeCoord>
+         <BSC>
+            <TypeCoord>  eTC_RTL </TypeCoord>
+
+            <AuxR> 13.94812248	  </AuxR>
+            <AuxR> 45.82937609 </AuxR>
+            <AuxR> 288.389   </AuxR>
+         </BSC>
+
+         <BSC>
+            <TypeCoord>  eTC_WGS84 </TypeCoord>
+            <AuxRUnite> eUniteAngleDegre </AuxRUnite>
+         </BSC>
+
+</SystemeCoord>
+
+
