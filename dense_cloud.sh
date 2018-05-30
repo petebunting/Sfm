@@ -35,12 +35,17 @@ mm3d ChgSysCo  ".*JPG" All-RTL SysCoRTL.xml@$3 All-UTM;
 # I wonder if it is worth using
 mm3d Pims MicMac ".*JPG" All-UTM DefCor=0 FilePair=FileImagesNeighbour.xml;
 
-#mm3d Pims2Ply MicMac Out=Final.ply; 
+
 
 # DEM (PIMs-Merged_Prof.tif) is produced in the  PIMS-Tmp-Basc folder 
 mm3d Pims2MNT MicMac DoOrtho=1;
 
+# Tawny is a bit unreliable - when the image gets big - it seems to produce a
+# header and subtiles (the header can't be opened in QGIS)
 mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif;
 
+# This seems to fail when it gets big....
+#mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif Out=pointcloud.ply
 
-mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif Out=pointcloud.ply
+# Perhaps this'd be better
+mm3d Pims2Ply MicMac Out=Final.ply

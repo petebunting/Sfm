@@ -1,0 +1,52 @@
+Micmac Vs Photoscan
+
+I have been working with MicMac for years, I discovered PhotoScan two years ago. Same opinion as most of you, it's a good interfaced, fast and robust solution but the lack of settings and the black box aspect is a little off for a fervent user of open source solution.
+I recently participated in a CIPA training "sponsored" by Agisoft, the perfect opportunity to understand how PhotoScan works to transmit you these next elements of comparison.
+
+Tapioca VS Align Photos (part 1):
+Net advantage PhotoScan for speed / robustness but which can be subject to reserve that it is possible to obtain an almost probable result on a glass of water ...
+
+Quality> High = Image size divided by 2 (a scale factor of 4)
+Middle = divided by 4 (factor 16)
+Low = divided by 8 (factor 64)
+
+Pair Selection: Disable = All / Generic = Line
+
+For example, for 4000x2000 images:
+Align Photo> Middle> Disable would be tantamount to Tapioca All 500
+
+No mode MulScale therefore, but given the speed of their solution we can not hold them to rigor ...
+No full-res mode (-1 in MicMac language)
+
+Tapas VS Align Photos (part 2):
+By displaying the PhotoScan console, at the end of the process we see that their algo works with 7 parameters (2 for the focal length, 2 for the main point and 3 for the radial distortion). This gives us a Tapas equivalent, closer to RadialBasic than RadialExtended (maybe RadialStd ...?).
+Go to Tools> Camera Calibration to see the corrected values ​​frame by frame.
+Tools> Optimize Cameras to change the calibration model to an equivalent Tapas
+
+Finally in the References tab, hidden to the right, are the residues (reprojection error in pixels), they are present, but we must get this crucial information to judge the quality of a calculation!
+Projection gives the number of homologous points on which the calculation was performed.
+
+It should be known that PhotoScan works by default with a model of "weak" correction, and that the information to evaluate the quality of the result, are not directly proposed to the user.
+As an example, while the AperiCloud extracts all the homologous points on each image allowing to visually validate a result or on the contrary to detect a problem, PhotoScan filters them, yes but how?
+
+MicMac / Malt / C3DC VS Dense Cloud Build:
+We notice that three tools (manual / semiauto / automatic) plus a plethora of options and settings are facing a very opaque command.
+You should know that PhotoScan works (apriori) exclusively epipolar, so the calculation time can be long or very long depending on the number of photos. The comparison with MicMac is only possible with a C3DC Statue.
+
+Quality (we could obviously discuss the choice of this term, which can be misleading for a novice user) but it is actually a density setting similar to that proposed in the alignment step:
+Ultra High = ZoomF1! (1 point per pixel)
+High = ZoomF2 (1pt for 4 pixels)
+Medium = ZoomF4 (1pt for 16 px)
+Low = ZoomF8 (1pt for 64px)
+Lowest = ZoomF16 (1pt for 256px)
+
+Filtering, it might be a little more info from MPD to know if and how is applied filtering with the Statue mode. But knowing the philosophy of MicMac, it is better a lack of data than a data erronée, I think it would be necessary to disable the filtering in PhotoScan to guarantee a comparison of the data ...? ...
+However, to understand the action of this option, Agressive applies to complex geometries and Disabled to a very planar object. To know then that Agiloft hears by filtering (outliers, interpolation, management of the noise ...), mystery ...
+
+Let's say that the rest as the mesh, overflowing a little of the initial problematic ... But to have a little digging the question with the trainers who worked with the developers, the mesh at Agisoft is a recipe well kept! It seems that it is adapted to the case by case (cloud density, presence of outliers ...), sometimes fish, sometimes something else but again, the only one who does not know is the user ...
+
+In fact it summarizes a little, the philosophy of PhotoScan, robustness foolproof for a result cost that listens and visually always satisfactory. However to guarantee the fidelity of the result, it is necessary to know to dig and accept the part of unknown when one uses a commercial solution.
+
+I hope that these answers will help those who want to deepen an objective and fair comparison between the two solutions!
+
+@Erwan: In case of lack of hook, it is possible to activate an interesting feature of MicMac, it is a little hidden but has the merit to exist, see the documentation Advance Tie Points! 

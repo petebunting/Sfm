@@ -13,15 +13,19 @@ mm3d OriConvert OriTxtInFile $1 Nav-Brut-RTL ChSys=DegreeWGS84@SysCoRTL.xml MTD1
 
 mm3d Tapioca File FileImagesNeighbour.xml $2;
 
-mm3d Schnaps ".*JPG";
+mm3d Schnaps ".*JPG" VeryStrict=1;
 
-calib_subset.py -csv $1; 
+# This should work now, but not sure whether the incal will work with tapas
+#calib_subset.py -csv $1; 
 
-mm3d Tapas RadialBasic ".*JPG" Out=All-Rel SH=_mini InCal=Sample4Calib-Rel
+mm3d Tapas $3 ".*JPG" Out=All-Rel SH=_mini #InCal=Sample4Calib-Rel
+
+# TODO get rid vignette
+#mm3d Vodka ".*JPG"
 
 mm3d AperiCloud ".*JPG" All-Rel;
 
-meshlab AperiCloud_All-Rel.ply
+#meshlab AperiCloud_All-Rel.ply
 
 # Next calculate the movement during camera execution to edit the cloud in next command
 # this is for lever arm compensation
