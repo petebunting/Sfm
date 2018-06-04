@@ -92,15 +92,17 @@ Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif
 mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif Out=pointcloud.ply;
 
 # OR
-mm3d C3DC MicMac ".*JPG" MEP-Terrain Out=C3DC_MicMac.ply
+mm3d C3DC MicMac ".*JPG" MEP-Terrain Out=C3DC_MicMac.ply 
 
 # OSSIM - BASED MOSAICING ----------------------------------------------------------------------------
 # Just here as an alternative for putting together tiles 
+# gdalwarp -t_srs EPSG:32617 -s_srs EPSG:4326 *Ort**.tif
 # Create some image histograms for ossim
 #ossim-create-histo -i *Ort**.tif;
 
+# Unfortunately have to reproject all the bloody images for OSSIM to understand ie espg4326
 # Basic ortho with ossim is:
-#ossim-orthoigen *Ort**.tif mosaic.tif;
+#ossim-orthoigen *Ort**.tif mosaic_plain.tif;
 
 # Or more options
 # Here am feathering edges and matching histogram to specific image - produced most pleasing result
