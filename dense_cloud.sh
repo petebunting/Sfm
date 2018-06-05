@@ -44,9 +44,12 @@ mm3d Pims2Ply MicMac Out=Final.ply;
 mm3d Pims2MNT MicMac DoOrtho=1 UseTA=1;
 
 # Erm this throws an error claiming a lack of some file with DoMnt=0 annoyingly
+# this is an attempt to fill gaps
 #mm3d Pims2MNT MicMac DoOrtho=1 DoMnt=0 UseTA=1;
 
-mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif;
+mm3d Tawny PIMs-ORTHO/ DEq=2 Out=Orthophotomosaic.tif;
+
+# CorThr=0.7 (default correlation for tawny) 
 
 # Now we do the DSM
 #DEM (PIMs-Merged_Prof.tif) is produced in the  PIMS-Tmp-Basc folder 
@@ -55,14 +58,29 @@ mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif;
 
 # Tawny is a bit unreliable - when the image gets big - it seems to produce a
 # header and subtiles (the header can't be opened in QGIS)
-# The images are incorrectly placed sometimes too  - proj issue somewhere......
+# The images are incorrectly placed if tile as the header doesn't work
 # Suspect I need to look more at params
 # https://micmac.ensg.eu/index.php/Tawny
-mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif;
+mm3d Tawny PIMs-ORTHO/ DEq = 2 Out=Orthophotomosaic.tif;
+
 
 # This seems to fail when it gets big....hence pims2ply before-hand
 mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif Out=pointcloud.ply
 
+gdal_edit.py -a_srs EPSG:32630 PIMs-TmpBasc/PIMs-Merged_Prof.tif;
+
+edit_raster.py -inRas PIMs-TmpBasc/PIMs-Merged_Prof.tif -edRas PIMs-ORTHO/Orthophotomosaic_Tile_0_0.tif -pixsize 0.02;
+
+
+
+Cutting--room--floor-----------------------------------------------------------
+#Project info for ortho - failed as it has no ref seemingly
+
+#
+
+#gdalsrsinfo -o wkt PIMs-TmpBasc/PIMs-Merged_Prof.tif > target.wkt;
+
+#gdalwarp -t_srs target.wkt -to SRC_METHOD=NO_GEOTRANSFORM PIMs-ORTHO/Orthophotomosaic_Tile_0_0.tif OrthoFinal.tif
 
 # RSGIS mosaicing-------------------------------------------------------------
 # source activate pyrsgis
@@ -73,7 +91,7 @@ mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif
 # Just here as an alternative for putting together tiles 
 # Unfortunately have to reproject all the bloody images for OSSIM to understand ie espg4326
 # So really there has to be a load of tidyup not currently present here
-# gdalwarp -t_srs EPSG:32617 -s_srs EPSG:4326 *Ort**.tif
+# gdalwarp -t_srs EPSG:32630 -s_srs EPSG:4326 *Ort**.tif
 # Create some image histograms for ossim
 #ossim-create-histo -i *Ort**.tif;
 
@@ -83,4 +101,4 @@ mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif
 # Or more options
 # Here am feathering edges and matching histogram to specific image - produced most pleasing result
 # See https://trac.osgeo.org/ossim/wiki/orthoigen for really detailed cmd help
-#ossim-orthoigen --combiner-type ossimFeatherMosaic --hist-match Ort_DSC00698.tif *Ort**.tif mosaic.tif;
+#ossim-orthoigen --combiner-type ossimFeatherMosaic --hist-match Ort_DSC00698.tif --srs ESPG:32630 *Ort**.tif mosaic.tif;

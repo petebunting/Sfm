@@ -10,9 +10,10 @@ mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWG
 #Find Tie points
 mm3d Tapioca File FileImagesNeighbour.xml $0; 
 
-# weed out the crap 
+# weed out the crap  
 mm3d Schnaps ".*JPG" VeryStrict=1 MoveBadImgs=1;
 #Compute Relative orientation (Arbitrary system)
+
 mm3d Tapas $1 ".*JPG" Out=Arbitrary SH=_mini;
 #Visualize relative orientation  
 mm3d AperiCloud ".*JPG" Ori-Arbitrary;
@@ -24,11 +25,11 @@ mm3d Campari ".*JPG" Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,5];
 #Change system to final cartographic system 
 mm3d ChgSysCo  ".*JPG" Ground_RTL RTLFromExif.xml@sysCoUTM30_EPSG32630.xml Ground_UTM;
 #Correlation into DEM with only Nadir images (hence weird pattern, to be adapted for other datasets, "".*JPG"" if all images)
-
+ 
 
 mm3d Pims MicMac ".*JPG" Ground_UTM DefCor=0 FilePair=FileImagesNeighbour.xml;
 
-#mm3d Pims2Ply MicMac Out=Final.ply; 
+#mm3d Pims2Ply MicMac Out=Final.ply;  
 
 # DEM (PIMs-Merged_Prof.tif) is produced in the  PIMS-Tmp-Basc folder 
 mm3d Pims2MNT MicMac DoOrtho=1;
