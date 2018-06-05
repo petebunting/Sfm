@@ -24,7 +24,7 @@ mm3d ChgSysCo  ".*JPG" All-RTL SysCoRTL.xml@$3 All-UTM;
  
 #mm3d Malt Ortho ".*JPG" All-UTM DirMEC=MEC;
 # I don't fully understand the params - but the cmd takes a very long time with the defaults above
-# mm3d Malt Ortho ".*JPG" All-UTM DirMEC=MEC EZA=1 DefCor=0 AffineLast=1 Regul=0.005 HrOr=0 LrOr=0 ZoomF=1
+# mm3d Malt Ortho ".*JPG" All-UTM DirMEC=MEC EZA=1 DefCor=0 NbVI=2 AffineLast=1 Regul=0.005 HrOr=0 LrOr=0 ZoomF=1
 
 # There is a bug with Tawny!!!!
 #mm3d Tawny MEC; 
