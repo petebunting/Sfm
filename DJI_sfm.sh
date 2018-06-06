@@ -14,7 +14,7 @@ mm3d Tapioca File FileImagesNeighbour.xml $0;
 mm3d Schnaps ".*JPG" VeryStrict=1 MoveBadImgs=1;
 #Compute Relative orientation (Arbitrary system)
 
-mm3d Tapas $1 ".*JPG" Out=Arbitrary SH=_mini;
+mm3d Tapas Fraser ".*JPG" Out=Arbitrary SH=_mini;
 #Visualize relative orientation  
 mm3d AperiCloud ".*JPG" Ori-Arbitrary;
 #Transform to  RTL system
@@ -34,7 +34,7 @@ mm3d Pims MicMac ".*JPG" Ground_UTM DefCor=0 FilePair=FileImagesNeighbour.xml;
 # DEM (PIMs-Merged_Prof.tif) is produced in the  PIMS-Tmp-Basc folder 
 mm3d Pims2MNT MicMac DoOrtho=1;
 
-mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif; 
+mm3d Tawny PIMs-ORTHO/ Out=Orthophotomosaic.tif; 
 
 # OR?
 mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif Out=pointcloud.ply;

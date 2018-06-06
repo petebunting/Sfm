@@ -3,30 +3,60 @@
 """
 Created on Tue Jun  5 15:04:58 2018
 
-@author: ciaran
+@author: ciaran robb
+
+A script to georeference the tif tiles resulting from MicMac Tawny
+
 """
 
 
-
-# This works as a mechanism but the x y origin calculations are the wrong way.
-# its putting the second tile (0,1) on top rather than at bottom of first one.....
 
 from glob2 import glob
 import gdal, osr
 from os import path
 import numpy as np
+from tqdm import tqdm
+import argparse
 import re
+from math import sqrt
 
-folder = path.join("PIMs-ORTHO", "Orthophotomosaic_Tile")
+parser = argparse.ArgumentParser()
 
-wildcard = '*Orthophotomosaic_Tile*.tif'
+parser.add_argument("-folder", "--fld", type=str, required=True, 
+                    help="path to folder - the micmac work dir")
 
-tfwPth = path.join("PIMs-ORTHO", "Orthophotomosaic.tfw")
+parser.add_argument("-espg", "--esp", type=int, required=True, 
+                    help="the code to project the tile to")
+
+
+#parser.add_argument("-fmt", "--format", type=int, required=False, 
+#                    help="index of first image")
+
+#parser.add_argument("-dtype", "--data", type=int, required=False, 
+#                    help="index of last image")
+
+
+
+
+args = parser.parse_args() 
+
+espg = args.esp
+
+folder = args.fld
+
+wildcard =  path.join("PIMs-ORTHO", '*Orthophotomosaic_Tile*.tif')
+
+folderFinal = path.join(folder, wildcard)
+
+
+wildcard2  = path.join("PIMs-ORTHO", "Orthophotomosaic.tfw")
+
+tfwPth = path.join(folder, wildcard2)
 
 tfw = np.loadtxt(tfwPth)
 
 
-fileList = glob(path.join(folder, wildcard))
+fileList = glob(folderFinal)
 
 fileList.sort()
 
@@ -43,7 +73,7 @@ X = inRas.RasterXSize
 Y = inRas.RasterYSize
 
 
-for file in fileList:
+for file in tqdm(fileList):
     
     fileStr = path.split(file)[1]
 #    code = fileStr[:+4]
@@ -64,17 +94,25 @@ for file in fileList:
     
     srs = osr.SpatialReference()
     
-    srs.ImportFromEPSG(32630)
+    srs.ImportFromEPSG(espg)
     
-    print(cde)
-    if cde is '0, 0':
+    #Tile 0_1 is same x,  and y = [origen y ] - (20480 x 0.028)
+#Tile 1_0 is same y,  and x = [origen x ] + (20480 x 0.028)
+#Tile 1_1 x = [origen x ] + (20480 x 0.028) , y like tile 0_1
+#... etc
+    if cde == '0, 0':
         y_max = tfw[5] 
-    elif cde is '0, 1':
-        y_max = tfw[5] - (Y *  pix+pix)
-    elif cde is '1, 0':
-        x_min = tfw[0] - (X *  pix)
-    elif cde is '1, 1':
-        x_min = tfw[0] + (X *  pix)
+    elif cde == '0, 1':
+        y_max = tfw[5] - (Y *  pix)
+    elif cde == '1, 0':
+        x_min = tfw[4] + (X *  pix)
+    elif cde == '1, 1':
+        Y2 = outDataset.RasterYSize
+        X2 = outDataset.RasterXSize
+        # well this should be correct - finding the hypotenuse length the
+        # multiplying by the scale
+        x_min =  x_min + (X2 * pix)
+        y_max = x_min + (X2 * pix) - (Y2 *  pix)
         
     
 

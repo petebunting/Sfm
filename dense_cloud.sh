@@ -61,7 +61,7 @@ mm3d Tawny PIMs-ORTHO/ DEq=2 Out=Orthophotomosaic.tif;
 # The images are incorrectly placed if tile as the header doesn't work
 # Suspect I need to look more at params
 # https://micmac.ensg.eu/index.php/Tawny
-mm3d Tawny PIMs-ORTHO/ DEq = 2 Out=Orthophotomosaic.tif;
+#mm3d Tawny PIMs-ORTHO/ DEq = 2 Out=Orthophotomosaic.tif;
 
 
 # This seems to fail when it gets big....hence pims2ply before-hand
@@ -71,9 +71,12 @@ gdal_edit.py -a_srs EPSG:32630 PIMs-TmpBasc/PIMs-Merged_Prof.tif;
 
 edit_raster.py -inRas PIMs-TmpBasc/PIMs-Merged_Prof.tif -edRas PIMs-ORTHO/Orthophotomosaic_Tile_0_0.tif -pixsize 0.02;
 
+write_tiles.py -folder $PWD -espg 32630 
 
+#gdalwarp -of Gtiff PIMs-ORTHO/Orthophotomosaic_Tile_0_0.tif PIMs-ORTHO/Orthophotomosaic_Tile_0_1.tif PIMs-ORTHO/Orthophotomosaic_Tile_1_0.tif PIMs-ORTHO/Orthophotomosaic_Tile_1_1.tif
 
-Cutting--room--floor-----------------------------------------------------------
+  
+#Cutting--room--floor-----------------------------------------------------------
 #Project info for ortho - failed as it has no ref seemingly
 
 #
