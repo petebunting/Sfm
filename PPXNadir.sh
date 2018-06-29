@@ -3,12 +3,12 @@
 #I would like to remind users that an along-track overlap of 80% and across track overlap of 60% are the minimum recommended values.
 
 # example:
-# ./DroneNadir.sh -e JPG -u "32 +north" -r 0.1
+# ./PPXNadir.sh -e JPG -csv Llan.csv -u "30 +north" -r 0.1
 
 
 
 # add default values
-EXTENSION=JPG
+EXTENSION=JPG 
 CSV=*.csv 
 X_OFF=0;
 Y_OFF=0;
@@ -202,3 +202,5 @@ cd ..
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Ortho-MEC-Malt/Orthophotomosaic.tif OUTPUT/OrthoImage_geotif.tif
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastDEM OUTPUT/DEM_geotif.tif
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastcor OUTPUT/CORR.tif
+
+
