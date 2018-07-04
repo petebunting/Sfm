@@ -14,7 +14,7 @@ Y_OFF=0;
 utm_set=false
 do_ply=true
 do_AperiCloud=true
-use_Schnaps=true
+#use_Schnaps=true
 resol_set=false
 ZoomF=2
 obliqueFolder=none
@@ -28,7 +28,7 @@ while getopts "e:x:y:u:spao:r:z:h" opt; do
       echo "	-x X_OFF         : X (easting) offset for ply file overflow issue (default=0)."
       echo "	-y Y_OFF         : Y (northing) offset for ply file overflow issue (default=0)."
       echo "	-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
-      echo "	-s SH            : Use 'Schnaps' optimised homologous points."
+#      echo "	-s SH            : Do not use 'Schnaps' optimised homologous points."
       echo "	-p do_ply        : use to NOT export ply file."
       echo "	-a do_AperiCloud : use to NOT export AperiCloud file."
       echo "	-o obliqueFolder : Folder with oblique imagery to help orientation (will be entierely copied then deleted during process)."
@@ -40,19 +40,19 @@ while getopts "e:x:y:u:spao:r:z:h" opt; do
       ;;   
 	e)
       EXTENSION=$OPTARG
-      ;; 
+      ;;
 	u)
       UTM=$OPTARG
       utm_set=true
       ;;  
-	r) 
+	r)
       RESOL=$OPTARG
       resol_set=true
       ;; 
 	s)
-      use_Schnaps=true
+      use_Schnaps=false
       ;;   	
-    p) 
+    p)
       do_ply=false
       ;; 
     a)
@@ -84,13 +84,13 @@ if [ "$utm_set" = false ]; then
 	echo "UTM zone not set"
 	exit 1
 fi
-if [ "$use_schnaps" = true ]; then
-	echo "Using Schnaps!"
-	SH="_mini"
-else
-	echo "Not using Schnaps!"
-	SH=""
-fi
+#if [ "$use_schnaps" = true ]; then
+#	echo "Using Schnaps!"
+#	SH="_mini"
+#else
+#	echo "Not using Schnaps!"
+#	SH=""
+#fi
 #create UTM file (after deleting any existing one)
 rm SysUTM.xml
 echo "<SystemeCoord>                                                                                              " >> SysUTM.xml
@@ -103,7 +103,7 @@ echo "            <AuxStr>  +proj=utm +zone="$UTM "+ellps=WGS84 +datum=WGS84 +un
 echo "                                                                                                            " >> SysUTM.xml
 echo "         </BSC>                                                                                             " >> SysUTM.xml
 echo "</SystemeCoord>                                                                                             " >> SysUTM.xml
-
+ 
 
 #Copy everything from the folder with oblique images
 if [ "obliqueFolder" != none ]; then
@@ -111,9 +111,9 @@ if [ "obliqueFolder" != none ]; then
 fi
 
 #Convert all images to tif (BW and RGB) for use in AperiCloud (because it otherwise breaks if too many CPUs are used)
-if [ "$do_AperiCloud" = true ]; then
-	DevAllPrep.sh
-fi
+#if [ "$do_AperiCloud" = true ]; then
+#	DevAllPrep.sh
+#fi
 
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
 mm3d XifGps2Txt .*$EXTENSION
@@ -123,25 +123,25 @@ mm3d XifGps2Xml .*$EXTENSION RAWGNSS
 mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml DN=100
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 mm3d Tapioca File FileImagesNeighbour.xml 2000
-if [ "$use_schnaps" = true ]; then
+#if [ "$use_schnaps" = true ]; then
 	#filter TiePoints (better distribution, avoid clogging)
-	mm3d Schnaps .*$EXTENSION MoveBadImgs=1
-fi
+mm3d Schnaps .*$EXTENSION MoveBadImgs=1
+#fi
 #Compute Relative orientation (Arbitrary system)
-mm3d Tapas FraserBasic .*$EXTENSION Out=Arbitrary SH=$SH
+mm3d Tapas FraserBasic .*$EXTENSION Out=Arbitrary SH=_mini
 
 #Visualize relative orientation, if apericloud is not working, run 
-if [ "$do_AperiCloud" = true ]; then
-	mm3d AperiCloud .*$EXTENSION Ori-Arbitrary SH=$SH 
+if [ "$do_AperiCloud" = true ]; then 
+	mm3d AperiCloud .*$EXTENSION Ori-Arbitrary SH=_mini
 fi
 
 #Transform to  RTL system
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 #Bundle adjust using both camera positions and tie points (number in EmGPS option is the quality estimate of the GNSS data in meters)
-mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,5] AllFree=1 SH=$SH
+mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,5] AllFree=1 SH=_mini
 #Visualize Ground_RTL orientation
 if [ "$do_AperiCloud" = true ]; then
-	mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=$SH
+	mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
 fi
 #Change system to final cartographic system
 mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
@@ -169,8 +169,7 @@ else
 fi
 
 #Mosaic from individual orthos
-# NOTE - think an equalisation method would not go amiss here eg DEq=2 hence it has been added for now
-mm3d Tawny Ortho-MEC-Malt DEq=2
+mm3d Tawny Ortho-MEC-Malt
 #Making OUTPUT folder
 mkdir OUTPUT
 #PointCloud from Ortho+DEM, with offset substracted to the coordinates to solve the 32bit precision issue
