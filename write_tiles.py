@@ -44,12 +44,12 @@ espg = args.esp
 
 folder = args.fld
 
-wildcard =  path.join("PIMs-ORTHO", '*Orthophotomosaic_Tile*.tif')
+wildcard =  path.join("Ortho-MEC-Malt", '*Orthophotomosaic_Tile*.tif')
 
 folderFinal = path.join(folder, wildcard)
 
 
-wildcard2  = path.join("PIMs-ORTHO", "Orthophotomosaic.tfw")
+wildcard2  = path.join("Ortho-MEC-Malt", "Orthophotomosaic.tfw")
 
 tfwPth = path.join(folder, wildcard2)
 
