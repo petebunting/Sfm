@@ -4,7 +4,9 @@
 # the Bramour PPX platform
 # You will need a Unix platform
 
-#This file is a workflow for drone images taken at nadir (or close to nadir) containing GNSS location data. It was created and tested using images from a DJI Mavic Pro and should run for all similar drones (other DJI products for instance), and also for more "serious" aerial photography systems.
+# This file is a workflow for the Bramour PPX fixed wing platform where images are
+# NADIR 
+# 
 
 #I would like to remind users that an along-track overlap of 80% and across track overlap of 60% are the minimum recommended values.
 
@@ -25,6 +27,9 @@ use_Schnaps=true
 resol_set=false
 ZoomF=2
 obliqueFolder=none
+
+# TODO An option for this cmd if exif lacks info, which with bramour is possible
+# mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000 
 
 while getopts "e:csv:x:y:u:spao:r:z:h" opt; do
   case $opt in
@@ -102,6 +107,10 @@ else
 	echo "Not using Schnaps!"
 	SH=""
 fi
+
+# TODO An option for this cmd if exif lacks info, which with bramour is possible
+# mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000 
+
 #create UTM file (after deleting any existing one)
 rm SysUTM.xml
 echo "<SystemeCoord>                                                                                              " >> SysUTM.xml

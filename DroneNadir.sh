@@ -28,7 +28,7 @@ while getopts "e:x:y:u:spao:r:z:h" opt; do
       echo "	-x X_OFF         : X (easting) offset for ply file overflow issue (default=0)."
       echo "	-y Y_OFF         : Y (northing) offset for ply file overflow issue (default=0)."
       echo "	-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
-      echo "	-s SH            : Do not use 'Schnaps' optimised homologous points."
+      echo "	-s SH            : Use 'Schnaps' optimised homologous points."
       echo "	-p do_ply        : use to NOT export ply file."
       echo "	-a do_AperiCloud : use to NOT export AperiCloud file."
       echo "	-o obliqueFolder : Folder with oblique imagery to help orientation (will be entierely copied then deleted during process)."
@@ -40,7 +40,7 @@ while getopts "e:x:y:u:spao:r:z:h" opt; do
       ;;   
 	e)
       EXTENSION=$OPTARG
-      ;;
+      ;; 
 	u)
       UTM=$OPTARG
       utm_set=true
@@ -50,9 +50,9 @@ while getopts "e:x:y:u:spao:r:z:h" opt; do
       resol_set=true
       ;; 
 	s)
-      use_Schnaps=false
+      use_Schnaps=true
       ;;   	
-    p)
+    p) 
       do_ply=false
       ;; 
     a)
@@ -169,7 +169,8 @@ else
 fi
 
 #Mosaic from individual orthos
-mm3d Tawny Ortho-MEC-Malt
+# NOTE - think an equalisation method would not go amiss here eg DEq=2 hence it has been added for now
+mm3d Tawny Ortho-MEC-Malt DEq=2
 #Making OUTPUT folder
 mkdir OUTPUT
 #PointCloud from Ortho+DEM, with offset substracted to the coordinates to solve the 32bit precision issue
