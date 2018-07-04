@@ -22,7 +22,6 @@ X_OFF=0;
 Y_OFF=0;
 utm_set=false
 do_ply=true
-use_Schnaps=true
 resol_set=false
 ZoomF=2
 DEQ=2
@@ -30,7 +29,7 @@ DEQ=2
 # TODO An option for this cmd if exif lacks info, which with bramour is possible
 # mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
  
-while getopts "e:csv:x:y:u:sp:r:z:eq:h" opt; do  
+while getopts "e:csv:x:y:u:p:r:z:eq:h" opt; do   
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -51,7 +50,7 @@ while getopts "e:csv:x:y:u:sp:r:z:eq:h" opt; do
       ;;    
 	e) 
       EXTENSION=$OPTARG
-      ;;   
+      ;;    
 	csv)
       CSV=$OPTARG
       ;;
@@ -63,9 +62,6 @@ while getopts "e:csv:x:y:u:sp:r:z:eq:h" opt; do
       RESOL=$OPTARG
       resol_set=true
       ;; 
-	s)
-      use_Schnaps=false
-      ;;   	
     p)
       do_ply=false
       ;; 
@@ -133,25 +129,24 @@ mm3d OriConvert OriTxtInFile $CSV RAWGNSS_N ChSys=DegreeWGS84@SysCoRTL.xml MTD1=
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 
 mm3d Tapioca File FileImagesNeighbour.xml 2000 
-if [ "$use_schnaps" = true ]; then
-	#filter TiePoints (better distribution, avoid clogging)
-	mm3d Schnaps .*$EXTENSION MoveBadImgs=1
-fi
+
+mm3d Schnaps .*$EXTENSION MoveBadImgs=1
+
 #Compute Relative orientation (Arbitrary system)
-mm3d Tapas FraserBasic .*$EXTENSION Out=Arbitrary SH=$SH
+mm3d Tapas FraserBasic .*$EXTENSION Out=Arbitrary SH=_mini
 
 #Visualize relative orientation, if apericloud is not working, run  
 
-mm3d AperiCloud .*$EXTENSION Ori-Arbitrary SH=$SH 
+mm3d AperiCloud .*$EXTENSION Ori-Arbitrary SH=_mini 
 
 
 #Transform to  RTL system
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 #Bundle adjust using both camera positions and tie points (number in EmGPS option is the quality estimate of the GNSS data in meters)
-mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,5] AllFree=1 SH=$SH
+mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,5] AllFree=1 SH=_mini
 #Visualize Ground_RTL orientation
 if [ "$do_AperiCloud" = true ]; then
-	mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=$SH
+	mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
 fi
 #Change system to final cartographic system
 mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
@@ -209,4 +204,4 @@ gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastDEM OUTPUT/DEM_geotif.tif
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastcor OUTPUT/CORR.tif
 
-
+ 

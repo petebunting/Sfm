@@ -3,7 +3,7 @@
 #I would like to remind users that an along-track overlap of 80% and across track overlap of 60% are the minimum recommended values.
 
 # example:
-# ./DroneNadir.sh -e JPG -u "32 +north" -r 0.1
+# ./DroneNadir.sh -e JPG -u "30 +north" -r 0.1
 
 
 
@@ -45,7 +45,7 @@ while getopts "e:x:y:u:spao:r:z:h" opt; do
       UTM=$OPTARG
       utm_set=true
       ;;  
-	r)
+	r) 
       RESOL=$OPTARG
       resol_set=true
       ;; 
