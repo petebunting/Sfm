@@ -17,21 +17,20 @@
 
 # add default values
 EXTENSION=JPG 
-CSV=*.csv 
+CSV=*.csv  
 X_OFF=0;
 Y_OFF=0;
 utm_set=false
 do_ply=true
-do_AperiCloud=true
 use_Schnaps=true
 resol_set=false
 ZoomF=2
-obliqueFolder=none
-
+DEQ=2
+  
 # TODO An option for this cmd if exif lacks info, which with bramour is possible
-# mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000 
-
-while getopts "e:csv:x:y:u:spao:r:z:h" opt; do
+# mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
+ 
+while getopts "e:csv:x:y:u:sp:r:z:eq:h" opt; do  
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -43,15 +42,14 @@ while getopts "e:csv:x:y:u:spao:r:z:h" opt; do
       echo "	-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
       echo "	-s SH            : Do not use 'Schnaps' optimised homologous points."
       echo "	-p do_ply        : use to NOT export ply file."
-      echo "	-a do_AperiCloud : use to NOT export AperiCloud file."
-      echo "	-o obliqueFolder : Folder with oblique imagery to help orientation (will be entierely copied then deleted during process)."
       echo "	-r RESOL         : Ground resolution (in meters)"
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
+      echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
       echo "	-h	             : displays this message and exits."
       echo " "
       exit 0
-      ;;   
-	e)
+      ;;    
+	e) 
       EXTENSION=$OPTARG
       ;;   
 	csv)
@@ -71,12 +69,6 @@ while getopts "e:csv:x:y:u:spao:r:z:h" opt; do
     p)
       do_ply=false
       ;; 
-    a)
-      do_AperiCloud=false
-      ;; 
-	o)
-      obliqueFolder=$OPTARG
-      ;;
 	x)
       X_OFF=$OPTARG
       ;;	
@@ -85,6 +77,9 @@ while getopts "e:csv:x:y:u:spao:r:z:h" opt; do
       ;;	
 	z)
       ZoomF=$OPTARG
+      ;;          
+	z)
+      DEQ=$OPTARG  
       ;;
     \?)
       echo "PPXNadir.sh: Invalid option: -$OPTARG" >&1
@@ -125,30 +120,19 @@ echo "         </BSC>                                                           
 echo "</SystemeCoord>                                                                                             " >> SysUTM.xml
 
 
-#Copy everything from the folder with oblique images
-if [ "obliqueFolder" != none ]; then
-	cp $obliqueFolder/* .
-fi
-
+ 
 #Convert all images to tif (BW and RGB) for use in AperiCloud (because it otherwise breaks if too many CPUs are used)
-if [ "$do_AperiCloud" = true ]; then
-	DevAllPrep.sh
-fi
+#if [ "$do_AperiCloud" = true ]; then
+#	DevAllPrep.sh
+#fi
 
 # In place of L.Girods cmds to get coords from the images we are using a csv file as this applys to a system where they are recorded by a separate GPS
 
 mm3d OriConvert OriTxtInFile $CSV RAWGNSS_N ChSys=DegreeWGS84@SysCoRTL.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
-#mm3d OriConvert OriTxtInFile boats.csv RAWGNSS_N ChSys=DegreeWGS84@SysCoRTL.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
-
-#Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-#mm3d XifGps2Txt .*$EXTENSION
-#Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
-#mm3d XifGps2Xml .*$EXTENSION RAWGNSS
-#Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
-#mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml DN=100
+ 
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 
-mm3d Tapioca File FileImagesNeighbour.xml 2000
+mm3d Tapioca File FileImagesNeighbour.xml 2000 
 if [ "$use_schnaps" = true ]; then
 	#filter TiePoints (better distribution, avoid clogging)
 	mm3d Schnaps .*$EXTENSION MoveBadImgs=1
@@ -156,10 +140,10 @@ fi
 #Compute Relative orientation (Arbitrary system)
 mm3d Tapas FraserBasic .*$EXTENSION Out=Arbitrary SH=$SH
 
-#Visualize relative orientation, if apericloud is not working, run 
-if [ "$do_AperiCloud" = true ]; then
-	mm3d AperiCloud .*$EXTENSION Ori-Arbitrary SH=$SH 
-fi
+#Visualize relative orientation, if apericloud is not working, run  
+
+mm3d AperiCloud .*$EXTENSION Ori-Arbitrary SH=$SH 
+
 
 #Transform to  RTL system
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
@@ -196,7 +180,14 @@ fi
 
 #Mosaic from individual orthos
 # NOTE - think an equalisation method would not go amiss here eg DEq=2 hence it has been added for now
-mm3d Tawny Ortho-MEC-Malt DEq=2
+
+if [ "$DEQ" != none ]; then
+	mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
+else
+	mm3d Tawny Ortho-MEC-Malt DEq=2
+fi
+
+mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
 #Making OUTPUT folder
 mkdir OUTPUT
 #PointCloud from Ortho+DEM, with offset substracted to the coordinates to solve the 32bit precision issue
