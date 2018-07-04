@@ -143,7 +143,7 @@ mm3d AperiCloud .*$EXTENSION Ori-Arbitrary SH=_mini
 #Transform to  RTL system
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 #Bundle adjust using both camera positions and tie points (number in EmGPS option is the quality estimate of the GNSS data in meters)
-mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,5] AllFree=1 SH=_mini
+mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,2] AllFree=1 SH=_mini
 #Visualize Ground_RTL orientation
 if [ "$do_AperiCloud" = true ]; then
 	mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
@@ -165,7 +165,7 @@ if [ "$obliqueFolder" != none ]; then
 	cd $here	
 fi
 
-
+ 
 #Correlation into DEM
 if [ "$resol_set" = true ]; then
 	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
