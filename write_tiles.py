@@ -97,9 +97,9 @@ for file in tqdm(fileList):
     srs.ImportFromEPSG(espg)
     
     #Tile 0_1 is same x,  and y = [origen y ] - (20480 x 0.028)
-#Tile 1_0 is same y,  and x = [origen x ] + (20480 x 0.028)
-#Tile 1_1 x = [origen x ] + (20480 x 0.028) , y like tile 0_1
-#... etc
+    #Tile 1_0 is same y,  and x = [origen x ] + (20480 x 0.028)
+    #Tile 1_1 x = [origen x ] + (20480 x 0.028) , y like tile 0_1
+    #... etc
     if cde == '0, 0':
         y_max = tfw[5] 
     elif cde == '0, 1':

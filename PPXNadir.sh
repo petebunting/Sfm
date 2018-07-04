@@ -1,14 +1,20 @@
+# Author Ciaran Robb & Luc Girod
+
+# Most of this is Luc Girod's work (MicMac dev) - I have altered some inputs for
+# the Bramour PPX platform
+# You will need a Unix platform
+
 #This file is a workflow for drone images taken at nadir (or close to nadir) containing GNSS location data. It was created and tested using images from a DJI Mavic Pro and should run for all similar drones (other DJI products for instance), and also for more "serious" aerial photography systems.
 
 #I would like to remind users that an along-track overlap of 80% and across track overlap of 60% are the minimum recommended values.
 
-# example:
-# ./DroneNadir.sh -e JPG -u "32 +north" -r 0.1
+# example: (remove dot and slash if on your path)
+# ./PPXNadir.sh -e JPG -csv Llan.csv -u "30 +north" -r 0.1
 
 
 
 # add default values
-EXTENSION=JPG
+EXTENSION=JPG 
 CSV=*.csv 
 X_OFF=0;
 Y_OFF=0;
@@ -202,3 +208,5 @@ cd ..
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Ortho-MEC-Malt/Orthophotomosaic.tif OUTPUT/OrthoImage_geotif.tif
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastDEM OUTPUT/DEM_geotif.tif
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastcor OUTPUT/CORR.tif
+
+
