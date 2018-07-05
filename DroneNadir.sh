@@ -16,7 +16,7 @@ do_ply=true
 do_AperiCloud=true
 #use_Schnaps=true
 resol_set=false
-ZoomF=2
+ZoomF=1
 obliqueFolder=none
 
 while getopts "e:x:y:u:spao:r:z:h" opt; do
@@ -103,12 +103,12 @@ echo "            <AuxStr>  +proj=utm +zone="$UTM "+ellps=WGS84 +datum=WGS84 +un
 echo "                                                                                                            " >> SysUTM.xml
 echo "         </BSC>                                                                                             " >> SysUTM.xml
 echo "</SystemeCoord>                                                                                             " >> SysUTM.xml
- 
+  
 
 #Copy everything from the folder with oblique images
 if [ "obliqueFolder" != none ]; then
 	cp $obliqueFolder/* .
-fi
+fi 
 
 #Convert all images to tif (BW and RGB) for use in AperiCloud (because it otherwise breaks if too many CPUs are used)
 #if [ "$do_AperiCloud" = true ]; then

@@ -23,7 +23,7 @@ Y_OFF=0;
 utm_set=false
 do_ply=true
 resol_set=false
-ZoomF=2
+ZoomF=1
 DEQ=2
   
 # TODO An option for this cmd if exif lacks info, which with bramour is possible
@@ -130,7 +130,7 @@ mm3d OriConvert OriTxtInFile $CSV RAWGNSS_N ChSys=DegreeWGS84@SysCoRTL.xml MTD1=
 
 mm3d Tapioca File FileImagesNeighbour.xml 2000 
 
-mm3d Schnaps .*$EXTENSION MoveBadImgs=1
+mm3d Schnaps .*$EXTENSION  VeryStrict=1 MoveBadImgs=1
 
 #Compute Relative orientation (Arbitrary system)
 mm3d Tapas FraserBasic .*$EXTENSION Out=Arbitrary SH=_mini
@@ -138,15 +138,18 @@ mm3d Tapas FraserBasic .*$EXTENSION Out=Arbitrary SH=_mini
 #Visualize relative orientation, if apericloud is not working, run  
 
 mm3d AperiCloud .*$EXTENSION Ori-Arbitrary SH=_mini 
-
+ 
 
 #Transform to  RTL system
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
+
 #Bundle adjust using both camera positions and tie points (number in EmGPS option is the quality estimate of the GNSS data in meters)
-mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,2] AllFree=1 SH=_mini
+# Should this be replaced with the delay estimate? EmGPS is 1 metre here but it could be lower. 
+mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
+
 #Visualize Ground_RTL orientation
 if [ "$do_AperiCloud" = true ]; then
-	mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
+	mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini 
 fi
 #Change system to final cartographic system
 mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
