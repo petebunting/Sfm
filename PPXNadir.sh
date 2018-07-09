@@ -190,14 +190,24 @@ mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
 # TODO - Tawny is not great for a homogenous ortho
 
 # Here is an alternative on the MM forum using image magick
-#mm3d Tawny Ortho-Result/ DEq=2 DegRap=4
-#mv -v Ortho-Result/Ortho-Eg-Test-Redr.tif ./ortho.tif
-#midpoint=$((`convert ortho.tif -format %c histogram:info:-|tail -n +5|sort -n|tail -n 1|cut -d ',' -f 2`*100/255))
-#mogrify -sigmoidal-contrast 10,$midpoint% ortho.tif
+# Just here as an alternative for putting together tiles 
+# gdalwarp -overwrite -t_srs EPSG:4326 -dstnodata 0 *.tif
+
+# Create some image histograms for ossim
+#ossim-create-histo -i *Ort**.tif;
+
+# Unfortunately have to reproject all the bloody images for OSSIM to understand ie espg4326
+# Basic ortho with ossim is:
+#ossim-orthoigen *Ort**.tif mosaic_plain.tif;
+
+# Or more options
+# Here am feathering edges and matching histogram to specific image - produced most pleasing result
+# See https://trac.osgeo.org/ossim/wiki/orthoigen for really detailed cmd help
+#ossim-orthoigen --combiner-type ossimFeatherMosaic --hist-match Ort_DSC00698.tif *Ort**.tif mosaic.tif;
+# back to utm
+# gdalwarp -t_srs EPSG:4326  -s_srs EPSG:32617 *Ort**.tif
 
 
-#Making OUTPUT folder
-mkdir OUTPUT
 #PointCloud from Ortho+DEM, with offset substracted to the coordinates to solve the 32bit precision issue
 mm3d Nuage2Ply MEC-Malt/NuageImProf_STD-MALT_Etape_8.xml Attr=Ortho-MEC-Malt/Orthophotomosaic.tif Out=OUTPUT/PointCloud_OffsetUTM.ply Offs=[$X_OFF,$Y_OFF,0]
 
