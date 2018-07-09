@@ -17,9 +17,10 @@ do_AperiCloud=true
 #use_Schnaps=true
 resol_set=false
 ZoomF=1
+DEQ=2
 obliqueFolder=none
 
-while getopts "e:x:y:u:spao:r:z:h" opt; do
+while getopts "e:x:y:u:spao:r:z:eq:h" opt; do
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -34,6 +35,7 @@ while getopts "e:x:y:u:spao:r:z:h" opt; do
       echo "	-o obliqueFolder : Folder with oblique imagery to help orientation (will be entierely copied then deleted during process)."
       echo "	-r RESOL         : Ground resolution (in meters)"
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
+      echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
       echo "	-h	             : displays this message and exits."
       echo " "
       exit 0
@@ -69,6 +71,9 @@ while getopts "e:x:y:u:spao:r:z:h" opt; do
       ;;	
 	z)
       ZoomF=$OPTARG
+      ;;
+	eq)
+      DEQ=$OPTARG  
       ;;
     \?)
       echo "DroneNadir.sh: Invalid option: -$OPTARG" >&1
@@ -168,8 +173,13 @@ else
 	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM EZA=1 ZoomF=$ZoomF
 fi
 
-#Mosaic from individual orthos
-mm3d Tawny Ortho-MEC-Malt
+if [ "$DEQ" != none ]; then
+	mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
+else
+	mm3d Tawny Ortho-MEC-Malt DEq=2
+fi
+
+mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
 #Making OUTPUT folder
 mkdir OUTPUT
 #PointCloud from Ortho+DEM, with offset substracted to the coordinates to solve the 32bit precision issue

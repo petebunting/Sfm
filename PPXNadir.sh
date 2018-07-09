@@ -1,6 +1,6 @@
 # Author Ciaran Robb & Luc Girod
 
-# Most of this is Luc Girod's work (MicMac dev) - I have altered some inputs for
+# A lot of this is Luc Girod's work (MicMac dev) - I have altered some inputs for
 # the Bramour PPX platform
 # You will need a Unix platform
 
@@ -144,7 +144,7 @@ mm3d AperiCloud .*$EXTENSION Ori-Arbitrary SH=_mini
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 
 #Bundle adjust using both camera positions and tie points (number in EmGPS option is the quality estimate of the GNSS data in meters)
-# Should this be replaced with the delay estimate? EmGPS is 1 metre here but it could be lower. 
+# Should this be replaced with the delay estimate? EmGPS is 1 metre here but it could be lower.  
 mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
 
 #Visualize Ground_RTL orientation
