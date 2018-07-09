@@ -74,7 +74,7 @@ while getopts "e:csv:x:y:u:p:r:z:eq:h" opt; do
 	z)
       ZoomF=$OPTARG
       ;;          
-	z)
+	eq)
       DEQ=$OPTARG  
       ;;
     \?)
@@ -186,6 +186,16 @@ else
 fi
 
 mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
+
+# TODO - Tawny is not great for a homogenous ortho
+
+# Here is an alternative on the MM forum using image magick
+#mm3d Tawny Ortho-Result/ DEq=2 DegRap=4
+#mv -v Ortho-Result/Ortho-Eg-Test-Redr.tif ./ortho.tif
+#midpoint=$((`convert ortho.tif -format %c histogram:info:-|tail -n +5|sort -n|tail -n 1|cut -d ',' -f 2`*100/255))
+#mogrify -sigmoidal-contrast 10,$midpoint% ortho.tif
+
+
 #Making OUTPUT folder
 mkdir OUTPUT
 #PointCloud from Ortho+DEM, with offset substracted to the coordinates to solve the 32bit precision issue
