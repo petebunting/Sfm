@@ -190,7 +190,7 @@ mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
 # Just here as an alternative for putting together tiles 
 # # This need GNU parallel
 # paralell echo ::: cmd
-# gdalwarp -overwrite -s_srs "+proj=utm +zone=30 +ellps=WGS84+datum=WGS84 +units=m +no_defs" -t_srs EPSG:4326 -srcnodata 0 -dstnodata 0 *.tif
+# gdalwarp -overwrite -s_srs "+proj=utm +zone=30 +ellps=WGS84+datum=WGS84 +units=m +no_defs" -t_srs EPSG:4326 -srcnodata 0 -dstnodata 0 *Ort**.tif
 # Create some image histograms for ossim
 #ossim-create-histo -i *Ort**.tif;
 
