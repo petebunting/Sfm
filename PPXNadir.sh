@@ -190,7 +190,7 @@ mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
 # Just here as an alternative for putting together tiles 
 # # This need GNU parallel
 # paralell echo ::: cmd
-# gdalwarp -overwrite -s_srs "+proj=utm +zone=30 +ellps=WGS84+datum=WGS84 +units=m +no_defs" -t_srs EPSG:4326 -dstnodata 0 *.tif
+# gdalwarp -overwrite -s_srs "+proj=utm +zone=30 +ellps=WGS84+datum=WGS84 +units=m +no_defs" -t_srs EPSG:4326 -srcnodata 0 -dstnodata 0 *.tif
 # Create some image histograms for ossim
 #ossim-create-histo -i *Ort**.tif;
 
@@ -202,6 +202,7 @@ mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
 # Here am feathering edges and matching histogram to specific image - produced most pleasing result
 # See https://trac.osgeo.org/ossim/wiki/orthoigen for really detailed cmd help
 #ossim-orthoigen --combiner-type ossimFeatherMosaic --hist-match Ort_DSC00698.tif *Ort**.tif mosaic.tif;
+#ossim-orthoigen --combiner-type ossimBlendMosaic *Ort**.tif mosaic_blend.tif
 # back to utm
 # gdalwarp -t_srs EPSG:4326  -s_srs EPSG:32630 *Ort**.tif
 
