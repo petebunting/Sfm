@@ -117,10 +117,7 @@ echo "</SystemeCoord>                                                           
 
 
  
-#Convert all images to tif (BW and RGB) for use in AperiCloud (because it otherwise breaks if too many CPUs are used)
-#if [ "$do_AperiCloud" = true ]; then
-#	DevAllPrep.sh
-#fi
+
 
 # In place of L.Girods cmds to get coords from the images we are using a csv file as this applys to a system where they are recorded by a separate GPS
 
@@ -191,8 +188,8 @@ mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
 
 # Here is an alternative on the MM forum using image magick
 # Just here as an alternative for putting together tiles 
-# gdalwarp -overwrite -t_srs EPSG:4326 -dstnodata 0 *.tif
-
+# # This need GNU parallel
+# gdalwarp -overwrite -s_srs "+proj=utm +zone=30 +ellps=WGS84+datum=WGS84 +units=m +no_defs" -t_srs EPSG:4326 -dstnodata 0 *.tif
 # Create some image histograms for ossim
 #ossim-create-histo -i *Ort**.tif;
 
@@ -205,7 +202,7 @@ mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
 # See https://trac.osgeo.org/ossim/wiki/orthoigen for really detailed cmd help
 #ossim-orthoigen --combiner-type ossimFeatherMosaic --hist-match Ort_DSC00698.tif *Ort**.tif mosaic.tif;
 # back to utm
-# gdalwarp -t_srs EPSG:4326  -s_srs EPSG:32617 *Ort**.tif
+# gdalwarp -t_srs EPSG:4326  -s_srs EPSG:32630 *Ort**.tif
 
 
 #PointCloud from Ortho+DEM, with offset substracted to the coordinates to solve the 32bit precision issue

@@ -185,7 +185,11 @@ mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
 
 # OSSIM - BASED MOSAICING ----------------------------------------------------------------------------
 # Just here as an alternative for putting together tiles 
-# gdalwarp -overwrite -t_srs EPSG:4326 -dstnodata 0 *.tif
+# This need GNU parallel
+# gdalwarp -overwrite -s_srs "+proj=utm +zone=30 +ellps=WGS84+datum=WGS84 +units=m +no_defs" -t_srs EPSG:4326 -dstnodata 0 *.tif
+
+
+
 
 # Create some image histograms for ossim
 #ossim-create-histo -i *Ort**.tif;
@@ -199,7 +203,7 @@ mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
 # See https://trac.osgeo.org/ossim/wiki/orthoigen for really detailed cmd help
 #ossim-orthoigen --combiner-type ossimFeatherMosaic --hist-match Ort_DSC00698.tif *Ort**.tif mosaic.tif;
 # back to utm
-# gdalwarp -t_srs EPSG:4326  -s_srs EPSG:32617 *Ort**.tif
+
 
 #Making OUTPUT folder
 mkdir OUTPUT
