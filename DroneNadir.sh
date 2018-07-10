@@ -201,6 +201,7 @@ mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
 # Or more options
 # Here am feathering edges and matching histogram to specific image - produced most pleasing result
 # See https://trac.osgeo.org/ossim/wiki/orthoigen for really detailed cmd help
+#ossim-orthoigen --combiner-type ossimBlendMosaic *Ort**.tif mosaic_blend.tif
 #ossim-orthoigen --combiner-type ossimFeatherMosaic --hist-match Ort_DSC00698.tif *Ort**.tif mosaic.tif;
 # back to utm
 
