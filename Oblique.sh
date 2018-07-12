@@ -1,10 +1,11 @@
-#This file is a workflow for modeling a statue, with images taken from around it.
+# This is for oblique imagery - a work in progress
 
 #I would like to remind users that an angle of 10° between view angle is optimal.
 
 
 # add default values
 EXTENSION=JPG
+Algorithm=BigMac 
 use_Schnaps=true
 wait_for_mask=false
 ZOOM=2
@@ -13,8 +14,9 @@ while getopts "e:smz:h" opt; do
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
-      echo "usage: DroneNadir.sh -e JPG -x 55000 -y 6600000 -u \"32 +north\" -p true -r 0.05"
+      echo "usage: Oblique.sh -e JPG -a BigMac -z 1"
       echo "	-e EXTENSION   : image file type (JPG, jpg, TIF, png..., default=JPG)."
+      echo "	-a algorithm   : type of algo eg BigMac, MicMac, Forest, Statue etc."
       echo "	-s             : Do not use 'Schnaps' optimised homologous points (does by default)."
       echo "	-m             : Pause for Mask before correlation (does not by default)."
       echo "	-z ZOOM        : Zoom Level (default=2)"
@@ -25,6 +27,9 @@ while getopts "e:smz:h" opt; do
 	e)
       EXTENSION=$OPTARG
       ;;
+  algo)
+      Algorithm=$OPTARG
+      ;;      
 	z)
       ZOOM=$OPTARG
       ;;
@@ -72,8 +77,8 @@ fi
 	
 #Do the correlation of the images
 if [ "$use_Schnaps" = true ]; then
-	mm3d C3DC Statue .*$EXTENSION Ori-Arbitrary ZoomF=$ZOOM Masq3D=AperiCloud_Arbitrary__mini.ply
+	mm3d C3DC $Algorithm .*$EXTENSION Ori-Arbitrary ZoomF=$ZOOM Masq3D=AperiCloud_Arbitrary__mini.ply
 else
-	mm3d C3DC Statue .*$EXTENSION Ori-Arbitrary ZoomF=$ZOOM Masq3D=AperiCloud_Arbitrary.ply
+	mm3d C3DC $Algorithm .*$EXTENSION Ori-Arbitrary ZoomF=$ZOOM Masq3D=AperiCloud_Arbitrary.ply
 fi
 
