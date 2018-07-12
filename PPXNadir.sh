@@ -21,6 +21,7 @@ CSV=*.csv
 X_OFF=0;
 Y_OFF=0;
 utm_set=false
+sz = 2000
 do_ply=true
 resol_set=false
 ZoomF=1
@@ -29,7 +30,7 @@ DEQ=2
 # TODO An option for this cmd if exif lacks info, which with bramour is possible
 # mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
  
-while getopts "e:csv:x:y:u:p:r:z:eq:h" opt; do   
+while getopts "e:csv:x:y:u:sz:p:r:z:eq:h" opt; do   
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -57,7 +58,10 @@ while getopts "e:csv:x:y:u:p:r:z:eq:h" opt; do
 	u)
       UTM=$OPTARG
       utm_set=true
-      ;;  
+      ;;
+ 	sz)
+      size=$OPTARG
+      ;;          
 	r)
       RESOL=$OPTARG
       resol_set=true
@@ -125,7 +129,7 @@ mm3d OriConvert OriTxtInFile $CSV RAWGNSS_N ChSys=DegreeWGS84@SysCoRTL.xml MTD1=
  
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 
-mm3d Tapioca File FileImagesNeighbour.xml 2000 
+mm3d Tapioca File FileImagesNeighbour.xml $sz 
 
 mm3d Schnaps .*$EXTENSION  VeryStrict=1 MoveBadImgs=1
 

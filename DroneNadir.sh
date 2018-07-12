@@ -14,13 +14,13 @@ Y_OFF=0;
 utm_set=false
 do_ply=true
 do_AperiCloud=true
-#use_Schnaps=true
+size = 2000
 resol_set=false
 ZoomF=1
 DEQ=2
 obliqueFolder=none
 
-while getopts "e:x:y:u:spao:r:z:eq:h" opt; do
+while getopts "e:x:y:u:sz:spao:r:z:eq:h" opt; do
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -29,7 +29,7 @@ while getopts "e:x:y:u:spao:r:z:eq:h" opt; do
       echo "	-x X_OFF         : X (easting) offset for ply file overflow issue (default=0)."
       echo "	-y Y_OFF         : Y (northing) offset for ply file overflow issue (default=0)."
       echo "	-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
-#      echo "	-s SH            : Do not use 'Schnaps' optimised homologous points."
+      echo "	-sz size         : resize of imagery eg - 2000"
       echo "	-p do_ply        : use to NOT export ply file."
       echo "	-a do_AperiCloud : use to NOT export AperiCloud file."
       echo "	-o obliqueFolder : Folder with oblique imagery to help orientation (will be entierely copied then deleted during process)."
@@ -39,14 +39,17 @@ while getopts "e:x:y:u:spao:r:z:eq:h" opt; do
       echo "	-h	             : displays this message and exits."
       echo " "
       exit 0
-      ;;   
+      ;;    
 	e)
       EXTENSION=$OPTARG
       ;;
 	u)
       UTM=$OPTARG
       utm_set=true
-      ;;  
+      ;;
+ 	sz)
+      size=$OPTARG
+      ;;        
 	r)
       RESOL=$OPTARG
       resol_set=true
@@ -127,8 +130,8 @@ mm3d XifGps2Xml .*$EXTENSION RAWGNSS
 #Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
 mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml DN=100
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
-mm3d Tapioca File FileImagesNeighbour.xml 2000
-#if [ "$use_schnaps" = true ]; then
+mm3d Tapioca File FileImagesNeighbour.xml $size
+#if [ "$use_schnaps" = true ]; then 
 	#filter TiePoints (better distribution, avoid clogging)
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1
 #fi
