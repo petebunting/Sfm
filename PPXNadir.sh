@@ -21,7 +21,7 @@ CSV=*.csv
 X_OFF=0;
 Y_OFF=0;
 utm_set=false
-sz = 2000
+size = 2000
 do_ply=true
 resol_set=false
 ZoomF=1
@@ -58,7 +58,7 @@ while getopts "e:csv:x:y:u:sz:p:r:z:eq:h" opt; do
 	u)
       UTM=$OPTARG
       utm_set=true
-      ;;
+      ;; 
  	sz)
       size=$OPTARG
       ;;          
