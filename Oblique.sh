@@ -10,13 +10,13 @@ use_Schnaps=true
 wait_for_mask=false
 ZOOM=2
 
-while getopts "e:smz:h" opt; do
+while getopts "e:a:smz:h" opt; do
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
       echo "usage: Oblique.sh -e JPG -a BigMac -z 1"
       echo "	-e EXTENSION   : image file type (JPG, jpg, TIF, png..., default=JPG)."
-      echo "	-a algorithm   : type of algo eg BigMac, MicMac, Forest, Statue etc."
+      echo "	-a Algorithm   : type of algo eg BigMac, MicMac, Forest, Statue etc."
       echo "	-s             : Do not use 'Schnaps' optimised homologous points (does by default)."
       echo "	-m             : Pause for Mask before correlation (does not by default)."
       echo "	-z ZOOM        : Zoom Level (default=2)"
