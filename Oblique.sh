@@ -5,7 +5,7 @@
 
 # add default values
 EXTENSION=JPG
-Algorithm=BigMac 
+#Algorithm=BigMac 
 use_Schnaps=true
 wait_for_mask=false
 ZOOM=2
@@ -26,7 +26,7 @@ while getopts "e:a:smz:h" opt; do
       ;;   
 	e)
       EXTENSION=$OPTARG
-      ;;
+      ;;cd 
   algo)
       Algorithm=$OPTARG
       ;;      
@@ -40,11 +40,11 @@ while getopts "e:a:smz:h" opt; do
       wait_for_mask=true
       ;;  
     \?)
-      echo "DroneNadir.sh: Invalid option: -$OPTARG" >&1
+      echo "Oblique.sh: Invalid option: -$OPTARG" >&1
       exit 1
       ;;
     :)
-      echo "DroneNadir.sh: Option -$OPTARG requires an argument." >&1
+      echo "Oblique.sh: Option -$OPTARG requires an argument." >&1
       exit 1
       ;;
   esac

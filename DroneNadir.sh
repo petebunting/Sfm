@@ -17,7 +17,7 @@ do_AperiCloud=true
 size=2000
 resol_set=false
 ZoomF=1
-DEQ=2
+DEQ=1
 obliqueFolder=none
 
 while getopts "e:x:y:u:sz:spao:r:z:eq:h" opt; do
@@ -176,10 +176,10 @@ else
 	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM EZA=1 ZoomF=$ZoomF
 fi
 
-if [ "$DEQ" != none ]; then
+if [ "$DEQ" != none ]; then 
 	mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
 else
-	mm3d Tawny Ortho-MEC-Malt DEq=2
+	mm3d Tawny Ortho-MEC-Malt DEq=1
 fi
 
 mm3d Tawny Ortho-MEC-Malt DEq=$DEQ

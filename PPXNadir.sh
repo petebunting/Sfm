@@ -25,7 +25,7 @@ size = 2000
 do_ply=true
 resol_set=false
 ZoomF=1
-DEQ=2
+DEQ=1
   
 # TODO An option for this cmd if exif lacks info, which with bramour is possible
 # mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
@@ -183,10 +183,10 @@ fi
 if [ "$DEQ" != none ]; then
 	mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
 else
-	mm3d Tawny Ortho-MEC-Malt DEq=2
+	mm3d Tawny Ortho-MEC-Malt DEq=1
 fi
 
-mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
+
 
 # TODO - Tawny is not great for a homogenous ortho
 
