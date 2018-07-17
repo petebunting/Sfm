@@ -30,7 +30,7 @@ Clone or download then make the folder or files executable in a terminal
 
 .. code-block:: bash
    
-   chmod +x PPXNadir.sh
+   chmod +x PPX.sh
 
 Add to your .bashrc or .bash_profile if you wish to execute anywhere
 
@@ -38,11 +38,11 @@ Add to your .bashrc or .bash_profile if you wish to execute anywhere
 Contents
 ~~~~~~~~~~~~~~~~~
 
-**PPXNadir.sh**
+**PPX.sh**
 
 - A script to process a GNSS and associated photographs outputting orthomosaic, DSM and point cloud (.ply) file
 
-**DroneNadir.sh**
+**Drone.sh**
 
 - A script to process photographs with complete exif information outputting orthomosaic, DSM and point cloud (.ply) file
 Typically a DJI phantom or other such platform
@@ -67,7 +67,7 @@ type -h to get help on each script e.g. :
 
 .. code-block:: bash
 
-   PPXNadir.sh
+   PPX.sh
 
 Thanks
 ~~~~~~~~~~~~~~~~~
