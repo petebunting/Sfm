@@ -38,7 +38,7 @@ Add to your .bashrc or .bash_profile if you wish to execute anywhere
 Contents
 ~~~~~~~~~~~~~~~~~
 
-PPXNadir.sh
+**PPXNadir.sh**
 
 - A script to process a GNSS and associated photographs outputting orthomosaic, DSM and point cloud (.ply) file
 
