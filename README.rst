@@ -11,6 +11,8 @@ Dependencies
 
 Sfm requires:
 
+- GNU/Linux or Mac OS only 
+
 - Python 3
 
 - MicMac
@@ -19,8 +21,6 @@ https://micmac.ensg.eu/index.php/Accueil
 
 User installation
 ~~~~~~~~~~~~~~~~~
-
-GNU/Linux or Mac OS only 
 
 See MicMac install instructions here:
 
