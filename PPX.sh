@@ -20,7 +20,7 @@ CSV=*.csv
 X_OFF=0;
 Y_OFF=0;
 utm_set=false
-size = 2000
+size=2000
 do_ply=true
 resol_set=false
 ZoomF=1
@@ -30,10 +30,10 @@ DEQ=1
 # mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
  
 while getopts "e:csv:x:y:u:sz:p:r:z:eq:h" opt; do   
-  case $opt in
+  case $opt in 
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
-      echo "usage: PPXNadir.sh -e JPG -x 55000 -y 6600000 -u \"32 +north\" -p true -r 0.05"
+      echo "usage: PPX.sh -e JPG -x 55000 -y 6600000 -u \"32 +north\" -p true -r 0.05"
       echo "	-e EXTENSION     : image file type (JPG, jpg, TIF, png..., default=JPG)."
       echo "	-csv CSV         : csv of image coords"
       echo "	-x X_OFF         : X (easting) offset for ply file overflow issue (default=0)."
@@ -48,11 +48,11 @@ while getopts "e:csv:x:y:u:sz:p:r:z:eq:h" opt; do
       echo " "
       exit 0
       ;;    
-	e) 
+	e)  
       EXTENSION=$OPTARG
       ;;    
 	csv)
-      CSV=$OPTARG
+      CSV=$OPTARG 
       ;;
 	u)
       UTM=$OPTARG
@@ -126,11 +126,11 @@ echo "</SystemeCoord>                                                           
 
 mm3d OriConvert OriTxtInFile $CSV RAWGNSS_N ChSys=DegreeWGS84@SysCoRTL.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
  
-#Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
+#Find Tie points using 1/2 resolution image 
 
-mm3d Tapioca File FileImagesNeighbour.xml $sz 
+mm3d Tapioca File FileImagesNeighbour.xml $size
 
-mm3d Schnaps .*$EXTENSION  VeryStrict=1 MoveBadImgs=1
+mm3d Schnaps .*$EXTENSION VeryStrict=1 MoveBadImgs=1
 
 #Compute Relative orientation (Arbitrary system)
 mm3d Tapas FraserBasic .*$EXTENSION Out=Arbitrary SH=_mini
@@ -168,12 +168,12 @@ if [ "$obliqueFolder" != none ]; then
 	cd $here	
 fi
 
- 
+  
 #Correlation into DEM
 if [ "$resol_set" = true ]; then
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
+	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=1 ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
 else
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM EZA=1 ZoomF=$ZoomF
+	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=1 EZA=1 ZoomF=$ZoomF
 fi
 
 #Mosaic from individual orthos

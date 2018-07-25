@@ -58,9 +58,9 @@ mm3d ChgSysCo  ".*JPG" All-RTL SysCoRTL.xml@SysUTM.xml Ground-UTM;
 
 #Correlation into DEM
 if [ "$resol_set" = true ]; then
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
+	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=1 ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
 else
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM EZA=1 ZoomF=$ZoomF
+	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM EZA=1 UseGpu=1 ZoomF=$ZoomF
 fi
  
 #Mosaic from individual orthos
