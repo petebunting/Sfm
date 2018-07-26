@@ -169,19 +169,22 @@ fi
 
 
 #Correlation into DEM
-if [ "$resol_set" = true ]; then
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM SzW=1 UseGpu=1 ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
-else
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM  SzW=1 UseGpu=1 EZA=1 ZoomF=$ZoomF
-fi
+#if [ "$resol_set" = true ]; then
+	#mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM SzW=1 UseGpu=1 ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
+mm3d PIMs Forest ".*JPG" Ground_UTM FilePair=FileImagesNeighbour.xml SzW=1 UseGpu=1 ZoomF=$ZoomF
+#else
+#fi
 
-if [ "$DEQ" != none ]; then 
-	mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
-else
-	mm3d Tawny Ortho-MEC-Malt DEq=1
-fi
+mm3d Pims2MNT Forest DoOrtho=1
+#if [ "$DEQ" != none ]; then 
+#	mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
+#else
+##	mm3d Tawny Ortho-MEC-Malt DEq=1
+#fi
+mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif
 
-mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
+mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif Out=pointcloud.ply
+#mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
 
 # TODO - Tawny is not great for a homogenous ortho
 
@@ -211,20 +214,20 @@ mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
 #Making OUTPUT folder
 mkdir OUTPUT
 #PointCloud from Ortho+DEM, with offset substracted to the coordinates to solve the 32bit precision issue
-mm3d Nuage2Ply MEC-Malt/NuageImProf_STD-MALT_Etape_8.xml Attr=Ortho-MEC-Malt/Orthophotomosaic.tif Out=OUTPUT/PointCloud_OffsetUTM.ply Offs=[$X_OFF,$Y_OFF,0]
+mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=Orthophotomosaic.tif Out=OUTPUT/pointcloud.ply
 
-cd MEC-Malt
-finalDEMs=($(ls Z_Num*_DeZoom*_STD-MALT.tif))
-finalcors=($(ls Correl_STD-MALT_Num*.tif))
-DEMind=$((${#finalDEMs[@]}-1))
-corind=$((${#finalcors[@]}-1))
-lastDEM=${finalDEMs[DEMind]}
-lastcor=${finalcors[corind]}
-laststr="${lastDEM%.*}"
-corrstr="${lastcor%.*}"
-cp $laststr.tfw $corrstr.tfw
-cd ..
+#cd MEC-Malt
+#finalDEMs=($(ls Z_Num*_DeZoom*_STD-MALT.tif))
+#finalcors=($(ls Correl_STD-MALT_Num*.tif))
+#DEMind=$((${#finalDEMs[@]}-1))
+#corind=$((${#finalcors[@]}-1))
+#lastDEM=${finalDEMs[DEMind]}
+#lastcor=${finalcors[corind]}
+#laststr="${lastDEM%.*}"
+#corrstr="${lastcor%.*}"
+#cp $laststr.tfw $corrstr.tfw
+#cd ..
 
-gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Ortho-MEC-Malt/Orthophotomosaic.tif OUTPUT/OrthoImage_geotif.tif
-gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastDEM OUTPUT/DEM_geotif.tif
-gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastcor OUTPUT/CORR.tif
+gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Orthophotomosaic.tif OUTPUT/OrthoImage_geotif.tif
+gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMS-Tmp-Basc/PIMs-Merged_Prof.tif OUTPUT/DEM_geotif.tif
+#gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastcor OUTPUT/CORR.tif

@@ -158,22 +158,26 @@ mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
 mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
 
 #Taking away files from the oblique folder
-if [ "$obliqueFolder" != none ]; then	
-	here=$(pwd)
-	cd $obliqueFolder	
-	find ./ -type f -name "*" | while read filename; do
-		f=$(basename "$filename")
-		rm  $here/$f
-	done	
-	cd $here	
-fi
+#if [ "$obliqueFolder" != none ]; then	
+#	here=$(pwd)
+#	cd $obliqueFolder	
+#	find ./ -type f -name "*" | while read filename; do
+#		f=$(basename "$filename")
+#		rm  $here/$f
+#	done	
+#	cd $here	
+#fi
 
   
-#Correlation into DEM
+# Correlation into DEM - Note these use the smallest correll window of 3 - SzW=1
+# This is to ensure detail captured on forest or high freq areas of features
+
+# Note on GPUs
+# GPU can fail on memory allocation if it is modest
 if [ "$resol_set" = true ]; then
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=1 ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
+	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM SzW=1 UseGpu=1 ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
 else
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=1 EZA=1 ZoomF=$ZoomF
+	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM  SzW=1 UseGpu=1 EZA=1 ZoomF=$ZoomF
 fi
 
 #Mosaic from individual orthos
