@@ -25,11 +25,12 @@ do_ply=true
 resol_set=false
 ZoomF=1
 DEQ=1
+gpu=0
   
 # TODO An option for this cmd if exif lacks info, which with bramour is possible
 # mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
  
-while getopts "e:csv:x:y:u:sz:p:r:z:eq:h" opt; do   
+while getopts "e:csv:x:y:u:sz:p:r:z:eq:g:h" opt; do   
   case $opt in 
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -44,7 +45,8 @@ while getopts "e:csv:x:y:u:sz:p:r:z:eq:h" opt; do
       echo "	-r RESOL         : Ground resolution (in meters)"
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
       echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
-      echo "	-h	             : displays this message and exits."
+      echo "	-g gpu           : Use GPU default is 0, if you want to use -g=1"
+      echo "	-h	         : displays this message and exits."
       echo " "
       exit 0
       ;;    
@@ -78,7 +80,9 @@ while getopts "e:csv:x:y:u:sz:p:r:z:eq:h" opt; do
       ZoomF=$OPTARG
       ;;          
 	eq)
-      DEQ=$OPTARG  
+      DEQ=$OPTARG
+	g)
+      gpu=$OPTARG    
       ;;
     \?)
       echo "PPXNadir.sh: Invalid option: -$OPTARG" >&1
@@ -175,9 +179,9 @@ mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
 # Note on GPUs
 # GPU can fail on memory allocation if it is modest
 if [ "$resol_set" = true ]; then
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM SzW=1 UseGpu=1 ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
+	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM SzW=1 UseGpu=$gpu ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
 else
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM  SzW=1 UseGpu=1 EZA=1 ZoomF=$ZoomF
+	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM  SzW=1 UseGpu=$gpu EZA=1 ZoomF=$ZoomF
 fi
 
 #Mosaic from individual orthos
