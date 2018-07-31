@@ -171,7 +171,9 @@ fi
 #Correlation into DEM
 #if [ "$resol_set" = true ]; then
 	#mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM SzW=1 UseGpu=1 ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
-mm3d PIMs Forest ".*JPG" Ground_UTM FilePair=FileImagesNeighbour.xml SzW=1 UseGpu=1 EZA=1 ZoomF=$ZoomF
+	
+# NOTE - forest is totally buggy - I wouldn't use it - MicMac always works as does bigmac etc	
+mm3d PIMs MicMac ".*JPG" Ground_UTM FilePair=FileImagesNeighbour.xml SzW=1 UseGpu=1 EZA=1 ZoomF=$ZoomF
 #else
 #fi
 
