@@ -176,8 +176,11 @@ mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
 # Correlation into DEM - Note these use the smallest correll window of 3 - SzW=1
 # This is to ensure detail captured on forest or high freq areas of features
 
-# Note on GPUs
-# GPU can fail on memory allocation if it is modest
+# Note on GPUs - this seems to fail no matter what at present
+
+# Also the NbProc=32 (eg) is the threads but not sure if this uses all by default
+# It looks as though it does on the makefiles generated
+
 if [ "$resol_set" = true ]; then
 	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM SzW=1 UseGpu=$gpu ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
 else

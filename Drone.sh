@@ -169,6 +169,10 @@ fi
 
 
 #Correlation into DEM
+# Note on GPUs - this seems to fail no matter what at present
+
+# Also the NbProc=32 (eg) is the threads but think it uses all anyway
+# It looks as though it does on the makefiles generated
 if [ "$resol_set" = true ]; then
 	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM SzW=1 UseGpu=1 ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
 else
