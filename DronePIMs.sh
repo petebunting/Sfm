@@ -2,7 +2,7 @@
 # Modified from the original L.Girod script
 
 # example:
-# ./Drone.sh -e JPG -u "30 +north" -r 0.1
+# ./DronePIMs.sh -e JPG -u "30 +north" -r 0.1
 
 
 
@@ -170,10 +170,10 @@ fi
 
 #Correlation into DEM
 #if [ "$resol_set" = true ]; then
-	#mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM SzW=1 UseGpu=1 ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
+	#mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM SzW=1 UseGpu=1 ZReg=0.003 ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
 	
-# NOTE - forest is totally buggy - I wouldn't use it - MicMac always works as does bigmac etc	
-mm3d PIMs MicMac ".*JPG" Ground_UTM FilePair=FileImagesNeighbour.xml SzW=1 UseGpu=1 EZA=1 ZoomF=$ZoomF
+# NOTE - 
+mm3d PIMs Forest ".*JPG" Ground_UTM  SzNorm=1 DefCor=0 ZReg=0.003 UseGpu=0 ZoomF=$ZoomF
 #else
 #fi
 
@@ -218,7 +218,7 @@ mkdir OUTPUT
 #PointCloud from Ortho+DEM, with offset substracted to the coordinates to solve the 32bit precision issue
 mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=Orthophotomosaic.tif Out=OUTPUT/pointcloud.ply
 
-#cd MEC-Malt
+#cd MEC-Malt  
 #finalDEMs=($(ls Z_Num*_DeZoom*_STD-MALT.tif))
 #finalcors=($(ls Correl_STD-MALT_Num*.tif))
 #DEMind=$((${#finalDEMs[@]}-1))
