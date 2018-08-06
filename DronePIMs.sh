@@ -127,15 +127,15 @@ mm3d XifGps2Txt .*$EXTENSION
 #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
 mm3d XifGps2Xml .*$EXTENSION RAWGNSS
 #Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
-mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml DN=100
+mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml #DN=50
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 mm3d Tapioca File FileImagesNeighbour.xml $size
 #if [ "$use_schnaps" = true ]; then 
 	#filter TiePoints (better distribution, avoid clogging)
-mm3d Schnaps .*$EXTENSION MoveBadImgs=1
-#fi
+mm3d Schnaps .*$EXTENSION MoveBadImgs=1 VeryStrict=1
+#fi 
 #Compute Relative orientation (Arbitrary system)
-mm3d Tapas FraserBasic .*$EXTENSION Out=Arbitrary SH=_mini
+mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
 
 #Visualize relative orientation, if apericloud is not working, run 
 if [ "$do_AperiCloud" = true ]; then 
@@ -145,7 +145,7 @@ fi
 #Transform to  RTL system
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 #Bundle adjust using both camera positions and tie points (number in EmGPS option is the quality estimate of the GNSS data in meters)
-mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,5] AllFree=1 SH=_mini
+mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,0.5] AllFree=1 SH=_mini
 #Visualize Ground_RTL orientation
 if [ "$do_AperiCloud" = true ]; then
 	mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
@@ -159,7 +159,7 @@ mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
 #Taking away files from the oblique folder
 if [ "$obliqueFolder" != none ]; then	
 	here=$(pwd)
-	cd $obliqueFolder	
+	cd $obliqueFolder	 
 	find ./ -type f -name "*" | while read filename; do
 		f=$(basename "$filename")
 		rm  $here/$f
@@ -175,7 +175,7 @@ fi
 # NOTE - 
 mm3d PIMs Forest ".*JPG" Ground_UTM  SzNorm=1 DefCor=0 ZReg=0.003 UseGpu=0 ZoomF=$ZoomF
 #else
-#fi
+#fi 
 
 mm3d Pims2MNT Forest DoOrtho=1
 #if [ "$DEQ" != none ]; then 
@@ -230,6 +230,6 @@ mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=Orthophotomosaic.tif Out=OUTPUT
 #cp $laststr.tfw $corrstr.tfw
 #cd ..
 
-gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Orthophotomosaic.tif OUTPUT/OrthoImage_geotif.tif
+#gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMS/ORTHO/Orthophotomosaic.tif OUTPUT/OrthoImage_geotif.tif
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMS-Tmp-Basc/PIMs-Merged_Prof.tif OUTPUT/DEM_geotif.tif
 #gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastcor OUTPUT/CORR.tif
