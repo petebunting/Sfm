@@ -124,12 +124,16 @@ fi
 
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
 mm3d XifGps2Txt .*$EXTENSION
+
 #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
 mm3d XifGps2Xml .*$EXTENSION RAWGNSS
+
 #Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
 mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml DN=50
+
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 mm3d Tapioca File FileImagesNeighbour.xml $size
+
 #if [ "$use_schnaps" = true ]; then 
 	#filter TiePoints (better distribution, avoid clogging)
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1
@@ -144,12 +148,15 @@ fi
 
 #Transform to  RTL system
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
+
 #Bundle adjust using both camera positions and tie points (number in EmGPS option is the quality estimate of the GNSS data in meters)
 mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,5] AllFree=1 SH=_mini
+
 #Visualize Ground_RTL orientation
 if [ "$do_AperiCloud" = true ]; then
 	mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
 fi
+
 #Change system to final cartographic system
 mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
 
