@@ -47,7 +47,7 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:h" opt; do
       utm_set=true
       ;;
  	sz)
-      size=$OPTARG
+      size=$OPTARG 
       ;;        
 	r)
       RESOL=$OPTARG
@@ -121,7 +121,7 @@ fi
 #if [ "$do_AperiCloud" = true ]; then
 #	DevAllPrep.sh
 #fi
-
+#mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
 mm3d XifGps2Txt .*$EXTENSION
 #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
@@ -154,7 +154,7 @@ fi
 mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
 
 #Print out a text file with the camera positions (for use in external software, e.g. GIS)
-mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
+#mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
 
 #Taking away files from the oblique folder
 if [ "$obliqueFolder" != none ]; then	
@@ -162,7 +162,7 @@ if [ "$obliqueFolder" != none ]; then
 	cd $obliqueFolder	 
 	find ./ -type f -name "*" | while read filename; do
 		f=$(basename "$filename")
-		rm  $here/$f
+		rm  $here/$f 
 	done	
 	cd $here	
 fi
@@ -173,11 +173,20 @@ fi
 	#mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM SzW=1 UseGpu=1 ZReg=0.003 ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
 	
 # NOTE - 
-mm3d PIMs Forest ".*JPG" Ground_UTM  SzNorm=1 DefCor=0 ZReg=0.003 UseGpu=0 ZoomF=$ZoomF
+# This is a bit of a crap hack until I fix micmac GPU.....
+#source activate pymicmac;
+
+# Part of crap hack as it doesn't uinderstand the compiled stuff from other micmac
+rm -rf Tmp-MM-Dir;
+
+#mm3d PIMs Forest ".*JPG" Ground_UTM  SzNorm=1 DefCor=0 ZReg=0.003 UseGpu=0 ZoomF=$ZoomF
+mm3d PIMs Forest ".*JPG" Ground_UTM FilePair=FileImagesNeighbour.xml DefCor=0 ZReg=0.003 UseGpu=1 ZoomF=$ZoomF
 #else
 #fi 
 
 mm3d Pims2MNT Forest DoOrtho=1
+
+#source deactivate pymicmac;
 #if [ "$DEQ" != none ]; then 
 #	mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
 #else
@@ -230,6 +239,9 @@ mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=Orthophotomosaic.tif Out=OUTPUT
 #cp $laststr.tfw $corrstr.tfw
 #cd ..
 
-#gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMS/ORTHO/Orthophotomosaic.tif OUTPUT/OrthoImage_geotif.tif
+
+mm3d ConvertIm Orthophotomosaic.tif Out=OrthFinal.tif
+
+gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMS/ORTHO/OrthFinal.tif OUTPUT/OrthoImage_geotif.tif
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMS-Tmp-Basc/PIMs-Merged_Prof.tif OUTPUT/DEM_geotif.tif
 #gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastcor OUTPUT/CORR.tif
