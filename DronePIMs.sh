@@ -128,7 +128,7 @@ mm3d XifGps2Txt .*$EXTENSION
 #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
 mm3d XifGps2Xml .*$EXTENSION RAWGNSS
 
-Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
+#Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
 mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1#DN=50
 
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
@@ -147,26 +147,32 @@ if [ "$do_AperiCloud" = true ]; then
 	mm3d AperiCloud .*$EXTENSION Ori-Arbitrary SH=_mini
 fi
 
+mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
+# This or campari just messes stuff up 
 #Transform to  RTL system
-mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N temp CalcV=1
+#mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N temp CalcV=1
 
-mm3d OriConvert OriTxtInFile GpsCoordinatesFromExif.txt Nav-adjusted-RTL  MTD1=1 Delay=6.3016
-
-mm3d CenterBascule .*$EXTENSION Arbitrary Nav-adjusted-RTL All-RTL  
+#mm3d OriConvert OriTxtInFile GpsCoordinatesFromExif.txt Nav-adjusted-RTL  MTD1=1 Delay=6.3016
+ 
+#mm3d CenterBascule .*$EXTENSION Arbitrary Nav-adjusted-RTL All-RTL  
 
 #Bundle adjust using both camera positions and tie points (number in EmGPS option is the quality estimate of the GNSS data in meters)
 #mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
    
-#Visualize Ground_RTL orientation  
-if [ "$do_AperiCloud" = true ]; then
-	mm3d AperiCloud .*$EXTENSION Nav-adjusted-RTL SH=_mini
-fi
+#Visualize Ground_RTL orientation   
+#if [ "$do_AperiCloud" = true ]; then
+#	mm3d AperiCloud .*$EXTENSION Nav-adjusted-RTL SH=_mini
+#fi 
+
+ 
+
 #Change system to final cartographic system 
-mm3d ChgSysCo  .*$EXTENSION All-RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
+
+mm3d ChgSysCo  .*$EXTENSION Ground_Init_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
 
 #Print out a text file with the camera positions (for use in external software, e.g. GIS)
-#mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
-
+mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
+ 
 #Taking away files from the oblique folder
 if [ "$obliqueFolder" != none ]; then	
 	here=$(pwd)
@@ -182,7 +188,7 @@ fi
 #Correlation into DEM
 #if [ "$resol_set" = true ]; then
 	#mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM SzW=1 UseGpu=1 ZReg=0.003 ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
-	
+	 
 # NOTE - 
 # This is a bit of a crap hack until I fix micmac GPU.....
 #source activate pymicmac;
@@ -191,7 +197,7 @@ fi
 #rm -rf Tmp-MM-Dir;
 
 #mm3d PIMs Forest ".*JPG" Ground_UTM  SzNorm=1 DefCor=0 ZReg=0.003 UseGpu=0 ZoomF=$ZoomF
-mm3d PIMs Forest ".*JPG" Ground_UTM FilePair=FileImagesNeighbour.xml DefCor=0 ZReg=0.003 UseGpu=1 ZoomF=$ZoomF
+mm3d PIMs Forest ".*JPG" Ground_UTM DefCor=0 ZReg=0.003 UseGpu=1 ZoomF=$ZoomF
 #else
 #fi 
 
