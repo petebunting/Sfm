@@ -14,7 +14,7 @@
 
 
 
-# add default values
+# add default values 
 EXTENSION=JPG 
 CSV=*.csv  
 X_OFF=0;
@@ -25,10 +25,10 @@ do_ply=true
 resol_set=false
 ZoomF=1
 DEQ=1
-gpu=0
+gpu=1
   
 # TODO An option for this cmd if exif lacks info, which with bramour is possible
-# mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
+mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
  
 while getopts "e:csv:x:y:u:sz:p:r:z:eq:g:h" opt; do   
   case $opt in 
@@ -81,7 +81,7 @@ while getopts "e:csv:x:y:u:sz:p:r:z:eq:g:h" opt; do
       ;;          
 	eq)
       DEQ=$OPTARG
-      ;;    
+      ;;     
 	g)
       gpu=$OPTARG    
       ;;
@@ -148,20 +148,16 @@ mm3d AperiCloud .*$EXTENSION Arbitrary SH=_mini
 #Transform to  RTL system
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_RTL
 
-#This tends to screw things up - not required 
-#Bundle adjust using both camera positions and tie points (number in EmGPS option is the quality estimate of the GNSS data in meters)
-# Should this be replaced with the delay estimate? EmGPS is 1 metre here but it could be lower.  
-#mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
-
-#Visualize Ground_RTL orientation
-if [ "$do_AperiCloud" = true ]; then
-	mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini 
-fi
+mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
+   
+#Visualize Ground_RTL orientation   
+#if [ "$do_AperiCloud" = true ]; then
+mm3d AperiCloud .*$EXTENSION Ground_RTL SH=_mini
 #Change system to final cartographic system
 mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
 
 #Print out a text file with the camera positions (for use in external software, e.g. GIS)
-mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
+#mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
 
 #Taking away files from the oblique folder
 #if [ "$obliqueFolder" != none ]; then	

@@ -151,15 +151,15 @@ mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 
 #This tends to screw things up - not required 
 #Bundle adjust using both camera positions and tie points (number in EmGPS option is the quality estimate of the GNSS data in meters)
-#mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,5] AllFree=1 SH=_mini
+mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
 
 #Visualize Ground_RTL orientation
-#if [ "$do_AperiCloud" = true ]; then
-#	mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
-#fi
+if [ "$do_AperiCloud" = true ]; then
+	mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
+fi
 
 #Change system to final cartographic system 
-mm3d ChgSysCo  .*$EXTENSION Ground_Init_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
+mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
 
 #Print out a text file with the camera positions (for use in external software, e.g. GIS)
 mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1

@@ -144,10 +144,7 @@ mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
 
 #Visualize relative orientation, if apericloud is not working, run 
 if [ "$do_AperiCloud" = true ]; then 
-	mm3d AperiCloud .*$EXTENSION Ori-Arbitrary SH=_mini
-fi
-
-mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
+	mm3d AperiCloud .*$EXTENSION Ori-Arbitrary 
 # This or campari just messes stuff up 
 #Transform to  RTL system
 #mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N temp CalcV=1
@@ -157,18 +154,18 @@ mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 #mm3d CenterBascule .*$EXTENSION Arbitrary Nav-adjusted-RTL All-RTL  
 
 #Bundle adjust using both camera positions and tie points (number in EmGPS option is the quality estimate of the GNSS data in meters)
-#mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
+mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
    
 #Visualize Ground_RTL orientation   
 #if [ "$do_AperiCloud" = true ]; then
-#	mm3d AperiCloud .*$EXTENSION Nav-adjusted-RTL SH=_mini
+mm3d AperiCloud .*$EXTENSION Ground_RTL SH=_mini
 #fi 
 
  
 
 #Change system to final cartographic system 
 
-mm3d ChgSysCo  .*$EXTENSION Ground_Init_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
+mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
 
 #Print out a text file with the camera positions (for use in external software, e.g. GIS)
 mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
@@ -242,7 +239,7 @@ mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif
 #Making OUTPUT folder
 mkdir OUTPUT
 #PointCloud from Ortho+DEM, with offset substracted to the coordinates to solve the 32bit precision issue
-mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=Orthophotomosaic.tif Out=OUTPUT/pointcloud.ply
+#mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=Orthophotomosaic.tif Out=OUTPUT/pointcloud.ply
 
 #cd MEC-Malt  
 #finalDEMs=($(ls Z_Num*_DeZoom*_STD-MALT.tif)) 
