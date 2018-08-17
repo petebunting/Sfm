@@ -17,6 +17,7 @@ size=2000
 resol_set=false
 ZoomF=1
 DEQ=1
+gpu=false
 obliqueFolder=none
 
 while getopts "e:x:y:u:sz:spao:r:z:eq:h" opt; do
@@ -35,12 +36,13 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:h" opt; do
       echo "	-r RESOL         : Ground resolution (in meters)"
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
       echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
+      echo "-g gpu           : Whether to use GPU support, default false
       echo "	-h	             : displays this message and exits."
       echo " "
       exit 0
       ;;    
 	e)
-      EXTENSION=$OPTARG
+      EXTENSION=$OPTARG 
       ;;
 	u)
       UTM=$OPTARG
@@ -77,6 +79,9 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:h" opt; do
 	eq)
       DEQ=$OPTARG  
       ;;
+	g)
+      gpu=false  
+      ;;
     \?)
       echo "DroneNadir.sh: Invalid option: -$OPTARG" >&1
       exit 1
@@ -98,6 +103,14 @@ fi
 #	echo "Not using Schnaps!"
 #	SH=""
 #fi
+if [ "$gpu" = false ]; then
+	echo "Using CPU only"
+fi
+if [ "$gpu" = true ]; then
+	echo "Using GPU support"
+fi 
+
+
 #create UTM file (after deleting any existing one)
 rm SysUTM.xml
 echo "<SystemeCoord>                                                                                              " >> SysUTM.xml
@@ -138,7 +151,7 @@ mm3d Tapioca File FileImagesNeighbour.xml $size
 	#filter TiePoints (better distribution, avoid clogging)
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1 VeryStrict=1
 
-#fi 
+#fi  
 #Compute Relative orientation (Arbitrary system)
 mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
 
@@ -194,9 +207,13 @@ fi
 #rm -rf Tmp-MM-Dir;
 
 #mm3d PIMs Forest ".*JPG" Ground_UTM  SzNorm=1 DefCor=0 ZReg=0.003 UseGpu=0 ZoomF=$ZoomF
-mm3d PIMs Forest ".*JPG" Ground_UTM DefCor=0 ZReg=0.003 UseGpu=1 ZoomF=$ZoomF
-#else
-#fi 
+
+
+if [ "$gpu" = true ]; then
+	mm3d PIMs Forest ".*JPG" Ground_UTM DefCor=0 ZReg=0.003 UseGpu=1 ZoomF=$ZoomF
+else
+    mm3d PIMs Forest ".*JPG" Ground_UTM DefCor=0 ZReg=0.003 ZoomF=$ZoomF
+fi 
 
 mm3d Pims2MNT Forest DoOrtho=1
 
@@ -221,7 +238,7 @@ mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif
 
 
 
-# Create some image histograms for ossim
+# Create some image histograms for ossim 
 #ossim-create-histo -i *Ort**.tif;
 
 # Unfortunately have to reproject all the bloody images for OSSIM to understand ie espg4326
@@ -244,7 +261,7 @@ mkdir OUTPUT
 #cd MEC-Malt  
 #finalDEMs=($(ls Z_Num*_DeZoom*_STD-MALT.tif)) 
 #finalcors=($(ls Correl_STD-MALT_Num*.tif))
-#DEMind=$((${#finalDEMs[@]}-1))
+#DEMind=$((${#finalDEMs[@]}-1)) 
 #corind=$((${#finalcors[@]}-1))
 #lastDEM=${finalDEMs[DEMind]}
 #lastcor=${finalcors[corind]}
@@ -256,6 +273,6 @@ mkdir OUTPUT
 
 mm3d ConvertIm Orthophotomosaic.tif Out=OrthFinal.tif
 
-gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMS/ORTHO/OrthFinal.tif OUTPUT/OrthoImage_geotif.tif
-gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMS-Tmp-Basc/PIMs-Merged_Prof.tif OUTPUT/DEM_geotif.tif
+gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMs-ORTHO/OrthFinal.tif OUTPUT/OrthoImage_geotif.tif
+gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMs-Tmp-Basc/PIMs-Merged_Prof.tif OUTPUT/DEM_geotif.tif
 #gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastcor OUTPUT/CORR.tif

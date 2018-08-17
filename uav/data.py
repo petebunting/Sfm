@@ -71,9 +71,9 @@ def convert_c3p(folder, lognm):
                        pdcsv['Pitch'], pdcsv['Roll']], axis=1)
     
 
-    del pdcsv
+    #del pdcsv
     # get rid of the first columns consisting number 1
-    #npCsv = npCsv[:,1:len(npCsv)]
+    #npCsv = pdcsv[:,1:len(pdcsv)]
 
     newCsv.insert(loc=0, column="#F=N", value=files)
   
