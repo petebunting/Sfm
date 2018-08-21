@@ -148,7 +148,7 @@ mm3d AperiCloud .*$EXTENSION Arbitrary SH=_mini
 #Transform to  RTL system
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_RTL
 
-mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
+#mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
    
 #Visualize Ground_RTL orientation   
 #if [ "$do_AperiCloud" = true ]; then
