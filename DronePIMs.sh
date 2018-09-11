@@ -15,10 +15,10 @@ do_ply=true
 do_AperiCloud=true
 size=2000
 resol_set=false
-ZoomF=1
+ZoomF=1 
 DEQ=1
 gpu=false
-obliqueFolder=none
+obliqueFolder=none 
 
 while getopts "e:x:y:u:sz:spao:r:z:eq:h" opt; do
   case $opt in
@@ -36,7 +36,7 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:h" opt; do
       echo "	-r RESOL         : Ground resolution (in meters)"
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
       echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
-      echo "-g gpu           : Whether to use GPU support, default false
+      echo "-g gpu             : Whether to use GPU support, default false"
       echo "	-h	             : displays this message and exits."
       echo " "
       exit 0
@@ -237,7 +237,7 @@ mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif
 
 
 
-
+ 
 # Create some image histograms for ossim 
 #ossim-create-histo -i *Ort**.tif;
 
@@ -260,7 +260,7 @@ mkdir OUTPUT
 
 #cd MEC-Malt  
 #finalDEMs=($(ls Z_Num*_DeZoom*_STD-MALT.tif)) 
-#finalcors=($(ls Correl_STD-MALT_Num*.tif))
+#finalcors=($(ls Correl_STD-MALT_Num*.tif)) 
 #DEMind=$((${#finalDEMs[@]}-1)) 
 #corind=$((${#finalcors[@]}-1))
 #lastDEM=${finalDEMs[DEMind]}
@@ -270,9 +270,9 @@ mkdir OUTPUT
 #cp $laststr.tfw $corrstr.tfw
 #cd ..
 
-
+ 
 mm3d ConvertIm Orthophotomosaic.tif Out=OrthFinal.tif
 
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMs-ORTHO/OrthFinal.tif OUTPUT/OrthoImage_geotif.tif
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMs-Tmp-Basc/PIMs-Merged_Prof.tif OUTPUT/DEM_geotif.tif
-#gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastcor OUTPUT/CORR.tif
+
