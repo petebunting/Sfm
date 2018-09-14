@@ -13,19 +13,22 @@ Y_OFF=0;
 utm_set=false
 do_ply=true
 do_AperiCloud=true
-size=2000
+size=2000 
 resol_set=false
-ZoomF=1 
+ZoomF=1  
 DEQ=1
 gpu=false
 obliqueFolder=none 
-
-while getopts "e:x:y:u:sz:spao:r:z:eq:h" opt; do
+CSV=false
+cs=*.csv 
+ 
+while getopts "e:csv:x:y:u:sz:spao:r:z:eq:h" opt; do
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
       echo "usage: Drone.sh -e JPG -x 55000 -y 6600000 -u \"32 +north\" -p true -r 0.05"
       echo "	-e EXTENSION     : image file type (JPG, jpg, TIF, png..., default=JPG)."
+      echo "	-csv CSV         : if true uses csv in folder"
       echo "	-x X_OFF         : X (easting) offset for ply file overflow issue (default=0)."
       echo "	-y Y_OFF         : Y (northing) offset for ply file overflow issue (default=0)."
       echo "	-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
@@ -36,13 +39,16 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:h" opt; do
       echo "	-r RESOL         : Ground resolution (in meters)"
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
       echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
-      echo "-g gpu             : Whether to use GPU support, default false"
+      echo "  -g gpu           : Whether to use GPU support, default false"
       echo "	-h	             : displays this message and exits."
       echo " "
-      exit 0
+      exit 0 
       ;;    
-	e)
+	e) 
       EXTENSION=$OPTARG 
+      ;;
+	csv)
+      CSV=true 
       ;;
 	u)
       UTM=$OPTARG
@@ -109,7 +115,7 @@ fi
 if [ "$gpu" = true ]; then
 	echo "Using GPU support"
 fi 
-
+ 
 
 #create UTM file (after deleting any existing one)
 rm SysUTM.xml
@@ -123,27 +129,31 @@ echo "            <AuxStr>  +proj=utm +zone="$UTM "+ellps=WGS84 +datum=WGS84 +un
 echo "                                                                                                            " >> SysUTM.xml
 echo "         </BSC>                                                                                             " >> SysUTM.xml
 echo "</SystemeCoord>                                                                                             " >> SysUTM.xml
-  
-
+     
+ 
 #Copy everything from the folder with oblique images
 if [ "obliqueFolder" != none ]; then
-	cp $obliqueFolder/* .
+	cp $obliqueFolder/* . 
 fi 
-
+ 
 #Convert all images to tif (BW and RGB) for use in AperiCloud (because it otherwise breaks if too many CPUs are used)
 #if [ "$do_AperiCloud" = true ]; then
 #	DevAllPrep.sh
 #fi
-#mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000
+#mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000 
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-mm3d XifGps2Txt .*$EXTENSION
-
+if [ "$CSV"=true ]; then 
+    echo "using csv file" 
+    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
+else 
+    echo "using exif info"
+    mm3d XifGps2Txt .*$EXTENSION
 #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
-mm3d XifGps2Xml .*$EXTENSION RAWGNSS
+    mm3d XifGps2Xml .*$EXTENSION RAWGNSS
 
 #Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
-mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1#DN=50
-
+    mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1#DN=50
+fi 
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 mm3d Tapioca File FileImagesNeighbour.xml $size
 
@@ -156,9 +166,11 @@ mm3d Schnaps .*$EXTENSION MoveBadImgs=1 VeryStrict=1
 mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
 
 #Visualize relative orientation, if apericloud is not working, run 
-if [ "$do_AperiCloud" = true ]; then 
+if [ "$do_AperiCloud"=true ]; then 
 	mm3d AperiCloud .*$EXTENSION Ori-Arbitrary 
-# This or campari just messes stuff up 
+	
+mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_RTL
+# This or campari just messes stuff up  
 #Transform to  RTL system
 #mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N temp CalcV=1
 
@@ -171,17 +183,21 @@ mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree
    
 #Visualize Ground_RTL orientation   
 #if [ "$do_AperiCloud" = true ]; then
-mm3d AperiCloud .*$EXTENSION Ground_RTL SH=_mini
+#mm3d AperiCloud .*$EXTENSION Ground_RTL SH=_mini
 #fi 
-
  
-
+   
+  
 #Change system to final cartographic system 
-
-mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
+if [ "$CSV"=true ]; then 
+    mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
+else
+    mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
+    mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
+fi
 
 #Print out a text file with the camera positions (for use in external software, e.g. GIS)
-mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
+
  
 #Taking away files from the oblique folder
 if [ "$obliqueFolder" != none ]; then	
@@ -207,7 +223,7 @@ fi
 #rm -rf Tmp-MM-Dir;
 
 #mm3d PIMs Forest ".*JPG" Ground_UTM  SzNorm=1 DefCor=0 ZReg=0.003 UseGpu=0 ZoomF=$ZoomF
-
+ 
 
 if [ "$gpu" = true ]; then
 	mm3d PIMs Forest ".*JPG" Ground_UTM DefCor=0 ZReg=0.003 UseGpu=1 ZoomF=$ZoomF
@@ -236,7 +252,7 @@ mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif
 # gdalwarp -overwrite -s_srs "+proj=utm +zone=30 +ellps=WGS84+datum=WGS84 +units=m +no_defs" -t_srs EPSG:4326 -srcnodata 0 -dstnodata 0 *Ort**.tif
 
 
-
+ 
  
 # Create some image histograms for ossim 
 #ossim-create-histo -i *Ort**.tif;
@@ -275,4 +291,3 @@ mm3d ConvertIm Orthophotomosaic.tif Out=OrthFinal.tif
 
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMs-ORTHO/OrthFinal.tif OUTPUT/OrthoImage_geotif.tif
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMs-Tmp-Basc/PIMs-Merged_Prof.tif OUTPUT/DEM_geotif.tif
-

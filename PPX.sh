@@ -28,7 +28,7 @@ DEQ=1
 gpu=1
   
 # TODO An option for this cmd if exif lacks info, which with bramour is possible
-mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
+#mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
  
 while getopts "e:csv:x:y:u:sz:p:r:z:eq:g:h" opt; do   
   case $opt in 
