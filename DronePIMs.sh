@@ -154,7 +154,7 @@ else
  
 #Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
     mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
-fi 
+fi  
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 mm3d Tapioca File FileImagesNeighbour.xml $size
 
@@ -167,8 +167,8 @@ mm3d Schnaps .*$EXTENSION MoveBadImgs=1 VeryStrict=1
 mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
 
 #Visualize relative orientation, if apericloud is not working, run 
-if [ "$do_AperiCloud" = true ]; then 
-	mm3d AperiCloud .*$EXTENSION Ori-Arbitrary 
+#if [ "$do_AperiCloud" = true ]; then 
+mm3d AperiCloud .*$EXTENSION Ori-Arbitrary 
 	
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_RTL
 # This or campari just messes stuff up  
@@ -267,7 +267,7 @@ mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif
 # See https://trac.osgeo.org/ossim/wiki/orthoigen for really detailed cmd help
 #ossim-orthoigen --combiner-type ossimBlendMosaic *Ort**.tif mosaic_blend.tif
 #ossim-orthoigen --combiner-type ossimFeatherMosaic --hist-match Ort_DSC00698.tif *Ort**.tif mosaic.tif;
-# back to utm
+# back to utm 
 
 
 #Making OUTPUT folder
