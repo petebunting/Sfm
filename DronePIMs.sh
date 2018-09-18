@@ -168,9 +168,9 @@ mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
 
 #Visualize relative orientation, if apericloud is not working, run 
 #if [ "$do_AperiCloud" = true ]; then 
-mm3d AperiCloud .*$EXTENSION Ori-Arbitrary 
+mm3d AperiCloud .*$EXTENSION Ori-Arbitrary  
 	
-mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_RTL
+mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 # This or campari just messes stuff up  
 #Transform to  RTL system
 #mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N temp CalcV=1
