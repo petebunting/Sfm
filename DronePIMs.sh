@@ -20,7 +20,7 @@ DEQ=1
 gpu=false
 obliqueFolder=none 
 CSV=false
-cs=*.csv 
+
  
 while getopts "e:csv:x:y:u:sz:spao:r:z:eq:h" opt; do
   case $opt in
@@ -48,7 +48,7 @@ while getopts "e:csv:x:y:u:sz:spao:r:z:eq:h" opt; do
       EXTENSION=$OPTARG 
       ;;
 	csv)
-      CSV=true 
+      CSV=false 
       ;;
 	u)
       UTM=$OPTARG
@@ -139,20 +139,21 @@ fi
 #Convert all images to tif (BW and RGB) for use in AperiCloud (because it otherwise breaks if too many CPUs are used)
 #if [ "$do_AperiCloud" = true ]; then
 #	DevAllPrep.sh
-#fi
+#fi 
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000 
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-if [ "$CSV"=true ]; then 
+if [ "$CSV" = true ]; then 
     echo "using csv file" 
+    cs=*.csv  
     mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
-else 
+else  
     echo "using exif info"
     mm3d XifGps2Txt .*$EXTENSION
 #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
     mm3d XifGps2Xml .*$EXTENSION RAWGNSS
-
+ 
 #Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
-    mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1#DN=50
+    mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
 fi 
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 mm3d Tapioca File FileImagesNeighbour.xml $size
@@ -166,7 +167,7 @@ mm3d Schnaps .*$EXTENSION MoveBadImgs=1 VeryStrict=1
 mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
 
 #Visualize relative orientation, if apericloud is not working, run 
-if [ "$do_AperiCloud"=true ]; then 
+if [ "$do_AperiCloud" = true ]; then 
 	mm3d AperiCloud .*$EXTENSION Ori-Arbitrary 
 	
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_RTL
