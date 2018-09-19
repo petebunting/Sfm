@@ -168,11 +168,11 @@ mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
 
 #Visualize relative orientation, if apericloud is not working, run 
 #if [ "$do_AperiCloud" = true ]; then 
-mm3d AperiCloud .*$EXTENSION Ori-Arbitrary  
+mm3d AperiCloud .*$EXTENSION Arbitrary  
 	
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 # This or campari just messes stuff up  
-#Transform to  RTL system
+#Transform to  RTL system 
 #mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N temp CalcV=1
 
 #mm3d OriConvert OriTxtInFile GpsCoordinatesFromExif.txt Nav-adjusted-RTL  MTD1=1 Delay=6.3016
@@ -184,13 +184,13 @@ mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree
    
 #Visualize Ground_RTL orientation   
 #if [ "$do_AperiCloud" = true ]; then
-#mm3d AperiCloud .*$EXTENSION Ground_RTL SH=_mini
+mm3d AperiCloud .*$EXTENSION Ground_RTL SH=_mini
 #fi 
  
    
   
 #Change system to final cartographic system 
-if [ "$CSV"=true ]; then 
+if [ "$CSV" = true ]; then 
     mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
 else
     mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
@@ -218,21 +218,26 @@ fi
 	 
 # NOTE - 
 # This is a bit of a crap hack until I fix micmac GPU.....
-#source activate pymicmac;
- 
-# Part of crap hack as it doesn't uinderstand the compiled stuff from other micmac
-#rm -rf Tmp-MM-Dir;
+
 
 #mm3d PIMs Forest ".*JPG" Ground_UTM  SzNorm=1 DefCor=0 ZReg=0.003 UseGpu=0 ZoomF=$ZoomF
  
 
 if [ "$gpu" = true ]; then
-	mm3d PIMs Forest ".*JPG" Ground_UTM DefCor=0 ZReg=0.003 UseGpu=1 ZoomF=$ZoomF
+	mm3d PIMs MicMac ".*JPG" Ground_UTM DefCor=0 ZReg=0.003 SzW=1 UseGpu=1 ZoomF=$ZoomF
 else
-    mm3d PIMs Forest ".*JPG" Ground_UTM DefCor=0 ZReg=0.003 ZoomF=$ZoomF
+    mm3d PIMs MicMac ".*JPG" Ground_UTM DefCor=0 ZReg=0.003 SzW=1 ZoomF=$ZoomF
 fi 
 
-mm3d Pims2MNT Forest DoOrtho=1
+
+source activate pymicmac;
+ 
+# Part of crap hack as it doesn't uinderstand the compiled stuff from other micmac
+rm -rf Tmp-MM-Dir/*.xml
+rm -rf Tmp-MM-Dir/*.dmp 
+
+mm3d Pims2MNT MicMac DoOrtho=1
+ 
 
 #source deactivate pymicmac;
 #if [ "$DEQ" != none ]; then 
