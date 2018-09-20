@@ -2,7 +2,7 @@
 # Modified from the original L.Girod script
 
 # example:
-# ./DronePIMs.sh -e JPG -u "30 +north" -r 0.1
+# ./DronePIMs.sh -e JPG -a MicMac -u "30 +north" -r 0.1
 
 
 
@@ -22,12 +22,13 @@ obliqueFolder=none
 CSV=false
 
  
-while getopts "e:csv:x:y:u:sz:spao:r:z:eq:h" opt; do
+while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:h" opt; do
   case $opt in
-    h)
+    h) 
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
       echo "usage: Drone.sh -e JPG -x 55000 -y 6600000 -u \"32 +north\" -p true -r 0.05"
       echo "	-e EXTENSION     : image file type (JPG, jpg, TIF, png..., default=JPG)."
+      echo "	-a Algorithm     : type of algo eg BigMac, MicMac, Forest, Statue etc"
       echo "	-csv CSV         : if true uses csv in folder"
       echo "	-x X_OFF         : X (easting) offset for ply file overflow issue (default=0)."
       echo "	-y Y_OFF         : Y (northing) offset for ply file overflow issue (default=0)."
@@ -39,16 +40,19 @@ while getopts "e:csv:x:y:u:sz:spao:r:z:eq:h" opt; do
       echo "	-r RESOL         : Ground resolution (in meters)"
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
       echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
-      echo "  -g gpu           : Whether to use GPU support, default false"
+      echo " -g gpu           : Whether to use GPU support, default false"
       echo "	-h	             : displays this message and exits."
       echo " "
       exit 0 
       ;;    
-	e) 
+	e)   
       EXTENSION=$OPTARG 
       ;;
+    algo)
+      Algorithm=$OPTARG
+      ;;      
 	csv)
-      CSV=false 
+      CSV=false
       ;;
 	u)
       UTM=$OPTARG
@@ -140,11 +144,11 @@ fi
 #if [ "$do_AperiCloud" = true ]; then
 #	DevAllPrep.sh
 #fi 
-#mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000 
+#mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-if [ "$CSV" = true ]; then 
+if [ "$CSV"= true ]; then 
     echo "using csv file" 
-    cs=*.csv  
+    cs=*.csv   
     mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
 else  
     echo "using exif info"
@@ -157,7 +161,7 @@ else
 fi  
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 mm3d Tapioca File FileImagesNeighbour.xml $size
-
+ 
 #if [ "$use_schnaps" = true ]; then 
 	#filter TiePoints (better distribution, avoid clogging)
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1 VeryStrict=1
@@ -224,17 +228,17 @@ fi
  
 
 if [ "$gpu" = true ]; then
-	mm3d PIMs MicMac ".*JPG" Ground_UTM DefCor=0 ZReg=0.003 SzW=1 UseGpu=1 ZoomF=$ZoomF
+	mm3d PIMs $Algorithm ".*JPG" Ground_UTM DefCor=0 ZReg=0.003 SzW=1 UseGpu=1 ZoomF=$ZoomF SH=_mini
 else
-    mm3d PIMs MicMac ".*JPG" Ground_UTM DefCor=0 ZReg=0.003 SzW=1 ZoomF=$ZoomF
+    mm3d PIMs $Algorithm ".*JPG" Ground_UTM DefCor=0 ZReg=0.003 SzW=1 ZoomF=$ZoomF SH=_mini
 fi 
 
 
 source activate pymicmac;
  
 # Part of crap hack as it doesn't uinderstand the compiled stuff from other micmac
-rm -rf Tmp-MM-Dir/*.xml
-rm -rf Tmp-MM-Dir/*.dmp 
+#rm -rf Tmp-MM-Dir/*.xml
+#rm -rf Tmp-MM-Dir/*.dmp 
 
 mm3d Pims2MNT MicMac DoOrtho=1
  
