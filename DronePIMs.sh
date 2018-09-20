@@ -5,7 +5,7 @@
 # ./DronePIMs.sh -e JPG -a MicMac -u "30 +north" -r 0.1
 
 
-
+ 
 # add default values
 EXTENSION=JPG
 X_OFF=0;
@@ -19,7 +19,7 @@ ZoomF=1
 DEQ=1
 gpu=false
 obliqueFolder=none 
-CSV=false
+
 
  
 while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:h" opt; do
@@ -29,7 +29,6 @@ while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:h" opt; do
       echo "usage: Drone.sh -e JPG -x 55000 -y 6600000 -u \"32 +north\" -p true -r 0.05"
       echo "	-e EXTENSION     : image file type (JPG, jpg, TIF, png..., default=JPG)."
       echo "	-a Algorithm     : type of algo eg BigMac, MicMac, Forest, Statue etc"
-      echo "	-csv CSV         : if true uses csv in folder"
       echo "	-x X_OFF         : X (easting) offset for ply file overflow issue (default=0)."
       echo "	-y Y_OFF         : Y (northing) offset for ply file overflow issue (default=0)."
       echo "	-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
@@ -50,9 +49,6 @@ while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:h" opt; do
       ;;
     algo)
       Algorithm=$OPTARG
-      ;;      
-	csv)
-      CSV=false
       ;;
 	u)
       UTM=$OPTARG
@@ -146,19 +142,19 @@ fi
 #fi 
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-if [ "$CSV"= true ]; then 
-    echo "using csv file" 
-    cs=*.csv   
-    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
-else  
-    echo "using exif info"
-    mm3d XifGps2Txt .*$EXTENSION
+#if [ "$CSV"= true ]; then 
+#    echo "using csv file" 
+#    cs=*.csv   
+ #   mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
+#else  
+
+mm3d XifGps2Txt .*$EXTENSION
 #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
-    mm3d XifGps2Xml .*$EXTENSION RAWGNSS
+mm3d XifGps2Xml .*$EXTENSION RAWGNSS
  
 #Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
-    mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
-fi  
+mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
+
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 mm3d Tapioca File FileImagesNeighbour.xml $size
  
