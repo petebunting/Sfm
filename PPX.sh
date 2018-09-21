@@ -129,10 +129,10 @@ echo "</SystemeCoord>                                                           
 
 # In place of L.Girods cmds to get coords from the images we are using a csv file as this applys to a system where they are recorded by a separate GPS
 
-mm3d OriConvert OriTxtInFile $CSV RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
+mm3d OriConvert OriTxtInFile $CSV RAWGNSS_N ChSys=DegreeWGS84@SysCoRTL.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
  
 #Find Tie points using 1/2 resolution image 
-
+ 
 mm3d Tapioca File FileImagesNeighbour.xml $size
 
 mm3d Schnaps .*$EXTENSION VeryStrict=1 MoveBadImgs=1
@@ -144,12 +144,12 @@ mm3d Tapas FraserBasic .*$EXTENSION Out=Arbitrary SH=_mini
 
 mm3d AperiCloud .*$EXTENSION Arbitrary SH=_mini 
  
-
+ 
 #Transform to  RTL system
-mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_RTL
+mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 
-#mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
-   
+mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
+    
 #Visualize Ground_RTL orientation   
 #if [ "$do_AperiCloud" = true ]; then
 mm3d AperiCloud .*$EXTENSION Ground_RTL SH=_mini

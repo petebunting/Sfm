@@ -129,7 +129,7 @@ echo "            <AuxStr>  +proj=utm +zone="$UTM "+ellps=WGS84 +datum=WGS84 +un
 echo "                                                                                                            " >> SysUTM.xml
 echo "         </BSC>                                                                                             " >> SysUTM.xml
 echo "</SystemeCoord>                                                                                             " >> SysUTM.xml
-     
+      
  
 #Copy everything from the folder with oblique images
 if [ "obliqueFolder" != none ]; then
@@ -145,7 +145,7 @@ fi
 #if [ "$CSV"= true ]; then 
 #    echo "using csv file" 
 #    cs=*.csv   
- #   mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
+ #   mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
 #else  
 
 mm3d XifGps2Txt .*$EXTENSION
@@ -189,7 +189,7 @@ mm3d AperiCloud .*$EXTENSION Ground_RTL SH=_mini
  
    
   
-#Change system to final cartographic system 
+#Change system to final cartographic system  
 if [ "$CSV" = true ]; then 
     mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
 else
@@ -230,7 +230,7 @@ else
 fi 
 
 
-source activate pymicmac;
+#source activate pymicmac; 
  
 # Part of crap hack as it doesn't uinderstand the compiled stuff from other micmac
 #rm -rf Tmp-MM-Dir/*.xml
