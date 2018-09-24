@@ -26,7 +26,7 @@ while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:h" opt; do
   case $opt in
     h) 
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
-      echo "usage: Drone.sh -e JPG -x 55000 -y 6600000 -u \"32 +north\" -p true -r 0.05"
+      echo "usage: DronePIMs.sh -e JPG -a MicMac -u 30 +north -r 0.1"
       echo "	-e EXTENSION     : image file type (JPG, jpg, TIF, png..., default=JPG)."
       echo "	-a Algorithm     : type of algo eg BigMac, MicMac, Forest, Statue etc"
       echo "	-x X_OFF         : X (easting) offset for ply file overflow issue (default=0)."
@@ -145,8 +145,7 @@ fi
 #if [ "$CSV"= true ]; then 
 #    echo "using csv file" 
 #    cs=*.csv   
- #   mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
-#else  
+ # mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
 
 mm3d XifGps2Txt .*$EXTENSION
 #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
@@ -166,18 +165,12 @@ mm3d Schnaps .*$EXTENSION MoveBadImgs=1 VeryStrict=1
 #Compute Relative orientation (Arbitrary system)
 mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
 
-#Visualize relative orientation, if apericloud is not working, run 
+#Visualize relative orientation, if apericloud is not working, run  
 #if [ "$do_AperiCloud" = true ]; then 
 mm3d AperiCloud .*$EXTENSION Arbitrary  
 	
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
-# This or campari just messes stuff up  
-#Transform to  RTL system 
-#mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N temp CalcV=1
 
-#mm3d OriConvert OriTxtInFile GpsCoordinatesFromExif.txt Nav-adjusted-RTL  MTD1=1 Delay=6.3016
- 
-#mm3d CenterBascule .*$EXTENSION Arbitrary Nav-adjusted-RTL All-RTL  
 
 #Bundle adjust using both camera positions and tie points (number in EmGPS option is the quality estimate of the GNSS data in meters)
 mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
