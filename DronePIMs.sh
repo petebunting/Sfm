@@ -19,7 +19,7 @@ ZoomF=1
 DEQ=1
 gpu=false
 obliqueFolder=none 
-
+Algorithm=MicMac 
 
  
 while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:h" opt; do
@@ -217,9 +217,9 @@ fi
  
 
 if [ "$gpu" = true ]; then
-	mm3d PIMs $Algorithm ".*JPG" Ground_UTM DefCor=0 ZReg=0.003 SzW=1 UseGpu=1 ZoomF=$ZoomF SH=_mini
+	mm3d PIMs $Algorithm ".*JPG" Ground_UTM DefCor=0 ZReg=0.005 SzW=1 UseGpu=1 ZoomF=$ZoomF 
 else
-    mm3d PIMs $Algorithm ".*JPG" Ground_UTM DefCor=0 ZReg=0.003 SzW=1 ZoomF=$ZoomF SH=_mini
+    mm3d PIMs $Algorithm ".*JPG" Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF  
 fi 
 
 
@@ -283,10 +283,10 @@ mkdir OUTPUT
 #laststr="${lastDEM%.*}"
 #corrstr="${lastcor%.*}"
 #cp $laststr.tfw $corrstr.tfw
-#cd ..
+#cd .. 
 
  
-mm3d ConvertIm Orthophotomosaic.tif Out=OrthFinal.tif
+mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OrthFinal.tif
 
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMs-ORTHO/OrthFinal.tif OUTPUT/OrthoImage_geotif.tif
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMs-Tmp-Basc/PIMs-Merged_Prof.tif OUTPUT/DEM_geotif.tif
