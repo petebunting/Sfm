@@ -113,9 +113,10 @@ if [ "$gpu" = false ]; then
 	echo "Using CPU only"
 fi
 if [ "$gpu" = true ]; then
-	echo "Using GPU support"
+	echo "Using GPU support" 
 fi 
- 
+
+echo "Using $Algorithm for PIMs dense matching"  
 
 #create UTM file (after deleting any existing one)
 rm SysUTM.xml
@@ -217,9 +218,9 @@ fi
  
 
 if [ "$gpu" = true ]; then
-	mm3d PIMs $Algorithm ".*JPG" Ground_UTM DefCor=0 ZReg=0.005 SzW=1 UseGpu=1 ZoomF=$ZoomF 
+	mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 ZReg=0.005 SzW=1 UseGpu=1 ZoomF=$ZoomF 
 else
-    mm3d PIMs $Algorithm ".*JPG" Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF  
+    mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF  
 fi 
 
 
