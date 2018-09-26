@@ -230,6 +230,12 @@ fi
 #rm -rf Tmp-MM-Dir/*.xml
 #rm -rf Tmp-MM-Dir/*.dmp 
 
+# This is likely to be added as Malt produces a void free Ortho NbProc key parameter
+# For robustness it is better to leave defaults
+#mm3d Malt Ortho ".*JPG" Ground_UTM  EZA=1 NbProc=20
+# Also worth using Ground or Urbane settings depending on application
+
+
 mm3d Pims2MNT MicMac DoOrtho=1
  
 

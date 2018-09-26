@@ -18,8 +18,9 @@ resol_set=false
 ZoomF=1
 DEQ=1
 obliqueFolder=none
+gpu=false
 
-while getopts "e:x:y:u:sz:spao:r:z:eq:h" opt; do
+while getopts "e:x:y:u:sz:spao:r:z:eq:g:h" opt; do 
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -35,8 +36,9 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:h" opt; do
       echo "	-r RESOL         : Ground resolution (in meters)"
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
       echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
+      echo " -g gpu           : Whether to use GPU support, default false"
       echo "	-h	             : displays this message and exits."
-      echo " "
+      echo " " 
       exit 0
       ;;    
 	e)
@@ -76,6 +78,9 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:h" opt; do
       ;;
 	eq)
       DEQ=$OPTARG  
+      ;;
+	g)
+      gpu=false  
       ;;
     \?)
       echo "DroneNadir.sh: Invalid option: -$OPTARG" >&1
@@ -181,14 +186,14 @@ fi
 
 # Also the NbProc=32 (eg) is the threads but think it uses all anyway
 # It looks as though it does on the makefiles generated
-if [ "$resol_set" = true ]; then
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM SzW=1 UseGpu=1 ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
+if [ "$gpu" = true ]; then
+	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=1 EZA=1 ZoomF=$ZoomF
 else
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM  SzW=1 UseGpu=1 EZA=1 ZoomF=$ZoomF
+	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=0 EZA=1 ZoomF=$ZoomF NbProc=28
 fi
 
 if [ "$DEQ" != none ]; then 
-	mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
+	mm3d Tawny Ortho-MEC-Malt DEq=$DEQ 
 else
 	mm3d Tawny Ortho-MEC-Malt DEq=1
 fi
