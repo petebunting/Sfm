@@ -19,8 +19,9 @@ ZoomF=1
 DEQ=1
 obliqueFolder=none
 gpu=false
+proc=10 
 
-while getopts "e:x:y:u:sz:spao:r:z:eq:g:h" opt; do 
+while getopts "e:x:y:u:sz:spao:r:z:eq:g:proc:h" opt; do  
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -37,6 +38,7 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:h" opt; do
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
       echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
       echo " -g gpu           : Whether to use GPU support, default false"
+      echo " -prc proc           : Whether to use GPU support, default false"
       echo "	-h	             : displays this message and exits."
       echo " " 
       exit 0
@@ -81,6 +83,9 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:h" opt; do
       ;;
 	g)
       gpu=false  
+      ;;
+	prc)
+      proc=$OPTARG  
       ;;
     \?)
       echo "DroneNadir.sh: Invalid option: -$OPTARG" >&1
@@ -189,7 +194,7 @@ fi
 if [ "$gpu" = true ]; then
 	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=1 EZA=1 ZoomF=$ZoomF
 else
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=0 EZA=1 ZoomF=$ZoomF NbProc=28
+	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=0 EZA=1 ZoomF=$ZoomF NbProc=$proc
 fi
 
 if [ "$DEQ" != none ]; then 
