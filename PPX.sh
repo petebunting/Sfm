@@ -10,7 +10,7 @@
 #I would like to remind users that an along-track overlap of 80% and across track overlap of 60% are the minimum recommended values.
 
 # example: (remove dot and slash if on your path)
-# ./PPX.sh -e JPG -csv Llan.csv -u "30 +north" -r 0.1
+# ./PPX.sh -e JPG -u "30 +north" -g 1 -w 2 -prc 16
 
 
 
@@ -25,12 +25,13 @@ do_ply=true
 resol_set=false
 ZoomF=1
 DEQ=1
-gpu=1
-  
+gpu=1 
+proc=16
+   
 # TODO An option for this cmd if exif lacks info, which with bramour is possible
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
  
-while getopts "e:csv:x:y:u:sz:p:r:z:eq:g:h" opt; do   
+while getopts "e:csv:x:y:u:sz:p:r:z:eq:g:prc:h" opt; do   
   case $opt in 
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -46,6 +47,7 @@ while getopts "e:csv:x:y:u:sz:p:r:z:eq:g:h" opt; do
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
       echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
       echo "	-g gpu           : Use GPU default is 0, if you want to use -g=1"
+      echo " -prc proc           : Whether to use GPU support, default false"
       echo "	-h	         : displays this message and exits."
       echo " "
       exit 0
@@ -85,6 +87,9 @@ while getopts "e:csv:x:y:u:sz:p:r:z:eq:g:h" opt; do
 	g)
       gpu=$OPTARG    
       ;;
+	prc)
+      proc=$OPTARG  
+      ;;
     \?)
       echo "PPXNadir.sh: Invalid option: -$OPTARG" >&1
       exit 1
@@ -109,6 +114,16 @@ fi
 
 # TODO An option for this cmd if exif lacks info, which with bramour is possible
 # mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000 
+
+if [ "$gpu" = 0 ]; then
+	echo "Using CPU only"
+	echo "$proc CPU threads to be used during dense matching"
+fi
+if [ "$gpu" = 1 ]; then
+    echo "$proc CPU threads to be used during dense matching"
+	echo "Using GPU support" 
+fi 
+
 
 #create UTM file (after deleting any existing one)
 rm SysUTM.xml
@@ -179,10 +194,10 @@ mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
 # Also the NbProc=32 (eg) is the threads but not sure if this uses all by default
 # It looks as though it does on the makefiles generated
 
-if [ "$resol_set" = true ]; then
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM SzW=1 UseGpu=$gpu ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
+if [ "$gpu" = true ]; then
+	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=1 EZA=1 ZoomF=$ZoomF NbProc=$proc
 else
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM  SzW=1 UseGpu=$gpu EZA=1 ZoomF=$ZoomF
+	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=0 EZA=1 ZoomF=$ZoomF NbProc=$proc
 fi
 
 #Mosaic from individual orthos

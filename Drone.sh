@@ -2,7 +2,7 @@
 # Modified from the original L.Girod script
 
 # example:
-# ./Drone.sh -e JPG -u "30 +north" -r 0.1
+# ./Drone.sh -e JPG -u "30 +north" -g 1 -w 2 -prc 20
 
 
 
@@ -18,10 +18,11 @@ resol_set=false
 ZoomF=1
 DEQ=1
 obliqueFolder=none
-gpu=false
-proc=10 
-
-while getopts "e:x:y:u:sz:spao:r:z:eq:g:proc:h" opt; do  
+gpu=1
+proc=16 
+win=2
+ 
+while getopts "e:x:y:u:sz:spao:r:z:eq:g:w:proc:h" opt; do  
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -37,8 +38,9 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:proc:h" opt; do
       echo "	-r RESOL         : Ground resolution (in meters)"
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
       echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
-      echo " -g gpu           : Whether to use GPU support, default false"
-      echo " -prc proc           : Whether to use GPU support, default false"
+      echo " -g gpu           : Whether to use GPU support, default 1 (true!)"
+      echo " -w win           : Correl window size"
+      echo " -prc proc        : no of CPU thread used (needed even when using GPU)"
       echo "	-h	             : displays this message and exits."
       echo " " 
       exit 0
@@ -53,10 +55,10 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:proc:h" opt; do
  	sz)
       size=$OPTARG
       ;;        
-	r)
+	r) 
       RESOL=$OPTARG
       resol_set=true
-      ;; 
+      ;;  
 	s)
       use_Schnaps=false
       ;;   	
@@ -82,7 +84,10 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:proc:h" opt; do
       DEQ=$OPTARG  
       ;;
 	g)
-      gpu=false  
+      gpu=$OPTARG
+      ;;
+	w)
+      win=$OPTARG
       ;;
 	prc)
       proc=$OPTARG  
@@ -108,6 +113,18 @@ fi
 #	echo "Not using Schnaps!"
 #	SH=""
 #fi
+
+if [ "$gpu" = 0 ]; then
+	echo "Using CPU only"
+	echo "$proc CPU threads to be used during dense matching"
+fi
+if [ "$gpu" = 1 ]; then
+    echo "$proc CPU threads to be used during dense matching"
+	echo "Using GPU support" 
+fi 
+
+
+
 #create UTM file (after deleting any existing one)
 rm SysUTM.xml
 echo "<SystemeCoord>                                                                                              " >> SysUTM.xml
@@ -144,17 +161,16 @@ mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWG
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 mm3d Tapioca File FileImagesNeighbour.xml $size
 
-#if [ "$use_schnaps" = true ]; then 
-	#filter TiePoints (better distribution, avoid clogging)
+
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1
-#fi
+
 #Compute Relative orientation (Arbitrary system)
 mm3d Tapas FraserBasic .*$EXTENSION Out=Arbitrary SH=_mini
 
 #Visualize relative orientation, if apericloud is not working, run 
-if [ "$do_AperiCloud" = true ]; then 
-	mm3d AperiCloud .*$EXTENSION Ori-Arbitrary SH=_mini
-fi
+#if [ "$do_AperiCloud" = true ]; then 
+mm3d AperiCloud .*$EXTENSION Ori-Arbitrary SH=_mini
+#fi
 
 #Transform to  RTL system
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
@@ -164,9 +180,8 @@ mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
 
 #Visualize Ground_RTL orientation
-if [ "$do_AperiCloud" = true ]; then
-	mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
-fi
+mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
+
 
 #Change system to final cartographic system 
 mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
@@ -187,20 +202,17 @@ fi
 
 
 #Correlation into DEM
-# Note on GPUs - this seems to fail no matter what at present
 
-# Also the NbProc=32 (eg) is the threads but think it uses all anyway
-# It looks as though it does on the makefiles generated
-if [ "$gpu" = true ]; then
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=1 EZA=1 ZoomF=$ZoomF
-else
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=0 EZA=1 ZoomF=$ZoomF NbProc=$proc
-fi
+# Now we have figure out the GPU issue, it can become an optarg 
+	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=$gpu EZA=1 SzW=$win ZoomF=$ZoomF NbProc=$proc
+#else
+	#mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=0 EZA=1 SzW=$win ZoomF=$ZoomF NbProc=$proc 
+#fi
 
 if [ "$DEQ" != none ]; then 
 	mm3d Tawny Ortho-MEC-Malt DEq=$DEQ 
 else
-	mm3d Tawny Ortho-MEC-Malt DEq=1
+	mm3d Tawny Ortho-MEC-Malt DEq=1 
 fi
 
 mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
@@ -248,7 +260,7 @@ cp $laststr.tfw $corrstr.tfw
 cd ..
 
 
-mm3d ConvertIm Orthophotomosaic.tif Out=OrthFinal.tif
+mm3d ConvertIm Ortho-MEC-Malt/Orthophotomosaic.tif Out=OrthFinal.tif
 
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Ortho-MEC-Malt/OrthFinal.tif OUTPUT/OrthoImage_geotif.tif
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastDEM OUTPUT/DEM_geotif.tif
