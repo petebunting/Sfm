@@ -31,7 +31,7 @@ proc=16
 # TODO An option for this cmd if exif lacks info, which with bramour is possible
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
  
-while getopts "e:csv:x:y:u:sz:p:r:z:eq:g:prc:h" opt; do   
+while getopts "e:csv:x:y:u:sz:p:r:z:eq:g:w:prc:h" opt; do   
   case $opt in 
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -86,6 +86,9 @@ while getopts "e:csv:x:y:u:sz:p:r:z:eq:g:prc:h" opt; do
       ;;     
 	g)
       gpu=$OPTARG    
+      ;;
+	w)
+      win=$OPTARG
       ;;
 	prc)
       proc=$OPTARG  
@@ -247,9 +250,9 @@ lastcor=${finalcors[corind]}
 laststr="${lastDEM%.*}"
 corrstr="${lastcor%.*}"
 cp $laststr.tfw $corrstr.tfw
-cd ..
+cd .. 
 
-mm3d ConvertIm Orthophotomosaic.tif Out=OrthFinal.tif
+mm3d ConvertIm Ortho-MEC-Malt/Orthophotomosaic.tif Out=OrthFinal.tif
 
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Ortho-MEC-Malt/OrthFinal.tif OUTPUT/OrthoImage_geotif.tif
 gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastDEM OUTPUT/DEM_geotif.tif

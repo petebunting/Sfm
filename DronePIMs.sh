@@ -115,7 +115,7 @@ fi
 if [ "$gpu" = true ]; then
 	echo "Using GPU support" 
 fi 
-
+ 
 echo "Using $Algorithm for PIMs dense matching"  
 
 #create UTM file (after deleting any existing one)

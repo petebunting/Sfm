@@ -204,10 +204,12 @@ fi
 #Correlation into DEM
 
 # Now we have figure out the GPU issue, it can become an optarg 
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=$gpu EZA=1 SzW=$win ZoomF=$ZoomF NbProc=$proc
-#else
-	#mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=0 EZA=1 SzW=$win ZoomF=$ZoomF NbProc=$proc 
-#fi
+
+if [ "$gpu" = true ]; then
+	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=1 EZA=1 SzW=$win ZoomF=$ZoomF NbProc=$proc
+else
+	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=0 EZA=1 SzW=$win ZoomF=$ZoomF NbProc=$proc
+fi
 
 if [ "$DEQ" != none ]; then 
 	mm3d Tawny Ortho-MEC-Malt DEq=$DEQ 
