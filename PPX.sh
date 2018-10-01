@@ -197,6 +197,9 @@ mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
 # Also the NbProc=32 (eg) is the threads but not sure if this uses all by default
 # It looks as though it does on the makefiles generated
 
+# These args are used in grandleez 
+# DirMEC=MEC DefCor=0 AffineLast=1 Regul=0.005 HrOr=0 LrOr=0 ZoomF=1 
+
 if [ "$gpu" = true ]; then
 	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=1 EZA=1 ZoomF=$ZoomF NbProc=$proc
 else

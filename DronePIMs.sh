@@ -215,8 +215,9 @@ fi
 
 
 #mm3d PIMs Forest ".*JPG" Ground_UTM  SzNorm=1 DefCor=0 ZReg=0.003 UseGpu=0 ZoomF=$ZoomF
- 
 
+# mm3d MMByP PIMs
+# This gives more options
 if [ "$gpu" = true ]; then
 	mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 ZReg=0.005 SzW=1 UseGpu=1 ZoomF=$ZoomF 
 else

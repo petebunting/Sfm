@@ -1,8 +1,15 @@
+#
+
+#Created on Mon Oct  1 14:40:35 2018
+
+#@author: ciaran
+#"""
+
 # This is a generic workflow for DJI type platforms etc with embedded GNSS data
 # Modified from the original L.Girod script
 
 # example:
-# ./Drone.sh -e JPG -u "30 +north" -g 1 -w 2 -prc 20
+# ./gpymicmac.sh -e JPG -u "30 +north" -g 1 -w 2 -prc 20
 
 
 
@@ -123,7 +130,7 @@ if [ "$gpu" = 1 ]; then
 	echo "Using GPU support" 
 fi 
 
-
+  
 
 #create UTM file (after deleting any existing one)
 rm SysUTM.xml
@@ -206,65 +213,19 @@ fi
 # DirMEC=MEC DefCor=0 AffineLast=1 Regul=0.005 HrOr=0 LrOr=0 ZoomF=1
 # Now we have figure out the GPU issue, it can become an optarg 
 
-if [ "$gpu" = true ]; then
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=1 EZA=1 SzW=$win ZoomF=$ZoomF NbProc=$proc
-else
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=0 EZA=1 SzW=$win ZoomF=$ZoomF NbProc=$proc
-fi
+# It appears as though a strategy of relatively small tiles and modest processing requirement works
+# It may be that slightly more may do, but it seems micmac gpu memory sharing is limited to 50 odd images per job at best 
 
-if [ "$DEQ" != none ]; then 
-	mm3d Tawny Ortho-MEC-Malt DEq=$DEQ 
-else
-	mm3d Tawny Ortho-MEC-Malt DEq=1 
-fi
+source activate pymicmac
 
-mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
-
-# TODO - Tawny is not great for a homogenous ortho
-
-# OSSIM - BASED MOSAICING ----------------------------------------------------------------------------
-# Just here as an alternative for putting together tiles 
-# This need GNU parallel
-# gdalwarp -overwrite -s_srs "+proj=utm +zone=30 +ellps=WGS84+datum=WGS84 +units=m +no_defs" -t_srs EPSG:4326 -srcnodata 0 -dstnodata 0 *Ort**.tif
+micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n 6,6 --maltOptions "UseGpu=1 NbProc=4 ZoomF=1"
 
 
+# This is a shite hack for now until I fork and alter pymicmac
+# Use sed to replace the pymicmac mm3d
+sed -i -e 's/mm3d//home/ciaran/MicMacGPU/micmac/bin/mm3d/g' DistributedMatching.xml
 
+# The No of jobs going on here would suggest 16 threads that is how this is all actually working 
+coeman-par-local -d . -c DistributedMatching.xml -e DistGpu  -n 4
 
-# Create some image histograms for ossim
-#ossim-create-histo -i *Ort**.tif;
-
-# Unfortunately have to reproject all the bloody images for OSSIM to understand ie espg4326
-# Basic ortho with ossim is:
-#ossim-orthoigen *Ort**.tif mosaic_plain.tif;
-
-# Or more options
-# Here am feathering edges and matching histogram to specific image - produced most pleasing result
-# See https://trac.osgeo.org/ossim/wiki/orthoigen for really detailed cmd help
-#ossim-orthoigen --combiner-type ossimBlendMosaic *Ort**.tif mosaic_blend.tif
-#ossim-orthoigen --combiner-type ossimFeatherMosaic --hist-match Ort_DSC00698.tif *Ort**.tif mosaic.tif;
-# back to utm
-
-
-#Making OUTPUT folder
-mkdir OUTPUT
-#PointCloud from Ortho+DEM, with offset substracted to the coordinates to solve the 32bit precision issue
-mm3d Nuage2Ply MEC-Malt/NuageImProf_STD-MALT_Etape_8.xml Attr=Ortho-MEC-Malt/Orthophotomosaic.tif Out=OUTPUT/PointCloud_OffsetUTM.ply Offs=[$X_OFF,$Y_OFF,0]
-
-cd MEC-Malt
-finalDEMs=($(ls Z_Num*_DeZoom*_STD-MALT.tif))
-finalcors=($(ls Correl_STD-MALT_Num*.tif))
-DEMind=$((${#finalDEMs[@]}-1))
-corind=$((${#finalcors[@]}-1))
-lastDEM=${finalDEMs[DEMind]}
-lastcor=${finalcors[corind]}
-laststr="${lastDEM%.*}"
-corrstr="${lastcor%.*}"
-cp $laststr.tfw $corrstr.tfw
-cd ..
-
-
-mm3d ConvertIm Ortho-MEC-Malt/Orthophotomosaic.tif Out=OrthFinal.tif
-
-gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Ortho-MEC-Malt/OrthFinal.tif OUTPUT/OrthoImage_geotif.tif
-gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastDEM OUTPUT/DEM_geotif.tif
-gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastcor OUTPUT/CORR.tif
+# Seems to take around 10mins to process 4 tiles (typically 5k*5k)

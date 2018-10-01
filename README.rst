@@ -3,7 +3,7 @@
 Structure from Motion workflows
 ============
 
-A series of python and shell scripts for processing data from the C-Astral Bramour PPX platform
+A series of python and shell scripts for processing data from drones, originally for the the C-Astral Bramour PPX platform
 
 
 Dependencies
@@ -41,11 +41,16 @@ Contents
 **PPX.sh**
 
 - A script to process a GNSS and associated photographs outputting orthomosaic, DSM and point cloud (.ply) file
+Will process anything with a csv GNSS (in the correct format) and photos. This uses Malt for dense matching
 
 **Drone.sh**
 
 - A script to process photographs with complete exif information outputting orthomosaic, DSM and point cloud (.ply) file
-Typically a DJI phantom or other such platform
+Typically a DJI phantom or other such platform. This uses Malt for dense matching
+
+**DronePIMs.sh**
+
+- A script like the 2 previous but using the PIMs algorithm
 
 **write_tiles.py**
 
