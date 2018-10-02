@@ -203,6 +203,9 @@ fi
 
 #Correlation into DEM
 # These args are used in grandleez 
+# HrOr=Compute High Resolution Ortho
+# LrOr = Compute Low Resolution Ortho
+# AffineLast = Affine Last Etape with Step Z/2 (Def=true) 
 # DirMEC=MEC DefCor=0 AffineLast=1 Regul=0.005 HrOr=0 LrOr=0 ZoomF=1
 # Now we have figure out the GPU issue, it can become an optarg 
 

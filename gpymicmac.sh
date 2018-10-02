@@ -2,19 +2,44 @@
 
 #Created on Mon Oct  1 14:40:35 2018
 
-#@author: ciaran
-#"""
+#@author: Ciaran Robb
+#""" 
 
-# This is a generic workflow for DJI type platforms etc with embedded GNSS data
-# Modified from the original L.Girod script
+# This is a workflow intended for processing very large UAV datasets (eg > 500 images) with MicMac
+# Upon testing various configurations with the current version of MicMac,
+# some limitations are evident in the use of GPU aided processing which speeds
+# up processing considerably.
+
+# This requires an install of MicMac with GPU support and an install of pymicmac to handle job allocation  
+ 
+# (Do the following once MicMac is installed) 
+
+# Install pycoeman dependencies 
+#sudo apt-get install libfreetype6-dev libssl-dev libffi-dev
+# Install pycoeman
+#pip install git+https://github.com/NLeSC/pycoeman
+# Install noodles
+#pip install git+https://github.com/NLeSC/noodles
+# Install pymicmac
+#pip install git+https://github.com/ImproPhoto/pymicmac
+
+# An issue with what I assume is shared memory between CPU & GPU results in only
+# a linited number of CPU threads and images being useable without failure on large
+# datasets.
+
+# Consequently, an adaption of the pymicmac lib has been made to facilitate tile prcessing with GPU
+# support within the limits of the current software on github
+
+
+# Contains elements of L.Girod script - thanks 
 
 # example:
-# ./gpymicmac.sh -e JPG -u "30 +north" -g 1 -w 2 -prc 20
+# ./gpymicmac.sh -e JPG -u "30 +north" -g 6 -w 2 -prc 4 -b 4
 
 
-
+ 
 # add default values 
-EXTENSION=JPG
+EXTENSION=JPG 
 X_OFF=0;
 Y_OFF=0;
 utm_set=false
@@ -25,11 +50,12 @@ resol_set=false
 ZoomF=1
 DEQ=1
 obliqueFolder=none
-gpu=1
-proc=16 
+grd=6 
+proc=16  
 win=2
+batch=4
  
-while getopts "e:x:y:u:sz:spao:r:z:eq:g:w:proc:h" opt; do  
+while getopts "e:x:y:u:sz:spao:r:z:eq:g:w:proc:b:h" opt; do  
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -45,7 +71,8 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:w:proc:h" opt; do
       echo "	-r RESOL         : Ground resolution (in meters)"
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
       echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
-      echo " -g gpu           : Whether to use GPU support, default 1 (true!)"
+      echo " -g grd           : Grid dimension x and y"
+      echo " -b batch           : no of jobs at any one time"
       echo " -w win           : Correl window size"
       echo " -prc proc        : no of CPU thread used (needed even when using GPU)"
       echo "	-h	             : displays this message and exits."
@@ -91,7 +118,7 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:w:proc:h" opt; do
       DEQ=$OPTARG  
       ;;
 	g)
-      gpu=$OPTARG
+      grd=$OPTARG
       ;;
 	w)
       win=$OPTARG
@@ -121,14 +148,10 @@ fi
 #	SH=""
 #fi
 
-if [ "$gpu" = 0 ]; then
-	echo "Using CPU only"
-	echo "$proc CPU threads to be used during dense matching"
-fi
-if [ "$gpu" = 1 ]; then
-    echo "$proc CPU threads to be used during dense matching"
-	echo "Using GPU support" 
-fi 
+
+echo "$proc CPU threads to be used during dense matching, be warned that this has limitations with respect to amount of images processed at a time"
+echo "Using GPU support" 
+
 
   
 
@@ -213,19 +236,17 @@ fi
 # DirMEC=MEC DefCor=0 AffineLast=1 Regul=0.005 HrOr=0 LrOr=0 ZoomF=1
 # Now we have figure out the GPU issue, it can become an optarg 
 
-# It appears as though a strategy of relatively small tiles and modest processing requirement works
-# It may be that slightly more may do, but it seems micmac gpu memory sharing is limited to 50 odd images per job at best 
+# Until the cuda internals of MicMac are sorted these tests worked whereas exceeding them did not!!!
+# Successful test w/ 891 imgs
+# NbProc=1, 3x3 grid, -n 4 (likely 4-5hrs)  
+# NbProc=4, 5x5 grid, -n 3 (~2hrs)
+# NbProc=4, 6x6 grid, -n 4 (2hrs)  
+ 
+micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "UseGpu=1 SzW=$win NbProc=$proc ZoomF=1"
 
-source activate pymicmac
-
-micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n 6,6 --maltOptions "UseGpu=1 NbProc=4 ZoomF=1"
-
-
-# This is a shite hack for now until I fork and alter pymicmac
-# Use sed to replace the pymicmac mm3d
-sed -i -e 's/mm3d//home/ciaran/MicMacGPU/micmac/bin/mm3d/g' DistributedMatching.xml
+ 
 
 # The No of jobs going on here would suggest 16 threads that is how this is all actually working 
-coeman-par-local -d . -c DistributedMatching.xml -e DistGpu  -n 4
+coeman-par-local -d . -c DistributedMatching.xml -e DistGpu  -n $batch
 
 # Seems to take around 10mins to process 4 tiles (typically 5k*5k)
