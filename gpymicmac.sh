@@ -239,7 +239,7 @@ fi
 # Until the cuda internals of MicMac are sorted these tests worked whereas exceeding them did not!!!
 # Successful test w/ 891 imgs
 # NbProc=1, 3x3 grid, -n 4 (likely 4-5hrs)  
-# NbProc=4, 5x5 grid, -n 3 (~2hrs)
+# NbProc=4, 5x5 grid, -n 3 (~2hrs) 
 # NbProc=4, 6x6 grid, -n 4 (2hrs)  
  
 micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "UseGpu=1 SzW=$win NbProc=$proc ZoomF=1"
@@ -247,6 +247,6 @@ micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatchin
  
 
 # The No of jobs going on here would suggest 16 threads that is how this is all actually working 
+# Remember 1 batch is effectivelt sequential processing! This may be best when using lots of threads 
 coeman-par-local -d . -c DistributedMatching.xml -e DistGpu  -n $batch
 
-# Seems to take around 10mins to process 4 tiles (typically 5k*5k)
