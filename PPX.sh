@@ -229,7 +229,11 @@ fi
 
 # Unfortunately have to reproject all the bloody images for OSSIM to understand ie espg4326
 # Basic ortho with ossim is:
-#ossim-orthoigen *Ort**.tif mosaic_plain.tif;
+
+ls *Ort_*.tif** > filenames.src
+
+# Nice use of ls here to create an ordered list of names - not sure that glob does it in order hence this
+#ossim-orthoigen filenames.src mosaic_plain.tif;
 
 # Or more options
 # Here am feathering edges and matching histogram to specific image - produced most pleasing result
