@@ -241,12 +241,34 @@ fi
 # NbProc=1, 3x3 grid, -n 4 (likely 4-5hrs)  
 # NbProc=4, 5x5 grid, -n 3 (~2hrs) 
 # NbProc=4, 6x6 grid, -n 4 (2hrs)  
- 
-micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "UseGpu=1 SzW=$win NbProc=$proc ZoomF=1"
 
+rm -rf DMatch DistributedMatching.xml DSMs Mosaics DistGpu
  
+micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 SzW=$win NbProc=$proc ZoomF=1"
+
+
+
 
 # The No of jobs going on here would suggest 16 threads that is how this is all actually working 
 # Remember 1 batch is effectivelt sequential processing! This may be best when using lots of threads 
 coeman-par-local -d . -c DistributedMatching.xml -e DistGpu  -n $batch
+
+# Altered pymicmac writes seperate xml for Tawny as it is more efficient to run these all in parallel at the end as there
+# is not the same constraints on batch numbers
+coeman-par-local -d . -c DistributedMatchingTawny.xml -e DistGpu  -n 20
+
+# THIS LOT NOT TO BE USED YET....
+#cd Mosaics
+#for f in *.tif; do
+#     gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f" "${f%.*}final.tif"
+#done 
+
+#gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastDEM OUTPUT/DEM_geotif.tif
+ 
+# Create some image histograms for ossim
+#ossim-create-histo -i *final.tif
+
+#ossim-orthoigen --combiner-type ossimFeatherMosaic *final.tif feather.tif
+
+
 

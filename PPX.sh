@@ -226,11 +226,11 @@ fi
 # gdalwarp -overwrite -s_srs "+proj=utm +zone=30 +ellps=WGS84+datum=WGS84 +units=m +no_defs" -t_srs EPSG:4326 -srcnodata 0 -dstnodata 0 *Ort**.tif
 # Create some image histograms for ossim
 #ossim-create-histo -i *Ort**.tif;
-
+ 
 # Unfortunately have to reproject all the bloody images for OSSIM to understand ie espg4326
 # Basic ortho with ossim is:
 
-ls *Ort_*.tif** > filenames.src
+#ls *Ort_*.tif** > filenames.src
 
 # Nice use of ls here to create an ordered list of names - not sure that glob does it in order hence this
 #ossim-orthoigen filenames.src mosaic_plain.tif;
