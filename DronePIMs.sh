@@ -2,9 +2,9 @@
 # Modified from the original L.Girod script
 
 # example:
-# ./DronePIMs.sh -e JPG -a MicMac -u "30 +north" -r 0.1
+# ./DronePIMs.sh -e JPG -a Forest -u "30 +north" -r 0.1
 
-
+# Important NOTE - MicMac CPU based is FAR quicker than using the GPU, as it's memory management limits GPU processing to small chunks
  
 # add default values
 EXTENSION=JPG
@@ -19,7 +19,7 @@ ZoomF=1
 DEQ=1
 gpu=false
 obliqueFolder=none 
-Algorithm=MicMac 
+Algorithm=MicMac  
 
  
 while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:h" opt; do
@@ -205,21 +205,13 @@ if [ "$obliqueFolder" != none ]; then
 	cd $here	
 fi
 
+# Important NOTE
+ 
+ 
 
-#Correlation into DEM
-#if [ "$resol_set" = true ]; then
-	#mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM SzW=1 UseGpu=1 ZReg=0.003 ResolTerrain=$RESOL EZA=1 ZoomF=$ZoomF
-	 
-# NOTE - 
-# This is a bit of a crap hack until I fix micmac GPU.....
-
-
-#mm3d PIMs Forest ".*JPG" Ground_UTM  SzNorm=1 DefCor=0 ZReg=0.003 UseGpu=0 ZoomF=$ZoomF
-
-# mm3d MMByP PIMs
-# This gives more options
 if [ "$gpu" = true ]; then
-	mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 ZReg=0.005 SzW=1 UseGpu=1 ZoomF=$ZoomF 
+	#mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 ZReg=0.005 SzW=1 UseGpu=1 ZoomF=$ZoomF 
+	pims_subset.py -folder $PWD -algo $Algorithm -num 150
 else
     mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF  
 fi 
@@ -236,8 +228,9 @@ fi
 #mm3d Malt Ortho ".*JPG" Ground_UTM  EZA=1 NbProc=20
 # Also worth using Ground or Urbane settings depending on application
 
+# UseTA=1 # this would rid us of the crap interp in voids 
+mm3d Pims2MNT $Algorithm DoOrtho=1
 
-mm3d Pims2MNT MicMac DoOrtho=1
  
 
 #source deactivate pymicmac;
@@ -248,9 +241,27 @@ mm3d Pims2MNT MicMac DoOrtho=1
 #fi
 mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif
 
-mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif Out=pointcloud.ply
-#mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
+#Making OUTPUT folder
+mkdir OUTPUT
 
+
+# When images are large they will be tiled 
+
+
+
+
+mm3d ConvertIm PIMs-TmpBasc/PIMs-Merged_Prof.tif Out=OUTPUT/DSM.tif
+cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/DSM.tfw
+ 
+mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
+cp PIMs-ORTHO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
+
+mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=OUTPUT/OrthFinal.tif Out=pointcloud.ply
+
+
+
+#mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
+ 
 # TODO - Tawny is not great for a homogenous ortho
 
 # OSSIM - BASED MOSAICING ----------------------------------------------------------------------------
@@ -261,10 +272,9 @@ mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif
 
  
  
-# Create some image histograms for ossim 
+# Create some image histograms for ossim  
 #ossim-create-histo -i *Ort**.tif;
 
-# Unfortunately have to reproject all the bloody images for OSSIM to understand ie espg4326
 # Basic ortho with ossim is:
 #ossim-orthoigen *Ort**.tif mosaic_plain.tif;
 
@@ -276,25 +286,9 @@ mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif
 # back to utm 
 
 
-#Making OUTPUT folder
-mkdir OUTPUT
-#PointCloud from Ortho+DEM, with offset substracted to the coordinates to solve the 32bit precision issue
-#mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=Orthophotomosaic.tif Out=OUTPUT/pointcloud.ply
 
-#cd MEC-Malt  
-#finalDEMs=($(ls Z_Num*_DeZoom*_STD-MALT.tif)) 
-#finalcors=($(ls Correl_STD-MALT_Num*.tif)) 
-#DEMind=$((${#finalDEMs[@]}-1)) 
-#corind=$((${#finalcors[@]}-1))
-#lastDEM=${finalDEMs[DEMind]}
-#lastcor=${finalcors[corind]}
-#laststr="${lastDEM%.*}"
-#corrstr="${lastcor%.*}"
-#cp $laststr.tfw $corrstr.tfw
-#cd .. 
 
- 
-mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OrthFinal.tif
+#gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMs-ORTHO/OrthFinal.tif OUTPUT/OrthoImage_geotif.tif
+#gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMs-Tmp-Basc/PIMs-Merged_Prof.tif OUTPUT/DEM_geotif.tif
 
-gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMs-ORTHO/OrthFinal.tif OUTPUT/OrthoImage_geotif.tif
-gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMs-Tmp-Basc/PIMs-Merged_Prof.tif OUTPUT/DEM_geotif.tif
+

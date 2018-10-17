@@ -16,6 +16,9 @@ plus there own program only works in Windows (lame)
 This is a bit of kludge at the moment to be refined...
 """
 
+import sys
+from xml.sax import parse
+from xml.sax.saxutils import XMLGenerator
 import numpy as np
 import pandas as pd
 import os
@@ -209,46 +212,67 @@ def mirror_pairs(fle):
     tree2.write(newFle)
     
     
-def mirror_pairs_subset(fle, newFle, maxInd=10):
-    
-    """
+#def mirror_pairs_subset(fle, newFle, maxInd=10):
+#    
+#    """
+#
+#    Split fileimagseneighbout up for PIMs gpu
+#    
+#    Parameters
+#    ----------  
+#    
+#    fle : string
+#             path to xml pairs file
+#    """
+#    tree = ET.parse(fle)  
+#    root = tree.getroot()
+#
+#    # 
+#   
+#    
+#    elemList = []
+#    
+#    for elem in root:
+#        entry = elem.text
+#        elemList.append(entry)
+#
+#    def chunkIt(seq, num):
+#        avg = len(seq) / float(num)
+#        out = []
+#        last = 0.0
+#
+#        while last < len(seq):
+#            out.append(seq[int(last):int(last + avg)])
+#            last += avg
+#
+#        return out
+#
+#    def xml_fae_list(elemList,  filename):
+#        
+#        tree2 = ET.ElementTree()
+#    
+#        
+#        # Bloody hell this is such a shit module.
+#        # Create an element, then write a new root even though there aint one
+#        new = ET.Element('SauvegardeNamedRel')
+#        
+#        tree2._setroot(new)
+#        # finally the var needed
+#        newRoot = tree2.getroot()
+#        
+#        for e in elemList:
+#            entry = elem.text
+#         
+#            cple = ET.Element("Cple")
+#            cple.text = entry
+#            newRoot.append(elem)
+#            newRoot.append(cple)
+#        
+#        tree.write(newFle)
+#            
+#        
 
-    Micmac returns an error when image pairs are only in one direction. 
-    To avoid this, this func reverses the pair index and appends to pair file
-    
-    Parameters
-    ----------  
-    
-    fle : string
-             path to xml pairs file
-    """
-    tree = ET.parse(fle)  
-    root = tree.getroot()
 
-    # 
-    tree2 = ET.ElementTree()
-    
-        
-    # Bloody hell this is such a shit module.
-    # Create an element, then write a new root even though there aint one
-    new = ET.Element('SauvegardeNamedRel')
-    tree2._setroot(new)
-    # finally the var needed
-    newRoot = tree2.getroot()
-    
-    for index, elem in tqdm(enumerate(root)):
-        entry = elem.text
-        entlist = entry.split()
-        entlist.reverse()
-        newent = ' '.join(entlist)
-        cple = ET.Element("Cple")
-        cple.text = newent
-        newRoot.append(elem)
-        newRoot.append(cple)
-        if index > maxInd:
-            break
-    
-    tree.write(newFle)
 
 def mv_subset(csv, inFolder, outfolder):
     
@@ -260,8 +284,71 @@ def mv_subset(csv, inFolder, outfolder):
     
     Parallel(n_jobs=-1,verbose=5)(delayed(copy)(file, 
             outfolder) for file in dfList)
-        
-    
-    
+def chunkIt(seq, num):
+        avg = len(seq) / float(num)
+        out = []
+        last = 0.0
 
+        while last < len(seq):
+            out.append(seq[int(last):int(last + avg)])
+            last += avg
+
+        return out
+
+def xml_fae_list(elemList,  filename):
+    
+    tree2 = ET.ElementTree()
+
+    
+    # Bloody hell this is such a shit module.
+    # Create an element, then write a new root even though there aint one
+    new = ET.Element('SauvegardeNamedRel')
+    
+    tree2._setroot(new)
+    # finally the var needed
+    newRoot = tree2.getroot()
+    
+    for e in elemList:
+        entry = e
+     
+        cple = ET.Element("Cple")
+        cple.text = entry
+        newRoot.append(e)
+        newRoot.append(cple)
+    
+    tree2.write(filename)
         
+def split_xml(fle):
+    
+    """
+
+    Split fileimagseneighbout up for PIMs gpu
+    
+    Parameters
+    ----------  
+    
+    fle : string
+             path to xml pairs file
+    """
+    tree = ET.parse(fle)  
+    root = tree.getroot()
+
+    # 
+    fileName = fle[:-4]
+    
+    elemList = []
+    
+    for elem in root:
+        entry = elem.text
+        elemList.append(entry)
+
+    
+    # Main function    
+    chunks = chunkIt(elemList,10)
+    
+    for index, chunk in tqdm(enumerate(chunks)):
+        num = str(index+1)
+        xml_fae_list(chunk,  fileName+num+'.xml')
+    
+    
+    

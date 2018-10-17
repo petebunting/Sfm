@@ -59,7 +59,7 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:w:proc:b:h" opt; do
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
-      echo "usage: Drone.sh -e JPG -x 55000 -y 6600000 -u \"32 +north\" -p true -r 0.05"
+      echo "gpymicmac.sh -e JPG -u '30 +north' -g 6 -w 2 -prc 4 -b 4"
       echo "	-e EXTENSION     : image file type (JPG, jpg, TIF, png..., default=JPG)."
       echo "	-x X_OFF         : X (easting) offset for ply file overflow issue (default=0)."
       echo "	-y Y_OFF         : Y (northing) offset for ply file overflow issue (default=0)."
@@ -254,7 +254,7 @@ micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatchin
 coeman-par-local -d . -c DistributedMatching.xml -e DistGpu  -n $batch
 
 # Altered pymicmac writes seperate xml for Tawny as it is more efficient to run these all in parallel at the end as there
-# is not the same constraints on batch numbers
+# is not the same constraints on batch numbers 
 coeman-par-local -d . -c DistributedMatchingTawny.xml -e DistGpu  -n 20
 
 # THIS LOT NOT TO BE USED YET....

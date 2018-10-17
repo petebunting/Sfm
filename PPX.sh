@@ -201,7 +201,7 @@ mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
 # DirMEC=MEC DefCor=0 AffineLast=1 Regul=0.005 HrOr=0 LrOr=0 ZoomF=1 
 
 if [ "$gpu" = true ]; then
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=1 EZA=1 ZoomF=$ZoomF NbProc=$proc
+	/home/ciaran/MicMacGPU/micmac/bin/mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=1 EZA=1 ZoomF=$ZoomF NbProc=$proc
 else
 	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=0 EZA=1 ZoomF=$ZoomF NbProc=$proc
 fi
