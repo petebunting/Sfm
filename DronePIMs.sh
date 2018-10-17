@@ -260,7 +260,6 @@ mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=OUTPUT/OrthFinal.tif Out=pointc
 
 
 
-#mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
  
 # TODO - Tawny is not great for a homogenous ortho
 

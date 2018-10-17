@@ -210,18 +210,18 @@ fi
 # Now we have figure out the GPU issue, it can become an optarg 
 
 if [ "$gpu" = true ]; then
-	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=1 EZA=1 SzW=$win ZoomF=$ZoomF NbProc=$proc
+	/home/ciaran/MicMacGPU/micmac/bin/mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=1 EZA=1 SzW=$win ZoomF=$ZoomF NbProc=$proc
 else
 	mm3d Malt Ortho ".*.$EXTENSION" Ground_UTM UseGpu=0 EZA=1 SzW=$win ZoomF=$ZoomF NbProc=$proc
 fi
 
 if [ "$DEQ" != none ]; then 
-	mm3d Tawny Ortho-MEC-Malt DEq=$DEQ 
+	mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 Out=Orthophotomosaic.tif DEq=$DEQ 
 else
-	mm3d Tawny Ortho-MEC-Malt DEq=1 
+	mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 Out=Orthophotomosaic.tif DEq=1 
 fi
 
-mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
+mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 DEq=$DEQ
 
 # TODO - Tawny is not great for a homogenous ortho
 
