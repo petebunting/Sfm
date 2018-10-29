@@ -17,6 +17,7 @@ Sfm requires:
 
 - MicMac
 
+
 https://micmac.ensg.eu/index.php/Accueil
 
 User installation
@@ -64,6 +65,17 @@ Typically a DJI phantom or other such platform. This uses Malt for dense matchin
 
 - Part two of aformentioned workflow where the GNSS - camera delay is inputted prior to the output of Ortho, DSM and point cloud. 
 
+**gpymicmac.sh**
+
+- Using a modification of pymicmac functionallity, this script subdivides large datasets into a grid of overlapping tiles and processes either in parallel or sequentially
+
+**pims_subset.py**
+
+- Similar to gpymicmac, this processes data using the PIMs dense matching with the facility to control the amount of image pairs processed at any one time
+- This has been written to expolit GPU processing, but it is probably quicker to use CPU processing overall with larger datsets
+- This scripts calls the MicMac PIMs function in chunks to ensure GPU memory is not overloaded
+- Tends to overload 11gb GPU with around 30 images+
+- This takes advantage of the fact it all gets written to the PIMs folder without overwrite
 
 Use
 ~~~~~~~~~~~~~~~~~

@@ -258,15 +258,27 @@ coeman-par-local -d . -c DistributedMatching.xml -e DistGpu  -n $batch
 #coeman-par-local -d . -c DistributedMatchingTawny.xml -e DistGpu  -n 20
 
 # THIS LOT NOT TO BE USED YET....
-#cd Mosaics
-#for f in *.tif; do
+#
+# this returns error for some reason 
+#find *tile*/*Ortho-MEC-Malt/ | parallel mm3d Tawny {} RadiomEgal=1 Out=Orthophotomosaic.tif"
+
+# this works 
+#find *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}" 
+
+#find *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif | parallel gdal_edit.py -a_srs "+proj=utm +zone==$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" {}
+
+#for f in *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif; do
 #    gdal_edit.py -a_srs "+proj=utm +zone==$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
 #done 
+
+#ossim-orthoigen --combiner-type ossimFeatherMosaic *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif feather.tif
+
 
 #gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastDEM OUTPUT/DEM_geotif.tif
  
 # Create some image histograms for ossim
 #ossim-create-histo -i *final.tif
+# find *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}" 
 
 #ossim-orthoigen --combiner-type ossimFeatherMosaic *final.tif feather.tif
 

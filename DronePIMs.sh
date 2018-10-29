@@ -267,12 +267,13 @@ mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=OUTPUT/OrthFinal.tif Out=pointc
 # Just here as an alternative for putting together tiles 
 # This need GNU parallel
 # gdalwarp -overwrite -s_srs "+proj=utm +zone=30 +north +ellps=WGS84+datum=WGS84 +units=m +no_defs" -t_srs EPSG:32360 -srcnodata 0 -dstnodata 0 *Ort**.tif
-
+ 
 #for f in *.tif; 
 #do      
 #gdal_edit.py -a_srs "+proj=utm +zone=30 +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; 
 #done
- 
+
+#find *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif | parallel "gdal_edit.py -a_srs "+proj=utm +zone==$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" {}" 
  
 # Create some image histograms for ossim  
 #ossim-create-histo -i *Ort**.tif;
@@ -280,7 +281,9 @@ mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=OUTPUT/OrthFinal.tif Out=pointc
 # Basic ortho with ossim is:
 #ossim-orthoigen *Ort**.tif mosaic_plain.tif;
 
+#ossim-orthoigen --combiner-type ossimFeatherMosaic *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif feather.tif
 # Or more options
+
 # Here am feathering edges and matching histogram to specific image - produced most pleasing result
 # See https://trac.osgeo.org/ossim/wiki/orthoigen for really detailed cmd help
 #ossim-orthoigen --combiner-type ossimBlendMosaic *Ort**.tif mosaic_blend.tif

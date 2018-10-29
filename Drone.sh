@@ -227,18 +227,24 @@ mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 DegRap=4
 
 # OSSIM - BASED MOSAICING ----------------------------------------------------------------------------
 # Just here as an alternative for putting together tiles 
-# This need GNU parallel
-# gdalwarp -overwrite -s_srs "+proj=utm +zone=30 +ellps=WGS84+datum=WGS84 +units=m +no_defs" -t_srs EPSG:4326 -srcnodata 0 -dstnodata 0 *Ort**.tif
+#for f in *.tif; 
+#do      
+#gdal_edit.py -a_srs "+proj=utm +zone=30 +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; 
+#done
 
 
 
 
 # Create some image histograms for ossim
 #ossim-create-histo -i *Ort**.tif;
+#GNU para
+# find **Ort_*.tif | parallel "ossim-create-histo -i {}"
 
 # Unfortunately have to reproject all the bloody images for OSSIM to understand ie espg4326
 # Basic ortho with ossim is:
 #ossim-orthoigen *Ort**.tif mosaic_plain.tif;
+
+#ossim-orthoigen --combiner-type ossimFeatherMosaic *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif feather.tif
 
 # Or more options
 # Here am feathering edges and matching histogram to specific image - produced most pleasing result
