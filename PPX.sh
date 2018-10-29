@@ -209,11 +209,11 @@ fi
 #Mosaic from individual orthos
 # NOTE - think an equalisation method would not go amiss here eg DEq=2 hence it has been added for now
 
-if [ "$DEQ" != none ]; then
-	mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 Out=Orthophotomosaic.tif DEq=$DEQ
-else
-	mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 RadiomEgal=1 Out=Orthophotomosaic.tif
-fi 
+#if [ "$DEQ" != none ]; then
+#	mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 Out=Orthophotomosaic.tif DEq=$DEQ
+#else
+mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 DegRap=4 Out=Orthophotomosaic.tif
+#fi 
 
 
 

@@ -221,7 +221,7 @@ else
 	mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 Out=Orthophotomosaic.tif DEq=1 
 fi
 
-mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 DEq=$DEQ
+mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 DegRap=4
 
 # TODO - Tawny is not great for a homogenous ortho
 

@@ -250,17 +250,17 @@ micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatchin
 
 
 # The No of jobs going on here would suggest 16 threads that is how this is all actually working 
-# Remember 1 batch is effectivelt sequential processing! This may be best when using lots of threads 
-coeman-par-local -d . -c DistributedMatching.xml -e DistGpu  -n $batch
+# Remember 1 batch is effectively sequential processing! This may be best when using lots of threads 
+coeman-par-local -d . -c DistributedMatching.xml -e DistGpu  -n $batch  
 
 # Altered pymicmac writes seperate xml for Tawny as it is more efficient to run these all in parallel at the end as there
 # is not the same constraints on batch numbers 
-coeman-par-local -d . -c DistributedMatchingTawny.xml -e DistGpu  -n 20
+#coeman-par-local -d . -c DistributedMatchingTawny.xml -e DistGpu  -n 20
 
 # THIS LOT NOT TO BE USED YET....
 #cd Mosaics
 #for f in *.tif; do
-#     gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f" "${f%.*}final.tif"
+#    gdal_edit.py -a_srs "+proj=utm +zone==$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
 #done 
 
 #gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastDEM OUTPUT/DEM_geotif.tif
