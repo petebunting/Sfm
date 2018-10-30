@@ -246,7 +246,7 @@ rm -rf DMatch DistributedMatching.xml DSMs Mosaics DistGpu
  
 micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 SzW=$win NbProc=$proc ZoomF=1"
 
-
+ 
 
 
 # The No of jobs going on here would suggest 16 threads that is how this is all actually working 
@@ -257,22 +257,21 @@ coeman-par-local -d . -c DistributedMatching.xml -e DistGpu  -n $batch
 # is not the same constraints on batch numbers 
 #coeman-par-local -d . -c DistributedMatchingTawny.xml -e DistGpu  -n 20
 
-# THIS LOT NOT TO BE USED YET....
-#
-# this returns error for some reason 
-#find *tile*/*Ortho-MEC-Malt/ | parallel mm3d Tawny {} RadiomEgal=1 Out=Orthophotomosaic.tif"
+correct_mosaics.py -folder DistGpu
+
+# this works
+for f in *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif; do
+    gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
+done 
 
 # this works 
-#find *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}" 
+find *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}" 
 
-#find *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif | parallel gdal_edit.py -a_srs "+proj=utm +zone==$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" {}
 
-#for f in *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif; do
-#    gdal_edit.py -a_srs "+proj=utm +zone==$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
-#done 
+ossim-orthoigen --combiner-type ossimFeatherMosaic *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif feather.tif
 
-#ossim-orthoigen --combiner-type ossimFeatherMosaic *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif feather.tif
-
+#choices
+#ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic 
 
 #gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastDEM OUTPUT/DEM_geotif.tif
  

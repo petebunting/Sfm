@@ -240,18 +240,13 @@ mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 DegRap=4
 #GNU para
 # find **Ort_*.tif | parallel "ossim-create-histo -i {}"
 
-# Unfortunately have to reproject all the bloody images for OSSIM to understand ie espg4326
 # Basic ortho with ossim is:
 #ossim-orthoigen *Ort**.tif mosaic_plain.tif;
 
 #ossim-orthoigen --combiner-type ossimFeatherMosaic *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif feather.tif
 
-# Or more options
-# Here am feathering edges and matching histogram to specific image - produced most pleasing result
-# See https://trac.osgeo.org/ossim/wiki/orthoigen for really detailed cmd help
-#ossim-orthoigen --combiner-type ossimBlendMosaic *Ort**.tif mosaic_blend.tif
-#ossim-orthoigen --combiner-type ossimFeatherMosaic --hist-match Ort_DSC00698.tif *Ort**.tif mosaic.tif;
-# back to utm
+#choices
+#ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic 
 
 
 #Making OUTPUT folder

@@ -225,21 +225,16 @@ mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 DegRap=4 Out=Orthophotomosaic.tif
 #gdal_edit.py -a_srs "+proj=utm +zone=30 +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; 
 #done
 
-##find *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif | parallel "gdal_edit.py -a_srs "+proj=utm +zone==$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" {}"
 
 #ossim-create-histo -i *Ort**.tif;
  
 # find **Ort_*.tif | parallel "ossim-create-histo -i {}"
 
 #ossim-orthoigen filenames.src mosaic_plain.tif;
+#ossim-orthoigen --combiner-type ossimFeatherMosaic *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif feather.tif
 
-# Or more options
-# Here am feathering edges and matching histogram to specific image - produced most pleasing result
-# See https://trac.osgeo.org/ossim/wiki/orthoigen for really detailed cmd help
-#ossim-orthoigen --combiner-type ossimFeatherMosaic --hist-match Ort_DSC00698.tif *Ort**.tif mosaic.tif;
-#ossim-orthoigen --combiner-type ossimBlendMosaic *Ort**.tif mosaic_blend.tif
-# back to utm
-# gdalwarp -t_srs EPSG:4326  -s_srs EPSG:32630 *Ort**.tif
+#choices
+#ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic 
 
 
 #PointCloud from Ortho+DEM, with offset substracted to the coordinates to solve the 32bit precision issue
