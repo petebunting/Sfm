@@ -27,6 +27,30 @@ See MicMac install instructions here:
 
 https://micmac.ensg.eu/index.php/Install
 
+Install my fork of pymicmac which has bits modified for the gpymicmac script
+
+- Install pycoeman dependencies 
+.. code-block:: bash
+
+   sudo apt-get install libfreetype6-dev libssl-dev libffi-dev
+   
+- Install pycoeman
+.. code-block:: bash
+
+    pip install git+https://github.com/NLeSC/pycoeman
+    
+- Install noodles
+
+.. code-block:: bash
+
+    pip install git+https://github.com/NLeSC/noodles
+    
+-  Install pymicmac
+
+.. code-block:: bash
+
+    pip install git+https://github.com/Ciaran1981/pymicmac
+
 Clone or download then make the folder or files executable in a terminal
 
 .. code-block:: bash
