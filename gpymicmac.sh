@@ -54,8 +54,10 @@ grd=6
 proc=16  
 win=2
 batch=4
+gp=true
+
  
-while getopts "e:x:y:u:sz:spao:r:z:eq:g:w:proc:b:h" opt; do  
+while getopts "e:x:y:u:sz:spao:r:z:eq:g:gpu:w:proc:b:h" opt; do  
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -72,7 +74,8 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:w:proc:b:h" opt; do
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
       echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
       echo " -g grd           : Grid dimension x and y"
-      echo " -b batch           : no of jobs at any one time"
+      echo " -gpu gp          : Grid dimension x and y"
+      echo " -b batch         : no of jobs at any one time"
       echo " -w win           : Correl window size"
       echo " -prc proc        : no of CPU thread used (needed even when using GPU)"
       echo "	-h	             : displays this message and exits."
@@ -80,7 +83,7 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:w:proc:b:h" opt; do
       exit 0
       ;;    
 	e)
-      EXTENSION=$OPTARG
+      EXTENSION=$OPTARG 
       ;;
 	u)
       UTM=$OPTARG
@@ -119,6 +122,9 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:w:proc:b:h" opt; do
       ;;
 	g)
       grd=$OPTARG
+      ;;
+    gpu)
+      gp=$OPTARG
       ;;
 	w)
       win=$OPTARG
@@ -242,16 +248,14 @@ fi
 # NbProc=4, 5x5 grid, -n 3 (~2hrs) 
 # NbProc=4, 6x6 grid, -n 4 (2hrs)  
 
-rm -rf DMatch DistributedMatching.xml DSMs Mosaics DistGpu
- 
-micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 SzW=$win NbProc=$proc ZoomF=1"
+rm -rf DMatch DistributedMatching.xml DistGpu 
 
- 
-
-
-# The No of jobs going on here would suggest 16 threads that is how this is all actually working 
-# Remember 1 batch is effectively sequential processing! This may be best when using lots of threads 
-coeman-par-local -d . -c DistributedMatching.xml -e DistGpu  -n $batch  
+if [ "$gp" = true ]; then
+    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 SzW=$win NbProc=$proc ZoomF=1"
+else
+    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 SzW=$win NbProc=$proc ZoomF=1"   
+fi
+  
 
 # Altered pymicmac writes seperate xml for Tawny as it is more efficient to run these all in parallel at the end as there
 # is not the same constraints on batch numbers 
@@ -259,11 +263,11 @@ coeman-par-local -d . -c DistributedMatching.xml -e DistGpu  -n $batch
 
 correct_mosaics.py -folder DistGpu
 
-# this works
+# Here we loop through all the mosaic and add georef which is lost by MicMac
 for f in *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif; do
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
 done 
-
+ 
 # this works 
 find *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}" 
 
@@ -273,13 +277,6 @@ ossim-orthoigen --combiner-type ossimFeatherMosaic *tile*/*Ortho-MEC-Malt/*Ortho
 #choices
 #ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic 
 
-#gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" MEC-Malt/$lastDEM OUTPUT/DEM_geotif.tif
  
-# Create some image histograms for ossim
-#ossim-create-histo -i *final.tif
-# find *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}" 
-
-#ossim-orthoigen --combiner-type ossimFeatherMosaic *final.tif feather.tif
-
 
 
