@@ -271,8 +271,8 @@ done
 # this works 
 find *tile*/*Ortho-MEC-Malt/*Mosaic*.tif | parallel "ossim-create-histo -i {}" 
 
-
-ossim-orthoigen --combiner-type ossimFeatherMosaic *tile*/*Ortho-MEC-Malt/*Mosaic*.tif feather.tif
+# Max seems best
+ossim-orthoigen --combiner-type ossimMaxMosaic --writer-prop threads=20 *tile*/*Ortho-MEC-Malt/*Mosaic*.tif max.tif
 
 #choices
 #ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic 
