@@ -239,7 +239,7 @@ mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 DegRap=4
 #ossim-create-histo -i *Ort**.tif;
 #GNU para
 # find **Ort_*.tif | parallel "ossim-create-histo -i {}"
-
+ 
 # Basic ortho with ossim is:
 #ossim-orthoigen *Ort**.tif mosaic_plain.tif;
 

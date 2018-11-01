@@ -217,20 +217,9 @@ else
 fi 
 
 
-#source activate pymicmac; 
+
+mm3d Pims2MNT $Algorithm DoOrtho=0
  
-# Part of crap hack as it doesn't uinderstand the compiled stuff from other micmac
-#rm -rf Tmp-MM-Dir/*.xml
-#rm -rf Tmp-MM-Dir/*.dmp 
-
-# This is likely to be added as Malt produces a void free Ortho NbProc key parameter
-# For robustness it is better to leave defaults
-#mm3d Malt Ortho ".*JPG" Ground_UTM  EZA=1 NbProc=20
-# Also worth using Ground or Urbane settings depending on application
-
-# UseTA=1 # this would rid us of the crap interp in voids 
-mm3d Pims2MNT $Algorithm DoOrtho=1
-
  
 
 #source deactivate pymicmac;
@@ -239,29 +228,21 @@ mm3d Pims2MNT $Algorithm DoOrtho=1
 #else
 ##	mm3d Tawny Ortho-MEC-Malt DEq=1
 #fi
-mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 DegRap=4 Out=Orthophotomosaic.tif
+#mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 DegRap=4 Out=Orthophotomosaic.tif
 
 #Making OUTPUT folder
 mkdir OUTPUT
-
+ 
 
 # When images are large they will be tiled 
 
 
-
-
 mm3d ConvertIm PIMs-TmpBasc/PIMs-Merged_Prof.tif Out=OUTPUT/DSM.tif
 cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/DSM.tfw
+
+gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
  
-mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
-cp PIMs-ORTHO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
 
-mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=OUTPUT/OrthFinal.tif Out=pointcloud.ply
-
-
-
- 
-# TODO - Tawny is not great for a homogenous ortho
 
 # OSSIM - BASED MOSAICING ----------------------------------------------------------------------------
 # Just here as an alternative for putting together tiles 

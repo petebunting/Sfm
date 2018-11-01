@@ -259,20 +259,20 @@ fi
 
 # Altered pymicmac writes seperate xml for Tawny as it is more efficient to run these all in parallel at the end as there
 # is not the same constraints on batch numbers 
-#coeman-par-local -d . -c DistributedMatchingTawny.xml -e DistGpu  -n 20
+coeman-par-local -d . -c DistributedMatching.xml -e DistGpu  -n 8
 
 correct_mosaics.py -folder DistGpu
 
 # Here we loop through all the mosaic and add georef which is lost by MicMac
-for f in *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif; do
+for f in *tile*/*Ortho-MEC-Malt/*Mosaic*.tif; do
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
 done 
  
 # this works 
-find *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}" 
+find *tile*/*Ortho-MEC-Malt/*Mosaic*.tif | parallel "ossim-create-histo -i {}" 
 
 
-ossim-orthoigen --combiner-type ossimFeatherMosaic *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif feather.tif
+ossim-orthoigen --combiner-type ossimFeatherMosaic *tile*/*Ortho-MEC-Malt/*Mosaic*.tif feather.tif
 
 #choices
 #ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic 
