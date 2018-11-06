@@ -18,17 +18,18 @@ resol_set=false
 ZoomF=1  
 DEQ=1
 gpu=false
-obliqueFolder=none 
 Algorithm=MicMac  
-
+CSV=true
+prc=100
  
-while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:h" opt; do
+while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:proc:h" opt; do
   case $opt in
     h) 
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
       echo "usage: DronePIMs.sh -e JPG -a MicMac -u 30 +north -r 0.1"
       echo "	-e EXTENSION     : image file type (JPG, jpg, TIF, png..., default=JPG)."
       echo "	-a Algorithm     : type of algo eg BigMac, MicMac, Forest, Statue etc"
+      echo "	-csv CSV         : Whether to use a csv file."
       echo "	-x X_OFF         : X (easting) offset for ply file overflow issue (default=0)."
       echo "	-y Y_OFF         : Y (northing) offset for ply file overflow issue (default=0)."
       echo "	-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
@@ -40,6 +41,7 @@ while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:h" opt; do
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
       echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
       echo " -g gpu           : Whether to use GPU support, default false"
+      echo " -proc            : no chunks to split the data into for gpu processing"
       echo "	-h	             : displays this message and exits."
       echo " "
       exit 0 
@@ -47,9 +49,12 @@ while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:h" opt; do
 	e)   
       EXTENSION=$OPTARG 
       ;;
-    algo)
+    a)
       Algorithm=$OPTARG
       ;;
+    csv)
+      CSV=true
+      ;;    
 	u)
       UTM=$OPTARG
       utm_set=true
@@ -88,6 +93,8 @@ while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:h" opt; do
 	g)
       gpu=false  
       ;;
+    proc)
+      prc=$OPTARG
     \?)
       echo "DroneNadir.sh: Invalid option: -$OPTARG" >&1
       exit 1
@@ -102,13 +109,7 @@ if [ "$utm_set" = false ]; then
 	echo "UTM zone not set"
 	exit 1
 fi
-#if [ "$use_schnaps" = true ]; then
-#	echo "Using Schnaps!"
-#	SH="_mini"
-#else
-#	echo "Not using Schnaps!"
-#	SH=""
-#fi
+
 if [ "$gpu" = false ]; then
 	echo "Using CPU only"
 fi
@@ -132,42 +133,34 @@ echo "         </BSC>                                                           
 echo "</SystemeCoord>                                                                                             " >> SysUTM.xml
       
  
-#Copy everything from the folder with oblique images
-if [ "obliqueFolder" != none ]; then
-	cp $obliqueFolder/* . 
-fi 
- 
-#Convert all images to tif (BW and RGB) for use in AperiCloud (because it otherwise breaks if too many CPUs are used)
-#if [ "$do_AperiCloud" = true ]; then
-#	DevAllPrep.sh
-#fi 
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-#if [ "$CSV"= true ]; then 
-#    echo "using csv file" 
-#    cs=*.csv   
- # mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
-
-mm3d XifGps2Txt .*$EXTENSION
-#Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
-mm3d XifGps2Xml .*$EXTENSION RAWGNSS
- 
+if [ "$CSV" = true ]; then 
+    echo "using csv file" 
+    cs=*.csv   
+    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
+else
+    echo "using exif data"
+    mm3d XifGps2Txt .*$EXTENSION
+    #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
+    mm3d XifGps2Xml .*$EXTENSION RAWGNSS
+    mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
+fi  
 #Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
-mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
+
 
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 mm3d Tapioca File FileImagesNeighbour.xml $size
  
-#if [ "$use_schnaps" = true ]; then 
-	#filter TiePoints (better distribution, avoid clogging)
+
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1 VeryStrict=1
 
-#fi  
+
 #Compute Relative orientation (Arbitrary system)
 mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
 
 #Visualize relative orientation, if apericloud is not working, run  
-#if [ "$do_AperiCloud" = true ]; then 
+
 mm3d AperiCloud .*$EXTENSION Arbitrary  
 	
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
@@ -177,10 +170,9 @@ mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
    
 #Visualize Ground_RTL orientation   
-#if [ "$do_AperiCloud" = true ]; then
+
 mm3d AperiCloud .*$EXTENSION Ground_RTL SH=_mini
-#fi 
- 
+
    
   
 #Change system to final cartographic system  
@@ -194,24 +186,13 @@ fi
 #Print out a text file with the camera positions (for use in external software, e.g. GIS)
 
  
-#Taking away files from the oblique folder
-if [ "$obliqueFolder" != none ]; then	
-	here=$(pwd)
-	cd $obliqueFolder	 
-	find ./ -type f -name "*" | while read filename; do
-		f=$(basename "$filename")
-		rm  $here/$f 
-	done	
-	cd $here	
-fi
 
 # Important NOTE
  
  
 
 if [ "$gpu" = true ]; then
-	#mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 ZReg=0.005 SzW=1 UseGpu=1 ZoomF=$ZoomF 
-	pims_subset.py -folder $PWD -algo $Algorithm -num 150
+	pims_subset.py -folder $PWD -algo $Algorithm -num $prc
 else
     mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF  
 fi 

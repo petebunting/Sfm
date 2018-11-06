@@ -69,7 +69,13 @@ def convert_c3p(folder, lognm):
     # pd read in with ; sep
     pdcsv=pd.read_csv(lognm, sep=';')
     
-    newCsv = pd.concat([pdcsv['Longitude'], pdcsv['Latitude'],
+    # following solution is very ugly but I can't be arsed with this crap
+    strArr = np.array(files, dtype=np.str)
+
+    fleDf= pd.DataFrame(strArr, columns=["#F=N"])
+
+    
+    newCsv = pd.concat([fleDf["#F=N"], pdcsv['Longitude'], pdcsv['Latitude'],
                        pdcsv['Altitude'], pdcsv['Yaw'],
                        pdcsv['Pitch'], pdcsv['Roll']], axis=1)
     
@@ -78,7 +84,7 @@ def convert_c3p(folder, lognm):
     # get rid of the first columns consisting number 1
     #npCsv = pdcsv[:,1:len(pdcsv)]
 
-    newCsv.insert(loc=0, column="#F=N", value=files)
+    
   
     
     # header for MicMac     

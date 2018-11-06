@@ -77,8 +77,8 @@ fi
 	
 #Do the correlation of the images
 if [ "$use_Schnaps" = true ]; then
-	mm3d C3DC $Algorithm .*$EXTENSION Ori-Arbitrary ZoomF=$ZOOM Masq3D=AperiCloud_Arbitrary_mini.ply
+	mm3d C3DC $Algorithm .*$EXTENSION Arbitrary ZoomF=$ZOOM Masq3D=AperiCloud_Arbitrary_mini.ply
 else
-	mm3d C3DC $Algorithm .*$EXTENSION Ori-Arbitrary ZoomF=$ZOOM Masq3D=AperiCloud_Arbitrary.ply
+	mm3d C3DC $Algorithm .*$EXTENSION Arbitrary ZoomF=$ZOOM Masq3D=AperiCloud_Arbitrary.ply
 fi
 

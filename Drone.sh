@@ -139,16 +139,7 @@ echo "         </BSC>                                                           
 echo "</SystemeCoord>                                                                                             " >> SysUTM.xml
   
 
-#Copy everything from the folder with oblique images
-if [ "obliqueFolder" != none ]; then
-	cp $obliqueFolder/* .
-fi 
-
-#Convert all images to tif (BW and RGB) for use in AperiCloud (because it otherwise breaks if too many CPUs are used)
-#if [ "$do_AperiCloud" = true ]; then
-#	DevAllPrep.sh
-#fi
-
+ 
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
 mm3d XifGps2Txt .*$EXTENSION
 
