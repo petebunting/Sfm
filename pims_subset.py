@@ -37,6 +37,9 @@ parser.add_argument("-num", "--noCh", type=int, required=False,
 parser.add_argument("-zoom", "--zmF", type=int, required=False, 
                     help="Zoom level - eg 1=1 point per pixel, 2 = 1 point per  4 pixels")
 
+parser.add_argument("-zr", "--zrg", type=float, required=False, 
+                    help="z reg term context dependent")
+
 args = parser.parse_args() 
 
 def chunkIt(seq, num):
@@ -55,11 +58,16 @@ if args.algotype is None:
 else:
     algo = args.algotype
 
+if args.zr is None:
+   zregu=2
+else:
+    zregu = str(args.zmF)
+
 if args.zmF is None:
    zoomF=2
 else:
     zoomF = args.zmF
-              
+                            
 
 numChunks = args.noCh
 #maxIm = args.noIm2
@@ -88,7 +96,7 @@ for index, subList in enumerate(sections):
                      
     mm3d = [mm3dpth, "PIMs", algo, sub2, "Ground_UTM", "DefCor=0",
             "SzW=1",
-            "UseGpu=1", zm]
+            "UseGpu=1", zm, zregu]
     print('the img subset is '+sub2+'\n\n')  
     call(mm3d)
     print(str(index)+' is done\n\n')

@@ -17,12 +17,13 @@ size=2000
 resol_set=false
 ZoomF=2  
 DEQ=1
-gpu=false
+gpu=0
 Algorithm=MicMac  
-CSV=true
+zreg=0.02
+
 prc=100
  
-while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:proc:h" opt; do
+while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:proc:zr:h" opt; do
   case $opt in
     h) 
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -42,6 +43,7 @@ while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:proc:h" opt; do
       echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
       echo " -g gpu           : Whether to use GPU support, default false"
       echo " -proc            : no chunks to split the data into for gpu processing"
+      echo " -zr              : zreg term - context dependent - def is 0.02" 
       echo "	-h	             : displays this message and exits."
       echo " "
       exit 0 
@@ -91,16 +93,19 @@ while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:proc:h" opt; do
       DEQ=$OPTARG  
       ;;
 	g)
-      gpu=false  
-      ;;
+      gpu=$OPTARG 
+      ;; 
     proc)
       prc=$OPTARG
+    zr)
+      zreg=$OPTARG
+      ;;
     \?)
-      echo "DroneNadir.sh: Invalid option: -$OPTARG" >&1
+      echo "DronePIMs.sh: Invalid option: -$OPTARG" >&1
       exit 1
       ;;
     :)
-      echo "DroneNadir.sh: Option -$OPTARG requires an argument." >&1
+      echo "DronePIMs.sh: Option -$OPTARG requires an argument." >&1
       exit 1
       ;;
   esac
@@ -134,8 +139,9 @@ echo "</SystemeCoord>                                                           
       
  
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
+# magick convert .*$EXTENSION -resize 50% .*$EXTENSION 
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-if [ "$CSV" = true ]; then 
+if [ "$CSV" != none ]; then 
     echo "using csv file" 
     cs=*.csv   
     mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
@@ -176,7 +182,7 @@ mm3d AperiCloud .*$EXTENSION Ground_RTL SH=_mini
    
   
 #Change system to final cartographic system  
-if [ "$CSV" = true ]; then 
+if [ "$CSV" != none ]; then 
     mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
 else
     mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
@@ -191,12 +197,13 @@ fi
  
  
 
-if [ "$gpu" = true ]; then
-	pims_subset.py -folder $PWD -algo $Algorithm -num $prc
+if [ "$gpu" != 1 ]; then
+	mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF ZReg=$zreg  
 else
-    mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF  
-fi 
+    pims_subset.py -folder $PWD -algo $Algorithm -num $prc
 
+fi 
+ 
 
 
 mm3d Pims2MNT $Algorithm DoOrtho=0

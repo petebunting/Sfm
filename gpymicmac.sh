@@ -38,7 +38,7 @@
 
 
  
-# add default values 
+# add default values  
 EXTENSION=JPG 
 X_OFF=0;
 Y_OFF=0;
@@ -55,9 +55,10 @@ proc=16
 win=2
 batch=4
 gp=true
+csv=none
 
  
-while getopts "e:x:y:u:sz:spao:r:z:eq:g:gpu:w:proc:b:h" opt; do  
+while getopts "e:x:y:u:sz:spao:r:z:eq:g:gpu:b:w:prc:csv:h" opt; do  
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -78,6 +79,7 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:gpu:w:proc:b:h" opt; do
       echo " -b batch         : no of jobs at any one time"
       echo " -w win           : Correl window size"
       echo " -prc proc        : no of CPU thread used (needed even when using GPU)"
+      echo " -csv CSV         : a csv file of gnsss etc - default none - something if needed"
       echo "	-h	             : displays this message and exits."
       echo " " 
       exit 0
@@ -132,6 +134,9 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:gpu:w:proc:b:h" opt; do
 	prc)
       proc=$OPTARG  
       ;;
+     csv)
+      CSV=$OPTARG 
+      ;;             
     \?)
       echo "DroneNadir.sh: Invalid option: -$OPTARG" >&1
       exit 1
@@ -146,14 +151,10 @@ if [ "$utm_set" = false ]; then
 	echo "UTM zone not set"
 	exit 1
 fi
-#if [ "$use_schnaps" = true ]; then
-#	echo "Using Schnaps!"
-#	SH="_mini"
-#else
-#	echo "Not using Schnaps!"
-#	SH=""
-#fi
+#mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
+# mogrify -resize 2000 -path rescaled $PWD/*.JPG
 
+#mogrify -resize 2000  -path ~/images/converted ~/images/*.jpg
 
 echo "$proc CPU threads to be used during dense matching, be warned that this has limitations with respect to amount of images processed at a time"
 echo "Using GPU support" 
@@ -171,19 +172,21 @@ echo "            <AuxStr>  +proj=utm +zone="$UTM "+ellps=WGS84 +datum=WGS84 +un
 echo "                                                                                                            " >> SysUTM.xml
 echo "         </BSC>                                                                                             " >> SysUTM.xml
 echo "</SystemeCoord>                                                                                             " >> SysUTM.xml
-  
 
+#mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
+# magick convert .*$EXTENSION -resize 50% .*$EXTENSION 
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-mm3d XifGps2Txt .*$EXTENSION
-
-#Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
-mm3d XifGps2Xml .*$EXTENSION RAWGNSS
-
-#Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
-mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml #DN=50
-
-#Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
-mm3d Tapioca File FileImagesNeighbour.xml $size
+if [ "$CSV" != none ]; then 
+    echo "using csv file" 
+    cs=*.csv   
+    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
+else
+    echo "using exif data"
+    mm3d XifGps2Txt .*$EXTENSION
+    #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
+    mm3d XifGps2Xml .*$EXTENSION RAWGNSS
+    mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
+fi     
 
 
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1
@@ -202,23 +205,14 @@ mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree
 mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
 
 
-#Change system to final cartographic system 
-mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
-
-#Print out a text file with the camera positions (for use in external software, e.g. GIS)
-mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
-
-#Taking away files from the oblique folder
-if [ "$obliqueFolder" != none ]; then	
-	here=$(pwd)
-	cd $obliqueFolder	
-	find ./ -type f -name "*" | while read filename; do
-		f=$(basename "$filename")
-		rm  $here/$f
-	done	
-	cd $here	
+#Change system to final cartographic system  
+if [ "$CSV" != none ]; then 
+    mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
+else
+    mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
+    mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
 fi
- 
+
 
 #Correlation into DEM
 # These args are used in grandleez 
