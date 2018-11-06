@@ -13,7 +13,7 @@ ZOOM=2
 while getopts "e:a:smz:h" opt; do
   case $opt in
     h)
-      echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
+      echo "Run workflow for point cloud from culture 3d algo."
       echo "usage: Oblique.sh -e JPG -a BigMac -z 1"
       echo "	-e EXTENSION   : image file type (JPG, jpg, TIF, png..., default=JPG)."
       echo "	-a Algorithm   : type of algo eg BigMac, MicMac, Forest, Statue etc."
@@ -26,7 +26,7 @@ while getopts "e:a:smz:h" opt; do
       ;;   
 	e)
       EXTENSION=$OPTARG
-      ;;cd 
+      ;;
   algo)
       Algorithm=$OPTARG
       ;;      
@@ -34,7 +34,7 @@ while getopts "e:a:smz:h" opt; do
       ZOOM=$OPTARG
       ;;
 	s)
-      use_Schnaps=false
+      use_Schnaps=true
       ;; 
 	m)
       wait_for_mask=true
@@ -66,9 +66,9 @@ if [ "$use_Schnaps" = true ]; then
 	mm3d Schnaps .*$EXTENSION MoveBadImgs=1
 fi
 #Compute Relative orientation (Arbitrary system)
-mm3d Tapas FraserBasic .*$EXTENSION Out=Arbitrary SH=$SH
+mm3d Tapas FraserBasic .*$EXTENSION Out=Arbitrary SH=_mini
 #Visualize relative orientation
-mm3d AperiCloud .*$EXTENSION Ori-Arbitrary SH=$SH
+mm3d AperiCloud .*$EXTENSION Arbitrary SH=_mini
 
 #HERE, MASKING COULD BE DONE!!!
 if [ "$wait_for_mask" = true ]; then
@@ -77,7 +77,7 @@ fi
 	
 #Do the correlation of the images
 if [ "$use_Schnaps" = true ]; then
-	mm3d C3DC $Algorithm .*$EXTENSION Ori-Arbitrary ZoomF=$ZOOM Masq3D=AperiCloud_Arbitrary__mini.ply
+	mm3d C3DC $Algorithm .*$EXTENSION Ori-Arbitrary ZoomF=$ZOOM Masq3D=AperiCloud_Arbitrary_mini.ply
 else
 	mm3d C3DC $Algorithm .*$EXTENSION Ori-Arbitrary ZoomF=$ZOOM Masq3D=AperiCloud_Arbitrary.ply
 fi

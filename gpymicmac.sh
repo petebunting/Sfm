@@ -159,8 +159,6 @@ echo "$proc CPU threads to be used during dense matching, be warned that this ha
 echo "Using GPU support" 
 
 
-  
-
 #create UTM file (after deleting any existing one)
 rm SysUTM.xml
 echo "<SystemeCoord>                                                                                              " >> SysUTM.xml
@@ -174,16 +172,6 @@ echo "                                                                          
 echo "         </BSC>                                                                                             " >> SysUTM.xml
 echo "</SystemeCoord>                                                                                             " >> SysUTM.xml
   
-
-#Copy everything from the folder with oblique images
-if [ "obliqueFolder" != none ]; then
-	cp $obliqueFolder/* .
-fi 
-
-#Convert all images to tif (BW and RGB) for use in AperiCloud (because it otherwise breaks if too many CPUs are used)
-#if [ "$do_AperiCloud" = true ]; then
-#	DevAllPrep.sh
-#fi
 
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
 mm3d XifGps2Txt .*$EXTENSION
@@ -202,11 +190,6 @@ mm3d Schnaps .*$EXTENSION MoveBadImgs=1
 
 #Compute Relative orientation (Arbitrary system)
 mm3d Tapas FraserBasic .*$EXTENSION Out=Arbitrary SH=_mini
-
-#Visualize relative orientation, if apericloud is not working, run 
-#if [ "$do_AperiCloud" = true ]; then 
-mm3d AperiCloud .*$EXTENSION Ori-Arbitrary SH=_mini
-#fi
 
 #Transform to  RTL system
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
@@ -235,7 +218,7 @@ if [ "$obliqueFolder" != none ]; then
 	done	
 	cd $here	
 fi
-
+ 
 
 #Correlation into DEM
 # These args are used in grandleez 
@@ -262,21 +245,33 @@ fi
 coeman-par-local -d . -c DistributedMatching.xml -e DistGpu  -n 8
 
 correct_mosaics.py -folder DistGpu
-
+ 
 # Here we loop through all the mosaic and add georef which is lost by MicMac
+echo "geo-reffing Orthos"
 for f in *tile*/*Ortho-MEC-Malt/*Mosaic*.tif; do
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
 done 
  
 # this works 
 find *tile*/*Ortho-MEC-Malt/*Mosaic*.tif | parallel "ossim-create-histo -i {}" 
-
+ 
 # Max seems best
-ossim-orthoigen --combiner-type ossimMaxMosaic --writer-prop threads=20 *tile*/*Ortho-MEC-Malt/*Mosaic*.tif max.tif
+ossim-orthoigen --combiner-type ossimMaxMosaic  *tile*/*Ortho-MEC-Malt/*Mosaic*.tif Orthomax.tif
 
+#--writer-prop threads=20 
 #choices
 #ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic 
 
+# georef the dsms.....
+echo "geo-reffing DSMs" 
+for f in *tile*/*MEC-Malt/Z_Num7_DeZoom2_STD-MALT.tif; do
+    gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
+done 
  
+mask_dsm.py -folder DistGpu
+
+find *tile*/*MEC-Malt/Z_Num7_DeZoom2_STD-MALT.tif | parallel "ossim-create-histo -i {}" 
+
+ossim-orthoigen --combiner-type ossimMaxMosaic  *tile*/*MEC-Malt/Z_Num7_DeZoom2_STD-MALT.tif DSMmax.tif
 
 
