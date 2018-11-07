@@ -1,10 +1,9 @@
-# This is a generic workflow for DJI type platforms etc with embedded GNSS data
-# Modified from the original L.Girod script
+# This is a generic workflow for drone imagery using the malt pipeline
 
 # example:
 # ./Drone.sh -e JPG -u "30 +north" -g 1 -w 2 -prc 20
 
-
+ 
 
 # add default values 
 EXTENSION=JPG

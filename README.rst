@@ -63,11 +63,6 @@ Add to your .bashrc or .bash_profile if you wish to execute anywhere
 Contents
 ~~~~~~~~~~~~~~~~~
 
-**PPX.sh**
-
-- A script to process a GNSS and associated photographs outputting orthomosaic, DSM and point cloud (.ply) file
-Will process anything with a csv GNSS (in the correct format) and photos. This uses Malt for dense matching
-
 **Drone.sh**
 
 - A script to process photographs with complete exif information outputting orthomosaic, DSM and point cloud (.ply) file
@@ -75,19 +70,7 @@ Typically a DJI phantom or other such platform. This uses Malt for dense matchin
 
 **DronePIMs.sh**
 
-- A script like the 2 previous but using the PIMs algorithm
-
-**write_tiles.py**
-
-- A python script using GDAL which writes the georeferencing information to Tawny mosaic tiled output
-
-**tie.sh**
-
-- Part one of a 2 stage process for PPX-based Sfm, the output includes the delay between GNSS and camera which can be inputted into the sequel script dense_cloud.sh
-
-**dense_cloud.sh**
-
-- Part two of aformentioned workflow where the GNSS - camera delay is inputted prior to the output of Ortho, DSM and point cloud. 
+- A script like the previous but using the PIMs algorithm
 
 **gpymicmac.sh**
 
