@@ -81,7 +81,7 @@ Typically a DJI phantom or other such platform. This uses Malt for dense matchin
 - Similar to gpymicmac, this processes data using the PIMs dense matching with the facility to control the amount of image pairs processed at any one time
 - This has been written to expolit GPU processing, but it is probably quicker to use CPU processing overall with larger datsets
 - This scripts calls the MicMac PIMs function in chunks to ensure GPU memory is not overloaded
-- Tends to overload 11gb GPU with around 30 images+
+- Tends to overload 11gb GPU with around 30 24 megapixel images+
 - This takes advantage of the fact it all gets written to the PIMs folder without overwrite
 
 Use
