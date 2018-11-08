@@ -20,7 +20,7 @@ import numpy as np
 # The lib function is more flexible than this script which is here to a masking operation specific to MicMac
 
 def _copy_dataset_config(inDataset, FMT = 'Gtiff', outMap = 'copy',
-                         dtype = gdal.GDT_Int32, bands = 1):
+                          bands = 1):
     """Copies a dataset without the associated rasters.
 
     """
@@ -43,6 +43,8 @@ def _copy_dataset_config(inDataset, FMT = 'Gtiff', outMap = 'copy',
     geotransform = inDataset.GetGeoTransform()   
     #dtype=gdal.GDT_Int32
     driver = gdal.GetDriverByName(FMT)
+    
+    dtype = gdal.GDT_Float32
     
     # Set params for output raster
     outDataset = driver.Create(
@@ -195,10 +197,15 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-folder", "--fld", type=str, required=True, 
                     help="input dsm")
 
-
+parser.add_argument("-n", "--cores", type=int, required=False, 
+                    help="no of cpu jobs")
 
 args = parser.parse_args() 
 
+if args.cores is None:
+    noJ=-1
+else:
+    noJ = args.cores
 
 wildCard1 = '*tile*/*MEC-Malt/Z_Num7_DeZoom2_STD-MALT.tif'
 wildCard2 = '*tile*/*MEC-Malt/AutoMask_STD-MALT_Num_6.tif'
@@ -212,7 +219,7 @@ fileListMsk.sort()
 
 finalList = list(zip(fileListIm, fileListMsk))
 
-Parallel(n_jobs=-1,
+Parallel(n_jobs=noJ,
          verbose=3)(delayed(mask_raster_multi)(f[0],
                    mask=f[1]) for f in finalList)
 

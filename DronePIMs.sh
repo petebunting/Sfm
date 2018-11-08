@@ -97,6 +97,7 @@ while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:proc:zr:h" opt; do
       ;; 
     proc)
       prc=$OPTARG
+      ;; 
     zr)
       zreg=$OPTARG
       ;;

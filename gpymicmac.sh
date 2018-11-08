@@ -228,9 +228,9 @@ fi
 rm -rf DMatch DistributedMatching.xml DistGpu 
 
 if [ "$gp" = true ]; then
-    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 SzW=$win NbProc=$proc ZoomF=1"
+    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 SzW=$win NbProc=$proc ZoomF=2"
 else
-    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 SzW=$win NbProc=$proc ZoomF=1"   
+    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 SzW=$win NbProc=$proc ZoomF=2"   
 fi
   
 
@@ -255,14 +255,26 @@ ossim-orthoigen --combiner-type ossimMaxMosaic  *tile*/*Ortho-MEC-Malt/*Mosaic*.
 #--writer-prop threads=20 
 #choices
 #ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic 
+#tfw is :
+
+#5.000000000000	(size of pixel in x direction)
+#0.000000000000	(rotation term for row)
+#0.000000000000	(rotation term for column) 
+#-5.000000000000	(size of pixel in y direction)
+#492169.690845528910	(x coordinate of centre of upper left pixel in map units)
+#5426523.318065105000	(y coordinate of centre of upper left pixel in map units)
+
+
 
 # georef the dsms.....
 echo "geo-reffing DSMs" 
+#finalDEMs=($(ls Z_Num*_DeZoom*_STD-MALT.tif))
 for f in *tile*/*MEC-Malt/Z_Num7_DeZoom2_STD-MALT.tif; do
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
 done 
  
 mask_dsm.py -folder DistGpu
+
 
 find *tile*/*MEC-Malt/Z_Num7_DeZoom2_STD-MALT.tif | parallel "ossim-create-histo -i {}" 
 
