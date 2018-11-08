@@ -107,7 +107,7 @@ if [ "$gpu" = 1 ]; then
 fi 
 
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
-# magick convert .*$EXTENSION -resize 50% .*$EXTENSION 
+# magick mogrify -resize 50%
 
 #create UTM file (after deleting any existing one)
 rm SysUTM.xml
@@ -124,7 +124,8 @@ echo "</SystemeCoord>                                                           
   
 
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
-# magick convert .*$EXTENSION -resize 50% .*$EXTENSION 
+# mogrify -resize 30% *.JPG
+#mogrify -resize 2000 *.JPG
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
 if [ "$CSV" != none ]; then 
     echo "using csv file" 
@@ -218,7 +219,7 @@ mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 DegRap=4
 mkdir OUTPUT
 #PointCloud from Ortho+DEM, with offset substracted to the coordinates to solve the 32bit precision issue
 mm3d Nuage2Ply MEC-Malt/NuageImProf_STD-MALT_Etape_8.xml Attr=Ortho-MEC-Malt/Orthophotomosaic.tif Out=OUTPUT/PointCloud_OffsetUTM.ply Offs=[$X_OFF,$Y_OFF,0]
-
+ 
 cd MEC-Malt
 finalDEMs=($(ls Z_Num*_DeZoom*_STD-MALT.tif))
 finalcors=($(ls Correl_STD-MALT_Num*.tif))

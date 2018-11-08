@@ -55,7 +55,7 @@ while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:proc:zr:h" opt; do
       Algorithm=$OPTARG
       ;;
     csv)
-      CSV=true
+      CSV=$OPTARG
       ;;    
 	u)
       UTM=$OPTARG
@@ -140,7 +140,8 @@ echo "</SystemeCoord>                                                           
       
  
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
-# magick convert .*$EXTENSION -resize 50% .*$EXTENSION 
+# mogrify -resize 30% *.JPG
+# mogrify -resize 2000 *.JPG
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
 if [ "$CSV" != none ]; then 
     echo "using csv file" 

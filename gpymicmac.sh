@@ -152,9 +152,8 @@ if [ "$utm_set" = false ]; then
 	exit 1
 fi
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
-# mogrify -resize 2000 -path rescaled $PWD/*.JPG
+# mogrify -resize 2000 *.JPG
 
-#mogrify -resize 2000  -path ~/images/converted ~/images/*.jpg
 
 echo "$proc CPU threads to be used during dense matching, be warned that this has limitations with respect to amount of images processed at a time"
 echo "Using GPU support" 
@@ -267,7 +266,7 @@ ossim-orthoigen --combiner-type ossimMaxMosaic  *tile*/*Ortho-MEC-Malt/*Mosaic*.
 
 
 # georef the dsms.....
-echo "geo-reffing DSMs" 
+echo "geo-reffing DSMs"  
 #finalDEMs=($(ls Z_Num*_DeZoom*_STD-MALT.tif))
 for f in *tile*/*MEC-Malt/Z_Num7_DeZoom2_STD-MALT.tif; do
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
