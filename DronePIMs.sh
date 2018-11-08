@@ -200,7 +200,7 @@ fi
  
 
 if [ "$gpu" != 1 ]; then
-	mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF ZReg=$zreg  
+	mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF ZReg=$zreg SH=_mini  
 else
     pims_subset.py -folder $PWD -algo $Algorithm -num $prc
 

@@ -109,7 +109,7 @@ for index, subList in enumerate(sections):
                      
     mm3d = [mm3dpth, "PIMs", algo, sub2, "Ground_UTM", "DefCor=0",
             "SzW=1",
-            "UseGpu=1", zoomF, zregu]
+            "UseGpu=1", zoomF, zregu, 'SH=_mini']
     print('the img subset is '+sub2+'\n\n')  
     call(mm3d)
     print(str(index)+' is done\n\n')
