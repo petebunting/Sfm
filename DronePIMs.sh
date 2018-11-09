@@ -159,10 +159,10 @@ fi
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 if [$size != none]; then
     echo "resizing to $size for tie point detection"
-    mm3d Tapioca File FileImagesNeighbour.xml $size
+    mm3d Tapioca File FileImagesNeighbour.xml $size @SFS
 else
     echo "using actual size of imgs"
-    mm3d Tapioca File FileImagesNeighbour.xml $size
+    mm3d Tapioca File FileImagesNeighbour.xml $size @SFS
 fi 
 
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1 VeryStrict=1
@@ -212,7 +212,7 @@ fi
  
 
 
-mm3d Pims2MNT $Algorithm DoOrtho=0
+mm3d Pims2MNT $Algorithm DoOrtho=1 
  
  
 

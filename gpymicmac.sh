@@ -138,11 +138,11 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:gpu:b:w:prc:csv:h" opt; do
       CSV=$OPTARG 
       ;;             
     \?)
-      echo "DroneNadir.sh: Invalid option: -$OPTARG" >&1
+      echo "gpymicmac.sh: Invalid option: -$OPTARG" >&1
       exit 1
       ;;
     :)
-      echo "DroneNadir.sh: Option -$OPTARG requires an argument." >&1
+      echo "gpymicmac.sh: Option -$OPTARG requires an argument." >&1
       exit 1
       ;;
   esac
@@ -189,10 +189,10 @@ fi
 
 if [$size != none]; then
     echo "resizing to $size for tie point detection"
-    mm3d Tapioca File FileImagesNeighbour.xml $size
+    mm3d Tapioca File FileImagesNeighbour.xml $size @SFS
 else
     echo "using actual size of imgs"
-    mm3d Tapioca File FileImagesNeighbour.xml $size
+    mm3d Tapioca File FileImagesNeighbour.xml $size @SFS
 fi 
 
 
@@ -233,11 +233,11 @@ fi
 # NbProc=4, 6x6 grid, -n 4 (2hrs)  
 
 rm -rf DMatch DistributedMatching.xml DistGpu 
-
+ 
 if [ "$gp" = true ]; then
-    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 SzW=$win NbProc=$proc ZoomF=2"
+    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 EZA=1 SzW=$win NbProc=$proc ZoomF=2"
 else
-    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 SzW=$win NbProc=$proc ZoomF=2"   
+    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 SzW=$win EZA=1 NbProc=$proc ZoomF=2"   
 fi
   
 
@@ -275,15 +275,17 @@ ossim-orthoigen --combiner-type ossimMaxMosaic  *tile*/*Ortho-MEC-Malt/*Mosaic*.
 
 # georef the dsms.....
 echo "geo-reffing DSMs"  
-#finalDEMs=($(ls Z_Num*_DeZoom*_STD-MALT.tif))
+#finalDEMs=($(ls Z_Num*_DeZoom*_STD-MALT.tif)) 
 for f in *tile*/*MEC-Malt/Z_Num7_DeZoom2_STD-MALT.tif; do
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
 done 
- 
-mask_dsm.py -folder DistGpu
+
+# mask_dsm.py -folder $PWD -n 20 -z 1 -m 1
+#  This will assume a zoom level 2 
+mask_dsm.py -folder DistGpu 
 
 
-find *tile*/*MEC-Malt/Z_Num7_DeZoom2_STD-MALT.tif | parallel "ossim-create-histo -i {}" 
+find *tile*/*MEC-Malt/Z_Num$zoomF_DeZoom2_STD-MALT.tif | parallel "ossim-create-histo -i {}" 
 
 ossim-orthoigen --combiner-type ossimMaxMosaic  *tile*/*MEC-Malt/Z_Num7_DeZoom2_STD-MALT.tif DSMmax.tif
 
