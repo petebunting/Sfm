@@ -187,6 +187,14 @@ else
     mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
 fi     
 
+if [$size != none]; then
+    echo "resizing to $size for tie point detection"
+    mm3d Tapioca File FileImagesNeighbour.xml $size
+else
+    echo "using actual size of imgs"
+    mm3d Tapioca File FileImagesNeighbour.xml $size
+fi 
+
 
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1
 

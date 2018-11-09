@@ -13,7 +13,6 @@ Y_OFF=0;
 utm_set=false
 do_ply=true
 do_AperiCloud=true
-size=2000 
 resol_set=false
 ZoomF=2  
 DEQ=1
@@ -158,8 +157,13 @@ fi
 
 
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
-mm3d Tapioca File FileImagesNeighbour.xml $size
- 
+if [$size != none]; then
+    echo "resizing to $size for tie point detection"
+    mm3d Tapioca File FileImagesNeighbour.xml $size
+else
+    echo "using actual size of imgs"
+    mm3d Tapioca File FileImagesNeighbour.xml $size
+fi 
 
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1 VeryStrict=1
 
