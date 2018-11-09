@@ -175,19 +175,19 @@ echo "</SystemeCoord>                                                           
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
 # magick convert .*$EXTENSION -resize 50% .*$EXTENSION 
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-if [ "$CSV" != none ]; then 
-    echo "using csv file" 
-    cs=*.csv   
-    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
-else
+if [ -z "$CSV"  ]; then 
     echo "using exif data"
     mm3d XifGps2Txt .*$EXTENSION
     #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
     mm3d XifGps2Xml .*$EXTENSION RAWGNSS
     mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
-fi     
+else
+    echo "using csv file"  
+    cs=*.csv   
+    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
+fi 
 
-if [$size != none]; then
+if [ -z $size ]; then
     echo "resizing to $size for tie point detection"
     mm3d Tapioca File FileImagesNeighbour.xml $size @SFS
 else
@@ -213,11 +213,11 @@ mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
 
 
 #Change system to final cartographic system  
-if [ "$CSV" != none ]; then 
-    mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
-else
+if [ -z "$CSV" ]; then 
     mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
     mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
+else
+    mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
 fi
 
 
@@ -234,10 +234,10 @@ fi
 
 rm -rf DMatch DistributedMatching.xml DistGpu 
  
-if [ "$gp" = true ]; then
-    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 EZA=1 SzW=$win NbProc=$proc ZoomF=2"
+if [ -z "$gpu" ]; then
+    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 SzW=$win EZA=1 NbProc=$proc ZoomF=2"
 else
-    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 SzW=$win EZA=1 NbProc=$proc ZoomF=2"   
+    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 EZA=1 SzW=$win NbProc=$proc ZoomF=2"   
 fi
   
 

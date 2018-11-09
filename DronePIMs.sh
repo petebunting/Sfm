@@ -142,22 +142,22 @@ echo "</SystemeCoord>                                                           
 # mogrify -resize 30% *.JPG
 # mogrify -resize 2000 *.JPG
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-if [ "$CSV" != none ]; then 
-    echo "using csv file" 
-    cs=*.csv   
-    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
-else
+if [ -z "$CSV"  ]; then 
     echo "using exif data"
     mm3d XifGps2Txt .*$EXTENSION
     #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
     mm3d XifGps2Xml .*$EXTENSION RAWGNSS
     mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
-fi  
+else
+    echo "using csv file"  
+    cs=*.csv   
+    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
+fi 
 #Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
 
 
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
-if [$size != none]; then
+if [ -z $size ]; then
     echo "resizing to $size for tie point detection"
     mm3d Tapioca File FileImagesNeighbour.xml $size @SFS
 else
@@ -188,13 +188,12 @@ mm3d AperiCloud .*$EXTENSION Ground_RTL SH=_mini
    
   
 #Change system to final cartographic system  
-if [ "$CSV" != none ]; then 
-    mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
-else
+if [ -z "$CSV" ]; then 
     mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
     mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
+else
+    mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
 fi
-
 #Print out a text file with the camera positions (for use in external software, e.g. GIS)
 
  
@@ -203,11 +202,10 @@ fi
  
  
 
-if [ "$gpu" != 1 ]; then
-	mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF ZReg=$zreg SH=_mini  
-else
+if [ -z "$gpu" ]; then
     pims_subset.py -folder $PWD -algo $Algorithm -num $prc
-
+else
+    mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF ZReg=$zreg SH=_mini  
 fi 
  
 

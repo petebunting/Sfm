@@ -10,13 +10,10 @@ EXTENSION=JPG
 X_OFF=0;
 Y_OFF=0;
 utm_set=false
-do_ply=true
-do_AperiCloud=true
 resol_set=false
 ZoomF=2 
 DEQ=1
 obliqueFolder=none
-gpu=0
 proc=16 
 win=2
 
@@ -126,21 +123,21 @@ echo "</SystemeCoord>                                                           
 # mogrify -resize 30% *.JPG
 #mogrify -resize 2000 *.JPG
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-if [ "$CSV" != none ]; then 
-    echo "using csv file" 
-    cs=*.csv   
-    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
-else
+if [ -z "$CSV"  ]; then 
     echo "using exif data"
     mm3d XifGps2Txt .*$EXTENSION
     #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
     mm3d XifGps2Xml .*$EXTENSION RAWGNSS
     mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
+else
+    echo "using csv file"  
+    cs=*.csv   
+    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
 fi  
  
 
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
-if [$size != none]; then
+if [ -z $size ]; then
     echo "resizing to $size for tie point detection"
     mm3d Tapioca File FileImagesNeighbour.xml $size @SFS
 else
@@ -170,27 +167,28 @@ mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree
 mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
 
 #Change system to final cartographic system  
-if [ "$CSV" != none ]; then 
-    mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
-else
+if [ -z "$CSV" ]; then 
     mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
     mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
+else
+    mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
 fi
 
 
 #Correlation into DEM 
  
-if [ "$gpu" != 1 ]; then 
-    mm3d Malt UrbanMNE ".*.$EXTENSION" Ground_UTM UseGpu=0 EZA=1 DoOrtho=1 SzW=$win ZoomF=$ZoomF NbProc=$proc
+if [ -z "$gpu" ]; then 
+    	/home/ciaran/MicMacGPU/micmac/bin/mm3d Malt UrbanMNE ".*.$EXTENSION" Ground_UTM UseGpu=1 EZA=1 DoOrtho=1 SzW=$win ZoomF=$ZoomF NbProc=$proc
 else
-	/home/ciaran/MicMacGPU/micmac/bin/mm3d Malt UrbanMNE ".*.$EXTENSION" Ground_UTM UseGpu=1 EZA=1 DoOrtho=1 SzW=$win ZoomF=$ZoomF NbProc=$proc
+	mm3d Malt UrbanMNE ".*.$EXTENSION" Ground_UTM UseGpu=0 EZA=1 DoOrtho=1 SzW=$win ZoomF=$ZoomF NbProc=$proc
 fi
 
-if [ "$DEQ" != none ]; then 
-	mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 Out=Orthophotomosaic.tif DEq=$DEQ 
-else
-	mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 Out=Orthophotomosaic.tif DEq=1 
-fi
+#if [ -z "$DEQ" ]; then 
+	
+#else
+#	mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 Out=Orthophotomosaic.tif DEq=1 
+	
+#fi
 
 mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 DegRap=4
 
