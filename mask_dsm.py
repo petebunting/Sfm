@@ -200,15 +200,39 @@ parser.add_argument("-folder", "--fld", type=str, required=True,
 parser.add_argument("-n", "--cores", type=int, required=False, 
                     help="no of cpu jobs")
 
+parser.add_argument("-z", "--zoom", type=str, required=False, 
+                    help="zoom no eg 2")
+
+parser.add_argument("-m", "--mask", type=str, required=False, 
+                    help="mask no - you may need to look at a tile folder to find out which is the matching one")
+
+
 args = parser.parse_args() 
 
+# This conditional stuff is all a bit ugly but will do the job until I have time to do something better
 if args.cores is None:
     noJ=-1
 else:
     noJ = args.cores
 
-wildCard1 = '*tile*/*MEC-Malt/Z_Num7_DeZoom2_STD-MALT.tif'
-wildCard2 = '*tile*/*MEC-Malt/AutoMask_STD-MALT_Num_6.tif'
+if args.zoom is None:
+    zoomF='2'
+else:
+    zoomF = args.zoom
+    
+if args.mask is None:
+    maskN ='6'
+else:
+    maskN = args.mask
+    
+if int(zoomF) == 1:
+    extraNum='8'
+else:
+    extraNum='7'
+    
+    
+wildCard1 = "*tile*/*MEC-Malt/Z_Num"+extraNum+"_DeZoom"+zoomF +"_STD-MALT.tif"
+wildCard2 = "*tile*/*MEC-Malt/Masq_STD-MALT_DeZoom"+maskN+".tif"
 
 fileListIm = glob(os.path.join(args.fld, wildCard1))
 fileListMsk = glob(os.path.join(args.fld, wildCard2))
