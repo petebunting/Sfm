@@ -54,8 +54,10 @@ grd=6
 proc=16  
 win=2
 batch=4
-gp=true
+gpu=none
+sz=none
 csv=none
+
 
  
 while getopts "e:x:y:u:sz:spao:r:z:eq:g:gpu:b:w:prc:csv:h" opt; do  
@@ -175,26 +177,30 @@ echo "</SystemeCoord>                                                           
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
 # magick convert .*$EXTENSION -resize 50% .*$EXTENSION 
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-if [ -z "$CSV"  ]; then 
+if [  "$CSV" != none  ]; then 
+        echo "using csv file"  
+    cs=*.csv   
+    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1   
+else
     echo "using exif data"
     mm3d XifGps2Txt .*$EXTENSION
     #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
     mm3d XifGps2Xml .*$EXTENSION RAWGNSS
     mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
-else
-    echo "using csv file"  
-    cs=*.csv   
-    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
 fi 
+#Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
 
-if [ -z $size ]; then
+
+#Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
+if [  "$size" != none ]; then
     echo "resizing to $size for tie point detection"
-    mm3d Tapioca File FileImagesNeighbour.xml $size @SFS
+    mogrify -resize $size *.JPG
+    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 else
-    echo "using actual size of imgs"
-    mm3d Tapioca File FileImagesNeighbour.xml $size @SFS
+    echo "using a default re-size of 2000 long axis on imgs"
+    mogrify -resize 2000 *.JPG 
+    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 fi 
-
 
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1
 
@@ -213,7 +219,7 @@ mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
 
 
 #Change system to final cartographic system  
-if [ -z "$CSV" ]; then 
+if [ "$CSV" !=none ]; then 
     mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
     mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
 else
@@ -234,10 +240,12 @@ fi
 
 rm -rf DMatch DistributedMatching.xml DistGpu 
  
-if [ -z "$gpu" ]; then
-    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 SzW=$win EZA=1 NbProc=$proc ZoomF=2"
+if [ "$gp" != none ]; then
+    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 EZA=1 SzW=$win NbProc=$proc ZoomF=$ZoomF" 
+    
 else
-    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 EZA=1 SzW=$win NbProc=$proc ZoomF=2"   
+    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 SzW=$win EZA=1 NbProc=$proc ZoomF=$ZoomF"
+      
 fi
   
 

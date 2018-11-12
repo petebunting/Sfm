@@ -19,10 +19,12 @@ DEQ=1
 gpu=0
 Algorithm=MicMac  
 zreg=0.02
-
+size=none 
 prc=100
+gpu=none
+csv=none
  
-while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:proc:zr:h" opt; do
+while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:g:proc:zr:h" opt; do
   case $opt in
     h) 
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -139,30 +141,31 @@ echo "</SystemeCoord>                                                           
       
  
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
-# mogrify -resize 30% *.JPG
-# mogrify -resize 2000 *.JPG
+
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-if [ -z "$CSV"  ]; then 
+if [  "$CSV" != none  ]; then 
+        echo "using csv file"  
+    cs=*.csv   
+    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1   
+else
     echo "using exif data"
     mm3d XifGps2Txt .*$EXTENSION
     #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
     mm3d XifGps2Xml .*$EXTENSION RAWGNSS
     mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
-else
-    echo "using csv file"  
-    cs=*.csv   
-    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
 fi 
 #Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
 
 
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
-if [ -z $size ]; then
+if [  "$size" != none ]; then
     echo "resizing to $size for tie point detection"
-    mm3d Tapioca File FileImagesNeighbour.xml $size @SFS
+    mogrify -resize $size *.JPG
+    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 else
-    echo "using actual size of imgs"
-    mm3d Tapioca File FileImagesNeighbour.xml $size @SFS
+    echo "using a default re-size of 2000 long axis on imgs"
+    mogrify -resize 2000 *.JPG 
+    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 fi 
 
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1 VeryStrict=1
@@ -183,16 +186,16 @@ mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree
    
 #Visualize Ground_RTL orientation   
 
-mm3d AperiCloud .*$EXTENSION Ground_RTL SH=_mini
 
    
   
 #Change system to final cartographic system  
-if [ -z "$CSV" ]; then 
+if [ $CSV = 0 ]; then 
+    mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
+else
+
     mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
     mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
-else
-    mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
 fi
 #Print out a text file with the camera positions (for use in external software, e.g. GIS)
 
@@ -202,7 +205,7 @@ fi
  
  
 
-if [ -z "$gpu" ]; then
+if [ "$gpu" != none ]; then
     pims_subset.py -folder $PWD -algo $Algorithm -num $prc
 else
     mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF ZReg=$zreg SH=_mini  
@@ -210,7 +213,7 @@ fi
  
 
 
-mm3d Pims2MNT $Algorithm DoOrtho=1 
+mm3d Pims2MNT $Algorithm ZReg=$zreg
  
  
 

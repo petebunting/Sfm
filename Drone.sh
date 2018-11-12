@@ -16,6 +16,9 @@ DEQ=1
 obliqueFolder=none
 proc=16 
 win=2
+gpu=none
+sz=none
+csv=none
 
  
 while getopts "e:x:y:u:sz:r:z:eq:g:w:proc:csv:h" opt; do  
@@ -123,26 +126,29 @@ echo "</SystemeCoord>                                                           
 # mogrify -resize 30% *.JPG
 #mogrify -resize 2000 *.JPG
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-if [ -z "$CSV"  ]; then 
+if [  "$CSV" != none  ]; then 
+        echo "using csv file"  
+    cs=*.csv   
+    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1   
+else
     echo "using exif data"
     mm3d XifGps2Txt .*$EXTENSION
     #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
     mm3d XifGps2Xml .*$EXTENSION RAWGNSS
     mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
-else
-    echo "using csv file"  
-    cs=*.csv   
-    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
-fi  
- 
+fi 
+#Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
+
 
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
-if [ -z $size ]; then
+if [  "$size" != none ]; then
     echo "resizing to $size for tie point detection"
-    mm3d Tapioca File FileImagesNeighbour.xml $size @SFS
+    mogrify -resize $size *.JPG
+    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 else
-    echo "using actual size of imgs"
-    mm3d Tapioca File FileImagesNeighbour.xml $size @SFS
+    echo "using a default re-size of 2000 long axis on imgs"
+    mogrify -resize 2000 *.JPG 
+    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 fi 
 
 
@@ -167,7 +173,7 @@ mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree
 mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
 
 #Change system to final cartographic system  
-if [ -z "$CSV" ]; then 
+if [ "$CSV" ]; then 
     mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
     mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
 else
@@ -177,13 +183,13 @@ fi
 
 #Correlation into DEM 
  
-if [ -z "$gpu" ]; then 
+if [ "$gpu" ]; then 
     	/home/ciaran/MicMacGPU/micmac/bin/mm3d Malt UrbanMNE ".*.$EXTENSION" Ground_UTM UseGpu=1 EZA=1 DoOrtho=1 SzW=$win ZoomF=$ZoomF NbProc=$proc
 else
 	mm3d Malt UrbanMNE ".*.$EXTENSION" Ground_UTM UseGpu=0 EZA=1 DoOrtho=1 SzW=$win ZoomF=$ZoomF NbProc=$proc
 fi
 
-#if [ -z "$DEQ" ]; then 
+#if [ "$DEQ" ]; then 
 	
 #else
 #	mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 Out=Orthophotomosaic.tif DEq=1 
@@ -200,7 +206,6 @@ mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 DegRap=4
 #do      
 #gdal_edit.py -a_srs "+proj=utm +zone=30 +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; 
 #done
-
 
 
 
@@ -234,7 +239,6 @@ laststr="${lastDEM%.*}"
 corrstr="${lastcor%.*}"
 cp $laststr.tfw $corrstr.tfw
 cd ..
-
 
 mm3d ConvertIm Ortho-MEC-Malt/Orthophotomosaic.tif Out=OrthFinal.tif
 
