@@ -234,11 +234,16 @@ mkdir OUTPUT
 
 
 mm3d ConvertIm PIMs-TmpBasc/PIMs-Merged_Prof.tif Out=OUTPUT/DSM.tif
+
 cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/DSM.tfw
+cp PIMs-TmpBasc/PIMs-Merged_Prof.tif OUTPUT/DSM.tif
+cp PIMs-TmpBasc/PIMs-Merged_Masq.tif OUTPUT/Mask.tif
+cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/Mask.tfw
 
-gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
-  
+gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" DSM.tif
+gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Mask.tif
 
+mask_dsm.py -folder $PWD -pims 1 
 
 # OSSIM - BASED MOSAICING ----------------------------------------------------------------------------
 # Just here as an alternative for putting together tiles 

@@ -206,6 +206,9 @@ parser.add_argument("-z", "--zoom", type=str, required=False,
 parser.add_argument("-m", "--mask", type=str, required=False, 
                     help="mask no - you may need to look at a tile folder to find out which is the matching one")
 
+parser.add_argument("-pims", "--pms", type=bool, required=False, 
+                    help="if looking for output from DronePIMs")
+
 
 args = parser.parse_args() 
 
@@ -230,22 +233,26 @@ if int(zoomF) == 1:
 else:
     extraNum='7'
     
-    
-wildCard1 = "*tile*/*MEC-Malt/Z_Num"+extraNum+"_DeZoom"+zoomF +"_STD-MALT.tif"
-wildCard2 = "*tile*/*MEC-Malt/Masq_STD-MALT_DeZoom"+maskN+".tif"
+if args.pms is True:
+    wildCard1 = "OUTPUT/DSM.tif"
+    wildCard2 = "OUTPUT/Mask.tif"
+    mask_raster_multi(wildCard1, mval=1, mask=wildCard2)
+else:         
+    wildCard1 = "*tile*/*MEC-Malt/Z_Num"+extraNum+"_DeZoom"+zoomF +"_STD-MALT.tif"
+    wildCard2 = "*tile*/*MEC-Malt/Masq_STD-MALT_DeZoom"+maskN+".tif"
 
-fileListIm = glob(os.path.join(args.fld, wildCard1))
-fileListMsk = glob(os.path.join(args.fld, wildCard2))
+    fileListIm = glob(os.path.join(args.fld, wildCard1))
+    fileListMsk = glob(os.path.join(args.fld, wildCard2))
 
-fileListIm.sort()
-fileListMsk.sort()
+    fileListIm.sort()
+    fileListMsk.sort()
 
 
-finalList = list(zip(fileListIm, fileListMsk))
+    finalList = list(zip(fileListIm, fileListMsk))
 
-Parallel(n_jobs=noJ,
-         verbose=3)(delayed(mask_raster_multi)(f[0],
-                   mask=f[1]) for f in finalList)
+    Parallel(n_jobs=noJ,
+             verbose=3)(delayed(mask_raster_multi)(f[0],
+                       mask=f[1]) for f in finalList)
 
 
 
