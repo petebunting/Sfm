@@ -147,6 +147,7 @@ if [  "$CSV" != none  ]; then
         echo "using csv file"  
     cs=*.csv   
     mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1   
+    SysCort_make.py(cs)
 else
     echo "using exif data"
     mm3d XifGps2Txt .*$EXTENSION
