@@ -225,16 +225,19 @@ mm3d Pims2MNT $Algorithm ZReg=$zreg
 #else
 ##	mm3d Tawny Ortho-MEC-Malt DEq=1
 #fi
-#mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 DegRap=4 Out=Orthophotomosaic.tif
-
-#Making OUTPUT folder
-mkdir OUTPUT
- 
 
 # When images are large they will be tiled 
 
+mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif
 
-mm3d ConvertIm PIMs-TmpBasc/PIMs-Merged_Prof.tif Out=OUTPUT/DSM.tif
+#Making OUTPUT folder
+mkdir OUTPUT
+
+mm3d ConvertIm PIMs-ORThO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
+cp PIMs-ORThO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
+
+# need if else for this 
+#mm3d ConvertIm PIMs-TmpBasc/PIMs-Merged_Prof.tif Out=OUTPUT/DSM.tif
 
 cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/DSM.tfw
 cp PIMs-TmpBasc/PIMs-Merged_Prof.tif OUTPUT/DSM.tif
@@ -249,31 +252,22 @@ mask_dsm.py -folder $PWD -pims 1
 # OSSIM - BASED MOSAICING ----------------------------------------------------------------------------
 # Just here as an alternative for putting together tiles 
 # This need GNU parallel
-# gdalwarp -overwrite -s_srs "+proj=utm +zone=30 +north +ellps=WGS84+datum=WGS84 +units=m +no_defs" -t_srs EPSG:32360 -srcnodata 0 -dstnodata 0 *Ort**.tif
  
-#for f in *.tif; 
+#for f in PIMs-ORTHO/*Ort_**.tif; 
 #do      
-#gdal_edit.py -a_srs "+proj=utm +zone=30 +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; 
+# gdal_edit.py -a_srs "+proj=utm +zone=30 +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; 
 #done
 
-#find *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif | parallel "gdal_edit.py -a_srs "+proj=utm +zone==$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" {}" 
  
 # Create some image histograms for ossim  
-#ossim-create-histo -i *Ort**.tif;
+#
+#find PIMs-ORTHO/*Ort**.tif | parallel "ossim-create-histo -i {}" 
 
-# Basic ortho with ossim is:
-#ossim-orthoigen *Ort**.tif mosaic_plain.tif;
-
-#ossim-orthoigen --combiner-type ossimFeatherMosaic *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif feather.tif
+#ossim-orthoigen --combiner-type ossimMaxMosaic PIMs-ORTHO/**Ort**.tif OUTPUT/max.tif
 # Or more options
 
 #choices
 #ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic 
 
-
-
-
-#gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMs-ORTHO/OrthFinal.tif OUTPUT/OrthoImage_geotif.tif
-#gdal_translate -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" PIMs-Tmp-Basc/PIMs-Merged_Prof.tif OUTPUT/DEM_geotif.tif
 
 
