@@ -34,7 +34,7 @@
 # Contains elements of L.Girod script - thanks 
 
 # example:
-# ./gpymicmac.sh -e JPG -u "30 +north" -g 6 -w 2 -prc 4 -b 4
+# ./gpymicmac.sh -e JPG -u "30 +north" -g 6 -w 2 -prc 4 -gpu 1 -b 4
 
 
  
@@ -51,8 +51,8 @@ ZoomF=1
 DEQ=1
 obliqueFolder=none
 grd=6 
-proc=16  
-win=2
+proc=1  
+win=1
 batch=4
 gpu=none
 sz=none
@@ -212,18 +212,24 @@ mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 
 #This tends to screw things up - not required 
 #Bundle adjust using both camera positions and tie points (number in EmGPS option is the quality estimate of the GNSS data in meters)
-mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
+
 
 #Visualize Ground_RTL orientation
-mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
 
 
 #Change system to final cartographic system  
-if [ "$CSV" !=none ]; then 
+if [ $CSV != none ]; then 
+    mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_UTM EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
+    # For reasons unknown this screws it up from csv
+    #mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
+    mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
+
+else
+    mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
     mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
     mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
-else
-    mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
+    mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
+
 fi
 
 
