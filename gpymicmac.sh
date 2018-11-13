@@ -56,7 +56,7 @@ win=1
 batch=4
 gpu=none
 sz=none
-csv=none
+CSV=none
 
 
  

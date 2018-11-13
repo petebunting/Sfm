@@ -22,7 +22,7 @@ zreg=0.02
 size=none 
 prc=100
 gpu=none
-csv=none
+CSV=none
  
 while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:g:proc:zr:h" opt; do
   case $opt in

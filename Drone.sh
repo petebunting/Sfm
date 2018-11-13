@@ -18,7 +18,7 @@ proc=16
 win=2
 gpu=none
 sz=none
-csv=none
+CSV=none
 
  
 while getopts "e:x:y:u:sz:r:z:eq:g:w:proc:csv:h" opt; do  
