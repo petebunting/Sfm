@@ -208,7 +208,35 @@ fi
  
 
 if [ "$gpu" != none ]; then
+
+    # The only thing I wonder here is whether it is worth building the whole 'master'
+    # PIMs folder and simply moving the Ortho part for later (this still involves
+    # repetition of the PIMs2Mnt though
     pims_subset.py -folder $PWD -algo $Algorithm -num $prc
+    mkdir OUTPUT    
+
+    #mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
+    #cp PIMs-ORTHO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
+    cd PIMsBatch
+    for f in *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif; do 
+        gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
+    
+    find *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}"
+    
+    ossim-orthoigen --combiner-type ossimMaxMosaic *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif max.tif
+ 
+    # need if else for this  
+    #mm3d ConvertIm PIMs-TmpBasc/PIMs-Merged_Prof.tif Out=OUTPUT/DSM.tif
+
+    #cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/DSM.tfw
+    #cp PIMs-TmpBasc/PIMs-Merged_Prof.tif OUTPUT/DSM.tif
+    #cp PIMs-TmpBasc/PIMs-Merged_Masq.tif OUTPUT/Mask.tif
+    #cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/Mask.tfw
+
+    #gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" DSM.tif
+    #gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Mask.tif
+
+    #mask_dsm.py -folder $PWD -pims 1 
 else
     mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF ZReg=$zreg SH=_mini  
 fi 
