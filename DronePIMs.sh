@@ -223,7 +223,8 @@ if [ "$gpu" != none ]; then
     
     find *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}"
     
-    ossim-orthoigen --combiner-type ossimMaxMosaic *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif max.tif
+    ossim-orthoigen --combiner-type ossimFeatherMosaic *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif feather.tif
+
  
     # need if else for this  
     #mm3d ConvertIm PIMs-TmpBasc/PIMs-Merged_Prof.tif Out=OUTPUT/DSM.tif

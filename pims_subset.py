@@ -146,7 +146,7 @@ for subList in txtList:
     mnt = ['mm3d', 'PIMs2MNT', 'Forest', 'DoOrtho=1', zregu]
     call(mnt)
   
-    tawny = ['mm3d', 'Tawny', 'PIMs-ORTHO/', 'RadiomEgal=1',
+    tawny = ['mm3d', 'Tawny', 'PIMs-ORTHO/', 'RadiomEgal=1', 'DegRap=4',
              'Out=Orthophotomosaic.tif']
     call(tawny)
     

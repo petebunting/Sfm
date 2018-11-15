@@ -27,7 +27,9 @@ See MicMac install instructions here:
 
 https://micmac.ensg.eu/index.php/Install
 
-I have found it is best to install MicMac wthout the GPU as my main install and add it to the path. Then I install
+I have found it is best to install MicMac wthout the GPU as my main install and add it to the path 
+
+Then I install a separate micmac with GPU support and add it as a variable in shell scripts or the absoulute path when needed
 
 Install my fork of pymicmac which has bits modified for the gpymicmac script
 
