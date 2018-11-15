@@ -69,6 +69,11 @@ if args.algotype is None:
 else:
     algo = args.algotype
 
+if args.num is None:
+    numChunks = '3,3'
+else:       
+    numChunks = args.noCh
+
 if args.zrg is None:
    zregu='ZReg=0.01'
 else:
@@ -77,8 +82,7 @@ if args.zmF is None:
    zoomF='ZoomF=2'
 else:
     zoomF = 'ZoomF='+args.zmF
-                            
-numChunks = args.noCh
+                        
 #maxIm = args.noIm2
 
 #fld = args.fld

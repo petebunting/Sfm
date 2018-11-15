@@ -2,7 +2,7 @@
 # Modified from the original L.Girod script
 
 # example:
-# ./DronePIMs.sh -e JPG -a Forest -u "30 +north" -r 0.1
+# ./DronePIMs.sh -e JPG -a Forest -u "30 +north" -csv 1 -g 1 zreg = 0.01
 
 # Important NOTE - MicMac CPU based is FAR quicker than using the GPU, as it's memory management limits GPU processing to small chunks
  
@@ -17,10 +17,10 @@ resol_set=false
 ZoomF=2  
 DEQ=1
 gpu=0
-Algorithm=MicMac  
+Algorithm=Forest  
 zreg=0.01
 size=none 
-prc=100
+prc=3,3
 gpu=none
 CSV=none
  
@@ -138,7 +138,7 @@ echo "            <AuxStr>  +proj=utm +zone="$UTM "+ellps=WGS84 +datum=WGS84 +un
 echo "                                                                                                            " >> SysUTM.xml
 echo "         </BSC>                                                                                             " >> SysUTM.xml
 echo "</SystemeCoord>                                                                                             " >> SysUTM.xml
-      
+       
  
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
 
@@ -186,7 +186,7 @@ mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
    
 #Visualize Ground_RTL orientation   
 
-
+ 
    
 #  
 #Change system to final cartographic system  
