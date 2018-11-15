@@ -21,6 +21,7 @@ pims_subset.py -folder $PWD -algo MicMac -num 20
 import argparse
 from subprocess import call
 from glob2 import glob
+import os
 from os import path, mkdir, remove
 import shutil
 parser = argparse.ArgumentParser()
@@ -97,12 +98,14 @@ DMatch = path.join(args.fld, 'DMatch')
 bFolder = path.join(args.fld, 'PIMsBatch')
 distMatch = path.join(args.fld, 'DistributedMatching.xml')
 
-try:
-    remove(DMatch)
-    remove(distMatch)
-    remove(bFolder)
-except OSError:
-    pass
+binList = [DMatch, bFolder, distMatch]
+
+for crap in binList:
+    try:       
+        remove(crap)
+        
+    except OSError:
+        pass
 
 mkdir(bFolder)
 # run tiling
@@ -118,8 +121,8 @@ call(pymicmac)
 #
 txtList = glob(path.join(DMatch,'*.list'))
 
-
-for index, subList in enumerate(txtList):
+# Some very ugly stuff going on in here
+for subList in txtList:
     flStr = open(subList).read()
     flStr.replace("\n", "|")
     sub = flStr.replace("\n", "|")
@@ -128,13 +131,28 @@ for index, subList in enumerate(txtList):
             "SzW=1",
             "UseGpu=1", zoomF, zregu, 'SH=_mini']
     call(mm3d)
-    shutil.move('PIMsForest', path.join(bFolder, subList))
-    mnt = ['mm3d', 'PIMs2MNT', subList, 'DoOrtho=1', zregu]
+    pmsDir = path.join(args.fld,'PIMs-Forest')
+    
+    hd, tl = path.split(subList)
+    subDir = path.join(bFolder, tl)
+    mkdir(subDir)
+    mnt = ['mm3d', 'PIMs2MNT', 'Forest', 'DoOrtho=1', zregu]
     call(mnt)
-    
-    tawny = ['mm3d', 'Tawny', subList+'/PIMs-ORTHO/', 'RadiomEgal=1',
+  
+    tawny = ['mm3d', 'Tawny', 'PIMs-ORTHO/', 'RadiomEgal=1',
              'Out=Orthophotomosaic.tif']
-    print('the img subset is \n'+sub+'\n\n')  
-    
     call(tawny)
+    
+    # sooooo ugly I am getting very lazy
+    newPIMs = path.join(subDir, 'PIMs-Forest')
+    newBasc = path.join(subDir, 'PIMs-TmpBasc')
+    newOrtho = path.join(subDir, 'PIMs-ORTHO')
+    newTmpM = path.join(subDir, 'PIMs-TmpMnt')
+    newTmpMO = path.join(subDir, 'PIMs-TmpMntOrtho')
+    mvList = [newPIMs, newBasc, newOrtho, newTmpM, newTmpMO]
+    
+    shutil.move([f for f in mvList]) 
+    
+    print('the img subset is \n'+sub+'\n\n')  
+
 
