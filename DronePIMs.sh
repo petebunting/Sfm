@@ -233,9 +233,11 @@ mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif
 #Making OUTPUT folder
 mkdir OUTPUT
 
-mm3d ConvertIm PIMs-ORThO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
-cp PIMs-ORThO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
+mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
+cp PIMs-ORTHO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
+gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" OUTPUT/OrthFinal.tif
 
+ 
 # need if else for this 
 #mm3d ConvertIm PIMs-TmpBasc/PIMs-Merged_Prof.tif Out=OUTPUT/DSM.tif
 
@@ -262,6 +264,7 @@ mask_dsm.py -folder $PWD -pims 1
 # Create some image histograms for ossim  
 #
 #find PIMs-ORTHO/*Ort**.tif | parallel "ossim-create-histo -i {}" 
+ 
 
 #ossim-orthoigen --combiner-type ossimMaxMosaic PIMs-ORTHO/**Ort**.tif OUTPUT/max.tif
 # Or more options

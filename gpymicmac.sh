@@ -248,10 +248,10 @@ fi
 rm -rf DMatch DistributedMatching.xml DistGpu 
  
 if [ "$gp" != none ]; then
-    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 EZA=1 SzW=$win NbProc=$proc ZoomF=$ZoomF" 
+    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd -t Homol_mini --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 Regul=0.02 EZA=1 SzW=$win NbProc=$proc ZoomF=$ZoomF" 
     
 else
-    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd --maltOptions "DefCor=0 DoOrtho=1 SzW=$win EZA=1 NbProc=$proc ZoomF=$ZoomF"
+    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd -t Homol_mini --maltOptions "DefCor=0 DoOrtho=1 SzW=$win Regul=0.02 EZA=1 NbProc=$proc ZoomF=$ZoomF"
       
 fi
   
@@ -267,7 +267,7 @@ echo "geo-reffing Orthos"
 for f in *tile*/*Ortho-MEC-Malt/*Mosaic*.tif; do
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
 done 
- 
+  
 # this works 
 find *tile*/*Ortho-MEC-Malt/*Mosaic*.tif | parallel "ossim-create-histo -i {}" 
  
@@ -277,8 +277,9 @@ ossim-orthoigen --combiner-type ossimMaxMosaic  *tile*/*Ortho-MEC-Malt/*Mosaic*.
 #--writer-prop threads=20 
 #choices
 #ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic 
-#tfw is :
 
+# Just background info here
+#tfw is :
 #5.000000000000	(size of pixel in x direction)
 #0.000000000000	(rotation term for row)
 #0.000000000000	(rotation term for column) 

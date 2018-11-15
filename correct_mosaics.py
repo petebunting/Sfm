@@ -37,18 +37,22 @@ folder = args.fld
 
 fileList = glob(os.path.join(folder,wildCard))
 #fileList2 = glob(os.path.join(folder,wildCard2))
-procList=[]
+length = str(len(fileList))
+print('found '+length+' tiles to fix')
+
+
 
 print('correcting orthomosaics')
 for file in fileList:
     fld, fle = os.path.split(file)
-    oPath = os.path.join(fld, 'Orthophotomosaic.tif')
+    oPath = glob(os.path.join(fld,'*Mosaic*.tif'))
+    oPath = os.path.join(fld,'Mosaic*.tif')
     oPath2 = os.path.join(fld, 'OrthFinal.tif')
     cmd=['mm3d', 'ConvertIm', oPath, 'Out='+oPath2]
     subprocess.call(cmd)
     os.remove(oPath) 
     os.rename(oPath2, oPath)
-    
+print(str(fileList)+' corrected to single file' )    
 #print('correcting DSMs')
 #for file in fileList2:
 #    fld, fle = os.path.split(file)
