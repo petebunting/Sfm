@@ -94,6 +94,9 @@ numChunks = args.noCh
 
 # Use pymicmac tiling to define the pims groups
 # first get rid of previous
+
+
+
 DMatch = path.join(args.fld, 'DMatch')
 bFolder = path.join(args.fld, 'PIMsBatch')
 distMatch = path.join(args.fld, 'DistributedMatching.xml')
@@ -117,7 +120,11 @@ pymicmac = ['micmac-distmatching-create-config', '-i', 'Ori-Ground_UTM', '-e',
 call(pymicmac)
 
 
-
+origList = [path.join(args.fld, 'PIMs-Forest'), 
+            path.join(args.fld, 'PIMs-TmpBasc'),
+            path.join(args.fld, 'PIMs-ORTHO'),
+            path.join(args.fld, 'PIMs-TmpMnt'),
+            path.join(args.fld, 'PIMs-TmpMntOrtho')]
 #
 txtList = glob(path.join(DMatch,'*.list'))
 
@@ -150,8 +157,8 @@ for subList in txtList:
     newTmpM = path.join(subDir, 'PIMs-TmpMnt')
     newTmpMO = path.join(subDir, 'PIMs-TmpMntOrtho')
     mvList = [newPIMs, newBasc, newOrtho, newTmpM, newTmpMO]
-    
-    shutil.move([f for f in mvList]) 
+    toGo = list(zip(origList, mvList))
+    [shutil.move(f[0], f[1]) for f in toGo] 
     
     print('the img subset is \n'+sub+'\n\n')  
 
