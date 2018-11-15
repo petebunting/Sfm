@@ -18,7 +18,7 @@ ZoomF=2
 DEQ=1
 gpu=0
 Algorithm=MicMac  
-zreg=0.02
+zreg=0.01
 size=none 
 prc=100
 gpu=none
@@ -212,7 +212,7 @@ if [ "$gpu" != none ]; then
     # The only thing I wonder here is whether it is worth building the whole 'master'
     # PIMs folder and simply moving the Ortho part for later (this still involves
     # repetition of the PIMs2Mnt though
-    pims_subset.py -folder $PWD -algo $Algorithm -num $prc
+    pims_subset.py -folder $PWD -algo $Algorithm -num $prc -zrg $zreg
     mkdir OUTPUT    
 
     #mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
@@ -224,7 +224,10 @@ if [ "$gpu" != none ]; then
     find *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}"
     
     ossim-orthoigen --combiner-type ossimFeatherMosaic *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif feather.tif
-
+    
+    echo 'Everything done - take a look!' 
+    return
+    
  
     # need if else for this  
     #mm3d ConvertIm PIMs-TmpBasc/PIMs-Merged_Prof.tif Out=OUTPUT/DSM.tif
