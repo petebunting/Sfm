@@ -148,7 +148,7 @@ if [  "$CSV" != none  ]; then
     cs=*.csv
     mm3d SetExif .*$EXTENSION F35=45 F=30 Cam=ILCE-6000
     mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1   
-    SysCort_make.py($cs)
+    sysCort_make.py -csv $cs
 else 
     echo "using exif data"
     mm3d XifGps2Txt .*$EXTENSION
