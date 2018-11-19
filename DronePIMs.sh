@@ -2,7 +2,7 @@
 # Modified from the original L.Girod script
 
 # example:
-# ./DronePIMs.sh -e JPG -a Forest -u "30 +north" -csv 1 -g 1 zreg = 0.01
+# ./DronePIMs.sh -e JPG -a Forest -u "30 +north" -csv 1 -g 1 zreg = 0.03 -t 1 -proc 2,2
 
 # Important NOTE - MicMac CPU based is FAR quicker than using the GPU, as it's memory management limits GPU processing to small chunks
  
@@ -21,10 +21,10 @@ Algorithm=Forest
 zreg=0.01
 size=none 
 prc=3,3
-gpu=none
-CSV=none
+gpu=1
+CSV=1
  
-while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:g:proc:zr:h" opt; do
+while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:g:proc:zr:t:h" opt; do
   case $opt in
     h) 
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -102,6 +102,9 @@ while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:g:proc:zr:h" opt; do
     zr)
       zreg=$OPTARG
       ;;
+    t)
+      tile=$OPTARG
+      ;;
     \?)
       echo "DronePIMs.sh: Invalid option: -$OPTARG" >&1
       exit 1
@@ -146,9 +149,9 @@ echo "</SystemeCoord>                                                           
 if [  "$CSV" != none  ]; then 
     echo "using csv file"
     cs=*.csv
-    mm3d SetExif .*$EXTENSION F35=45 F=30 Cam=ILCE-6000
+    mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
     mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1   
-    sysCort_make.py -csv $cs
+    sysCort_make.py -csv $cs 
 else 
     echo "using exif data"
     mm3d XifGps2Txt .*$EXTENSION
@@ -207,72 +210,89 @@ fi
 # Important NOTE
  
  
-
-if [ "$gpu" != none ]; then
-
-    # The only thing I wonder here is whether it is worth building the whole 'master'
-    # PIMs folder and simply moving the Ortho part for later (this still involves
-    # repetition of the PIMs2Mnt though
-    pims_subset.py -folder $PWD -algo $Algorithm -num $prc -zrg $zreg
-    mkdir OUTPUT    
-
-    #mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
-    #cp PIMs-ORTHO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
-    cd PIMsBatch
-    for f in *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif; do 
-        gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
+if [ "$tile" != none ]; then
     
-    find *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}"
+    if [ "$gpu" != none ]; then
     
-    ossim-orthoigen --combiner-type ossimFeatherMosaic *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif feather.tif
+        # The only thing I wonder here is whether it is worth building the whole 'master'
+         # PIMs folder and simply moving the Ortho part for later (this still involves
+        # repetition of the PIMs2Mnt though
+        pims_subset.py -folder $PWD -algo $Algorithm -num $prc -zr $zreg -g 1
+        mkdir OUTPUT    
     
-    echo 'Everything done - take a look!' 
-    return
+        #mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
+        #cp PIMs-ORTHO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
+        cd PIMsBatch
+        for f in *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif; do 
+            gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
+        
+        find *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}"
+        
+        ossim-orthoigen --combiner-type ossimFeatherMosaic *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif feather.tif
+        
+        echo 'Everything done - take a look!' 
+        return
+        
+     
+        # need if else for this  
+        #mm3d ConvertIm PIMs-TmpBasc/PIMs-Merged_Prof.tif Out=OUTPUT/DSM.tif
     
- 
-    # need if else for this  
-    #mm3d ConvertIm PIMs-TmpBasc/PIMs-Merged_Prof.tif Out=OUTPUT/DSM.tif
-
-    #cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/DSM.tfw
-    #cp PIMs-TmpBasc/PIMs-Merged_Prof.tif OUTPUT/DSM.tif
-    #cp PIMs-TmpBasc/PIMs-Merged_Masq.tif OUTPUT/Mask.tif
-    #cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/Mask.tfw
-
-    #gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" DSM.tif
-    #gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Mask.tif
-
-    #mask_dsm.py -folder $PWD -pims 1 
+        #cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/DSM.tfw
+        #cp PIMs-TmpBasc/PIMs-Merged_Prof.tif OUTPUT/DSM.tif
+        #cp PIMs-TmpBasc/PIMs-Merged_Masq.tif OUTPUT/Mask.tif
+        #cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/Mask.tfw
+    
+        #gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" DSM.tif
+        #gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Mask.tif
+    
+        #mask_dsm.py -folder $PWD -pims 1 
+    else 
+        pims_subset.py -folder $PWD -algo $Algorithm -num $prc -zr $zreg 
+        
+        mkdir OUTPUT    
+    
+        #mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
+        #cp PIMs-ORTHO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
+        cd PIMsBatch
+        for f in *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif; do 
+            gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
+        
+        find *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}"
+        
+        ossim-orthoigen --combiner-type ossimFeatherMosaic *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif feather.tif
+        
+        echo 'Everything done - take a look!' 
+       return
+    fi
 else
-    mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF ZReg=$zreg SH=_mini  
-fi 
- 
 
+mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF ZReg=$zreg SH=_mini  
 
 mm3d Pims2MNT $Algorithm ZReg=$zreg
- 
- 
+	 
+	 
 
-#source deactivate pymicmac;
-#if [ "$DEQ" != none ]; then 
-#	mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
-#else
-##	mm3d Tawny Ortho-MEC-Malt DEq=1
-#fi
+	#source deactivate pymicmac;
+	#if [ "$DEQ" != none ]; then 
+	#	mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
+	#else
+	##	mm3d Tawny Ortho-MEC-Malt DEq=1
+	#fi
 
-# When images are large they will be tiled 
+	# When images are large they will be tiled 
 
 mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif
 
-#Making OUTPUT folder
-mkdir OUTPUT
+	#Making OUTPUT folder
+    #mkdir OUTPUT
 
 mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
-cp PIMs-ORTHO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
-gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" OUTPUT/OrthFinal.tif
+    #cp PIMs-ORTHO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
+    #gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" OUTPUT/OrthFinal.tif
 
- 
-# need if else for this 
-#mm3d ConvertIm PIMs-TmpBasc/PIMs-Merged_Prof.tif Out=OUTPUT/DSM.tif
+	 
+	# need if else for this 
+	#mm3d ConvertIm PIMs-TmpBasc/PIMs-Merged_Prof.tif Out=OUTPUT/DSM.tif
 
 cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/DSM.tfw
 cp PIMs-TmpBasc/PIMs-Merged_Prof.tif OUTPUT/DSM.tif
@@ -282,8 +302,8 @@ cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/Mask.tfw
 gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" DSM.tif
 gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Mask.tif
 
-mask_dsm.py -folder $PWD -pims 1 
-
+fi 
+    #mask_dsm.py -folder $PWD -pims 1 
 # OSSIM - BASED MOSAICING ----------------------------------------------------------------------------
 # Just here as an alternative for putting together tiles 
 # This need GNU parallel

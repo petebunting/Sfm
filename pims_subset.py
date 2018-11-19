@@ -5,15 +5,15 @@ Created on Tue May 29 16:20:58 2018
 
 @author: ciaran
 
-This scripts calls the MicMac PIMs function in chunks to ensure GPU memory is not overloaded
+This scripts calls the MicMac PIMs function in chunks for large datasets - gpu use is optional
 
 Tends to overload 11gb GPU with around 30 images+
 
-This takes advantage of the fact it all gets written to the PIMs folder without overwrite
+This uses pymicmac functionality to tile the datset into a grid then processes in sequence
 
 Usage: 
     
-pims_subset.py -folder $PWD -algo MicMac -num 20
+pims_subset.py -folder $PWD -algo MicMac -num 20 -zr 0.02 -g 1 
 
 """
 
@@ -21,9 +21,8 @@ pims_subset.py -folder $PWD -algo MicMac -num 20
 import argparse
 from subprocess import call
 from glob2 import glob
-import os
 from os import path, mkdir, remove
-import shutil
+from shutil import rmtree, move
 parser = argparse.ArgumentParser()
 
 parser.add_argument("-folder", "--fld", type=str, required=True, 
@@ -42,34 +41,24 @@ parser.add_argument("-zr", "--zrg", type=str, required=False,
                     help="z reg term context dependent")
 
 parser.add_argument("-ori", "--oRI", type=str, required=False, 
-                    help="z reg term context dependent")
+                    help="ori folder if not the default name of Ground_UTM")
 
+parser.add_argument("-g", "--gp", type=bool, required=False, 
+                    help="gpu use yes or no")
 
 args = parser.parse_args() 
 
-if args.algotype is None:
-   algo= "Ground_UTM"
+if args.oRI is None:
+   gOri= "Ground_UTM"
 else:
     gOri = args.oRI
 
-
-def chunkIt(seq, num):
-    avg = len(seq) / float(num)
-    out = []
-    last = 0.0
-
-    while last < len(seq):
-        out.append(seq[int(last):int(last + avg)])
-        last += avg
-    return out
-
-
 if args.algotype is None:
-   algo= "MicMac"
+   algo= "BigMac"
 else:
     algo = args.algotype
 
-if args.num is None:
+if args.noCh is None:
     numChunks = '3,3'
 else:       
     numChunks = args.noCh
@@ -78,10 +67,17 @@ if args.zrg is None:
    zregu='ZReg=0.01'
 else:
     zregu = 'ZReg='+args.zrg
+    
 if args.zmF is None:
    zoomF='ZoomF=2'
 else:
     zoomF = 'ZoomF='+args.zmF
+    
+if args.gp is None:
+    mmgpu = 'mm3d'
+else:
+    mmgpu = '/home/ciaran/MicMacGPU/micmac/bin/mm3d'
+
                         
 #maxIm = args.noIm2
 
@@ -105,18 +101,23 @@ DMatch = path.join(args.fld, 'DMatch')
 bFolder = path.join(args.fld, 'PIMsBatch')
 distMatch = path.join(args.fld, 'DistributedMatching.xml')
 
-binList = [DMatch, bFolder, distMatch]
+binList = [DMatch, bFolder]
 
 for crap in binList:
     try:       
-        remove(crap)
+        rmtree(crap)
         
     except OSError:
         pass
 
+try:
+    remove(distMatch)
+except OSError:
+        pass
+
 mkdir(bFolder)
 # run tiling
-pymicmac = ['micmac-distmatching-create-config', '-i', 'Ori-Ground_UTM', '-e',
+pymicmac = ['micmac-distmatching-create-config', '-i', 'Ori-'+gOri, '-e',
             'JPG', '-o', 'DistributedMatching.xml', '-f', 'DMatch', '-n',
             numChunks, '--maltOptions', 
             "DefCor=0 DoOrtho=1 UseGpu=1 SzW=1 NbProc=8 ZoomF=2"]
@@ -132,13 +133,14 @@ origList = [path.join(args.fld, 'PIMs-Forest'),
 #
 txtList = glob(path.join(DMatch,'*.list'))
 
+
 # Some very ugly stuff going on in here
 for subList in txtList:
     flStr = open(subList).read()
     flStr.replace("\n", "|")
     sub = flStr.replace("\n", "|")
                    
-    mm3d = ['mm3d', "PIMs", algo,'"'+sub+'"', gOri, "DefCor=0",
+    mm3d = [mmgpu, "PIMs", algo,'"'+sub+'"', gOri, "DefCor=0",
             "SzW=1",
             "UseGpu=1", zoomF, zregu, 'SH=_mini']
     call(mm3d)
@@ -162,7 +164,7 @@ for subList in txtList:
     newTmpMO = path.join(subDir, 'PIMs-TmpMntOrtho')
     mvList = [newPIMs, newBasc, newOrtho, newTmpM, newTmpMO]
     toGo = list(zip(origList, mvList))
-    [shutil.move(f[0], f[1]) for f in toGo] 
+    [move(f[0], f[1]) for f in toGo] 
     
     print('the img subset is \n'+sub+'\n\n')  
 
