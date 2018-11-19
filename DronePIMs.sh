@@ -120,14 +120,13 @@ if [ "$utm_set" = false ]; then
 	exit 1
 fi
 
-if [ "$gpu" = false ]; then
-	echo "Using CPU only"
+if [ "$gpu" != none ]; then
+	echo "Using GPU support"
+else
+ echo "Using CPU only"
 fi
-if [ "$gpu" = true ]; then
-	echo "Using GPU support" 
-fi 
  
-echo "Using $Algorithm for PIMs dense matching"  
+echo "Using $Algorithm algorithm for PIMs dense matching"  
 
 #create UTM file (after deleting any existing one)
 rm SysUTM.xml
@@ -232,18 +231,6 @@ if [ "$tile" != none ]; then
         
         echo 'Everything done - take a look!' 
         return
-        
-     
-        # need if else for this  
-        #mm3d ConvertIm PIMs-TmpBasc/PIMs-Merged_Prof.tif Out=OUTPUT/DSM.tif
-    
-        #cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/DSM.tfw
-        #cp PIMs-TmpBasc/PIMs-Merged_Prof.tif OUTPUT/DSM.tif
-        #cp PIMs-TmpBasc/PIMs-Merged_Masq.tif OUTPUT/Mask.tif
-        #cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/Mask.tfw
-    
-        #gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" DSM.tif
-        #gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Mask.tif
     
         #mask_dsm.py -folder $PWD -pims 1 
     else 
