@@ -180,12 +180,12 @@ mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
 
 #Visualize relative orientation, if apericloud is not working, run  
 
-mm3d AperiCloud .*$EXTENSION Arbitrary  
+
 	
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 
 # Either this or the next stage is ruining stuff
-
+# Arbitrary  
    
 #Visualize Ground_RTL orientation   
 
@@ -195,8 +195,10 @@ mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 #Change system to final cartographic system  
 if [ $CSV != none ]; then 
     mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_UTM EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
-    # For reasons unknown this screws it up from csv
-    #mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
+    mm3d AperiCloud .*$EXTENSION Ground_UTM WithCam=0 Out=Ground.ply
+    # Unfortunately this doesn't handle carto system
+    #mm3d mm3d SaisieMasqQT Ground.ply 
+
 else
     mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
     mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM

@@ -13,7 +13,7 @@ This uses pymicmac functionality to tile the datset into a grid then processes i
 
 Usage: 
     
-pims_subset.py -folder $PWD -algo MicMac -num 20 -zr 0.02 -g 1 
+pims_subset.py -folder $PWD -algo MicMac -num 3,3 -zr 0.02 -g 1 
 
 """
 
@@ -81,7 +81,7 @@ else:
                         
 #maxIm = args.noIm2
 
-#fld = args.fld
+fld = args.fld
 
 #imList = glob(path.join(fld, '*.JPG'))
 
@@ -89,13 +89,6 @@ else:
 
 #sections = chunkIt(imList, numChunks)
 #subList = imList[minIm:maxIm]
-
-#mm3dpth = '/home/ciaran/MicMacGPU/micmac/bin/mm3d'
-
-# Use pymicmac tiling to define the pims groups
-# first get rid of previous
-
-
 
 DMatch = path.join(args.fld, 'DMatch')
 bFolder = path.join(args.fld, 'PIMsBatch')
@@ -125,11 +118,11 @@ pymicmac = ['micmac-distmatching-create-config', '-i', 'Ori-'+gOri, '-e',
 call(pymicmac)
 
 
-origList = [path.join(args.fld, 'PIMs-Forest'), 
-            path.join(args.fld, 'PIMs-TmpBasc'),
-            path.join(args.fld, 'PIMs-ORTHO'),
-            path.join(args.fld, 'PIMs-TmpMnt'),
-            path.join(args.fld, 'PIMs-TmpMntOrtho')]
+origList = [path.join(fld, 'PIMs-'+algo), 
+            path.join(fld, 'PIMs-TmpBasc'),
+            path.join(fld, 'PIMs-ORTHO'),
+            path.join(fld, 'PIMs-TmpMnt'),
+            path.join(fld, 'PIMs-TmpMntOrtho')]
 #
 txtList = glob(path.join(DMatch,'*.list'))
 
@@ -144,12 +137,12 @@ for subList in txtList:
             "SzW=1",
             "UseGpu=1", zoomF, zregu, 'SH=_mini']
     call(mm3d)
-    pmsDir = path.join(args.fld,'PIMs-Forest')
+    pmsDir = path.join(fld,'PIMs-Forest')
     
     hd, tl = path.split(subList)
     subDir = path.join(bFolder, tl)
     mkdir(subDir)
-    mnt = ['mm3d', 'PIMs2MNT', 'Forest', 'DoOrtho=1', zregu]
+    mnt = ['mm3d', 'PIMs2MNT', algo, 'DoOrtho=1', zregu]
     call(mnt)
   
     tawny = ['mm3d', 'Tawny', 'PIMs-ORTHO/', 'RadiomEgal=1', 'DegRap=4',
