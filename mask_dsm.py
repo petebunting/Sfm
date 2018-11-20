@@ -6,7 +6,7 @@ Created on Mon Nov  5 12:45:39 2018
 @author: ciaran
 
 usage:
-    mask_dsm.py -folder $PWD
+    mask_dsm.py -folder $PWD -n 4 -z 8 -m 7
 """
 
 import gdal
@@ -158,6 +158,7 @@ def mask_raster_multi(inputIm,  mval=1, outval = None, mask=None,
                         bnd = inDataset.GetRasterBand(band)
                         array = bnd.ReadAsArray(j, i, numCols, numRows)
                         array[mask != mval]=0
+                        array[array < 0]=0
                         bnd.WriteArray(array, j, i)
                         
     else:
@@ -183,7 +184,7 @@ def mask_raster_multi(inputIm,  mval=1, outval = None, mask=None,
         # This is annoying but necessary as the stats need updated and cannot be 
         # done in above band loop due as this would be very inefficient
         #for band in range(1, bands+1):
-        #inDataset.GetRasterBand(1).ComputeStatistics(0)
+        inDataset.GetRasterBand(1).SetNoDataValue(0)
            
         inDataset.FlushCache()
         inDataset = None
@@ -205,14 +206,17 @@ parser.add_argument("-z", "--zoom", type=str, required=False,
 
 parser.add_argument("-m", "--mask", type=str, required=False, 
                     help="mask no - you may need to look at a tile folder to find out which is the matching one")
-
-parser.add_argument("-pims", "--pms", type=bool, required=False, 
-                    help="if looking for output from DronePIMs")
+#
+#parser.add_argument("-pims", "--pms", type=bool, required=False, 
+#                    help="if looking for output from DronePIMs")
 
 
 args = parser.parse_args() 
 
 # This conditional stuff is all a bit ugly but will do the job until I have time to do something better
+
+fl = args.fld
+
 if args.cores is None:
     noJ=-1
 else:
@@ -232,27 +236,46 @@ if int(zoomF) == 1:
     extraNum='8'
 else:
     extraNum='7'
+#
+#if args.pms is None:
+#    pim = False
+#else:
+#    pim = True
+#    
+#if pim is False:
+#    wildCard1 = "OUTPUT/DSM.tif"
+#    wildCard2 = "OUTPUT/Mask.tif"
+#    mask_raster_multi(wildCard1, mval=1, mask=wildCard2)
+#    fileListIm = glob(os.path.join(args.fld, wildCard1))
+#    fileListMsk = glob(os.path.join(args.fld, wildCard2))
+#
+#    fileListIm.sort()
+#    fileListMsk.sort()
+#
+#
+#    finalList = list(zip(fileListIm, fileListMsk))
+#
+#    Parallel(n_jobs=noJ,
+#             verbose=3)(delayed(mask_raster_multi)(f[0],
+#                       mask=f[1]) for f in finalList)
+#else:
     
-if args.pms is True:
-    wildCard1 = "OUTPUT/DSM.tif"
-    wildCard2 = "OUTPUT/Mask.tif"
-    mask_raster_multi(wildCard1, mval=1, mask=wildCard2)
-else:         
-    wildCard1 = "*tile*/*MEC-Malt/Z_Num"+extraNum+"_DeZoom"+zoomF +"_STD-MALT.tif"
-    wildCard2 = "*tile*/*MEC-Malt/Masq_STD-MALT_DeZoom"+maskN+".tif"
-
-    fileListIm = glob(os.path.join(args.fld, wildCard1))
-    fileListMsk = glob(os.path.join(args.fld, wildCard2))
-
-    fileListIm.sort()
-    fileListMsk.sort()
+wildCard1 = "*tile*/*MEC-Malt/Z_Num"+extraNum+"_DeZoom"+zoomF +"_STD-MALT.tif"
+wildCard2 = "*tile*/*MEC-Malt/AutoMask_STD-MALT_Num_"+maskN+".tif"
 
 
-    finalList = list(zip(fileListIm, fileListMsk))
+fileListIm = glob(os.path.join(fl, wildCard1))
+fileListMsk = glob(os.path.join(fl, wildCard2))
 
-    Parallel(n_jobs=noJ,
-             verbose=3)(delayed(mask_raster_multi)(f[0],
-                       mask=f[1]) for f in finalList)
+fileListIm.sort()
+fileListMsk.sort()
+
+
+finalList = list(zip(fileListIm, fileListMsk))
+
+Parallel(n_jobs=noJ,
+         verbose=3)(delayed(mask_raster_multi)(f[0],
+                   mask=f[1]) for f in finalList)
 
 
 

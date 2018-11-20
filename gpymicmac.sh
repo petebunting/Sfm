@@ -301,7 +301,7 @@ done
 mask_dsm.py -folder DistGpu 
 
 
-find *tile*/*MEC-Malt/Z_Num$zoomF_DeZoom2_STD-MALT.tif | parallel "ossim-create-histo -i {}" 
+find *tile*/*MEC-Malt/Z_Num7_DeZoom2_STD-MALT.tif | parallel "ossim-create-histo -i {}" 
 
 ossim-orthoigen --combiner-type ossimMaxMosaic  *tile*/*MEC-Malt/Z_Num7_DeZoom2_STD-MALT.tif DSMmax.tif
 

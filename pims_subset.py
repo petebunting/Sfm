@@ -13,7 +13,7 @@ This uses pymicmac functionality to tile the datset into a grid then processes i
 
 Usage: 
     
-pims_subset.py -folder $PWD -algo MicMac -num 3,3 -zr 0.02 -g 1 
+pims_subset.py -folder $PWD -algo Forest -num 3,3 -zr 0.02 -g 1 
 
 """
 
@@ -132,7 +132,7 @@ for subList in txtList:
     flStr = open(subList).read()
     flStr.replace("\n", "|")
     sub = flStr.replace("\n", "|")
-                   
+    print('the img subset is \n'+sub+'\n\n')                 
     mm3d = [mmgpu, "PIMs", algo,'"'+sub+'"', gOri, "DefCor=0",
             "SzW=1",
             "UseGpu=1", zoomF, zregu, 'SH=_mini']
@@ -158,7 +158,8 @@ for subList in txtList:
     mvList = [newPIMs, newBasc, newOrtho, newTmpM, newTmpMO]
     toGo = list(zip(origList, mvList))
     [move(f[0], f[1]) for f in toGo] 
+    print(mvList+'moved')
     
-    print('the img subset is \n'+sub+'\n\n')  
+    
 
 
