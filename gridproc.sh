@@ -23,18 +23,13 @@
 # Install pymicmac
 #pip install git+https://github.com/ImproPhoto/pymicmac
 
-# An issue with what I assume is shared memory between CPU & GPU results in only
-# a linited number of CPU threads and images being useable without failure on large
-# datasets.
-
-# Consequently, an adaption of the pymicmac lib has been made to facilitate tile prcessing with GPU
-# support within the limits of the current software on github
+# A parallel processing tool for large scale Malt processing, uses single threads per tile with optional GPU support
 
 
 # Contains elements of L.Girod script - thanks 
 
 # example:
-# ./gpymicmac.sh -e JPG -u "30 +north" -g 6 -w 2 -prc 4 -gpu 1 -b 4
+# ./gridproc.sh -e JPG -u "30 +north" -g 6,6 -w 2 -prc 4 -gpu 1 -b 4
 
 
  
@@ -138,7 +133,10 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:gpu:b:w:prc:csv:h" opt; do
       ;;
      csv)
       CSV=$OPTARG 
-      ;;             
+      ;; 
+     b)
+      batch=$OPTARG 
+      ;;              
     \?)
       echo "gpymicmac.sh: Invalid option: -$OPTARG" >&1
       exit 1
@@ -235,34 +233,25 @@ fi
 
 
 #Correlation into DEM
-# These args are used in grandleez 
-# DirMEC=MEC DefCor=0 AffineLast=1 Regul=0.005 HrOr=0 LrOr=0 ZoomF=1
-# Now we have figure out the GPU issue, it can become an optarg 
-
-# Until the cuda internals of MicMac are sorted these tests worked whereas exceeding them did not!!!
-# Successful test w/ 891 imgs
-# NbProc=1, 3x3 grid, -n 4 (likely 4-5hrs)  
-# NbProc=4, 5x5 grid, -n 3 (~2hrs) 
-# NbProc=4, 6x6 grid, -n 4 (2hrs)  
 
 rm -rf DMatch DistributedMatching.xml DistGpu 
  
-if [ "$gp" != none ]; then
-    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd #-t Homol_mini # --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 Regul=0.02 EZA=1 SzW=$win NbProc=$proc ZoomF=$ZoomF" 
+#if [ "$gp" != none ]; then
+    #micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd #-t Homol_mini # --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 Regul=0.02 EZA=1 SzW=$win NbProc=$proc ZoomF=$ZoomF" 
     
-else
-    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd #-t Homol_mini #--maltOptions "DefCor=0 DoOrtho=1 SzW=$win Regul=0.02 EZA=1 NbProc=$proc ZoomF=$ZoomF"
+#else
+    #micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd #-t Homol_mini #--maltOptions "DefCor=0 DoOrtho=1 SzW=$win Regul=0.02 EZA=1 NbProc=$proc ZoomF=$ZoomF"
       
-fi
+#fi
   
 
-# Altered pymicmac writes seperate xml for Tawny as it is more efficient to run these all in parallel at the end as there
-# is not the same constraints on batch numbers 
-#coeman-par-local -d . -c DistributedMatching.xml -e DistGpu  -n 8
+# Parallel processing - best for a decent ortho later
+if [ "$gp" != none ]; then
+    MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd -zr 0.01 -g 1 -nt $batch 
+else
+    MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd -zr 0.01 -nt $batch 
 
-MaltBatch.py -folder $PWD -algo UrbanMNE -num 3,3 -zr 0.01 -g 1 -nt 3 -p 4
-
-correct_mosaics.py -folder DistGpu
+#correct_mosaics.py -folder DistGpu
  
 # Here we loop through all the mosaic and add georef which is lost by MicMac
 echo "geo-reffing Orthos"
@@ -279,16 +268,6 @@ ossim-orthoigen --combiner-type ossimMaxMosaic  MaltBatch/*tile*/*Ortho-tile*/*O
 #--writer-prop threads=20 
 #choices
 #ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic 
-
-# Just background info here
-#tfw is :
-#5.000000000000	(size of pixel in x direction)
-#0.000000000000	(rotation term for row)
-#0.000000000000	(rotation term for column) 
-#-5.000000000000	(size of pixel in y direction)
-#492169.690845528910	(x coordinate of centre of upper left pixel in map units)
-#5426523.318065105000	(y coordinate of centre of upper left pixel in map units)
-
 
 
 # georef the dsms.....
