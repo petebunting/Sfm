@@ -31,7 +31,7 @@ I have found it is best to install MicMac wthout the GPU as my main install and 
 
 Then I install a separate micmac with GPU support and add it as a variable in shell scripts or the absoulute path when needed
 
-Install my fork of pymicmac which has bits modified for the gpymicmac script
+Install my fork of pymicmac which has bits modified for creating tiles
 
 - Install pycoeman dependencies 
 .. code-block:: bash
@@ -59,7 +59,7 @@ Clone or download then make the folder or files executable in a terminal
 
 .. code-block:: bash
    
-   chmod +x PPX.sh
+   chmod +x Drone.sh
 
 Add to your .bashrc or .bash_profile if you wish to execute anywhere
 
@@ -76,9 +76,9 @@ Typically a DJI phantom or other such platform. This uses Malt for dense matchin
 
 - A script like the previous but using the PIMs algorithm
 
-**gpymicmac.sh**
+**gridproc.sh**
 
-- Using a modification of pymicmac functionallity, this script subdivides large datasets into a grid of overlapping tiles and processes either in parallel or sequentially
+- Process a large dataset in tiles (this appears to be best for large ortho-mosaics)
 
 **pims_subset.py**
 
@@ -91,9 +91,9 @@ type -h to get help on each script e.g. :
 
 .. code-block:: bash
 
-   PPX.sh
+   Drone.sh -help
 
 Thanks
 ~~~~~~~~~~~~~~~~~
 
-Thanks to devs and contributors at MicMac and it's forum, particularly L.Girod whose work forms the basis of the workflow scripts here
+Thanks to devs and contributors at MicMac and it's forum, particularly L.Girod whose work inspired the basis of the shell scripts and pymicmac from which the tiling function was derived
