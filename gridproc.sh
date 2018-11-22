@@ -29,7 +29,7 @@
 # Contains elements of L.Girod script - thanks 
 
 # example:
-# ./gridproc.sh -e JPG -u "30 +north" -g 6,6 -w 2 -prc 4 -gpu 1 -b 4
+# ./gridproc.sh -e JPG -u "30 +north" -g 6,6 -w 2 -prc 1 -gpu 1 -b 4
 
 
  
@@ -59,7 +59,7 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:gpu:b:w:prc:csv:h" opt; do
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
-      echo "gpymicmac.sh -e JPG -u '30 +north' -g 6 -w 2 -prc 4 -b 4"
+      echo "gridproc.sh -e JPG -u '30 +north' -g 6 -w 2 -prc 4 -b 4"
       echo "	-e EXTENSION     : image file type (JPG, jpg, TIF, png..., default=JPG)."
       echo "	-x X_OFF         : X (easting) offset for ply file overflow issue (default=0)."
       echo "	-y Y_OFF         : Y (northing) offset for ply file overflow issue (default=0)."
