@@ -13,7 +13,7 @@ This uses pymicmac functionality to tile the datset into a grid then processes i
 
 Usage: 
     
-pims_subset.py -folder $PWD -algo Forest -num 3,3 -zr 0.02 -g 1 
+pims_subset.py -folder $PWD -algo Forest -num 3,3 -zr 0.01 -g 1 
 
 """
 
@@ -112,8 +112,8 @@ mkdir(bFolder)
 # run tiling
 pymicmac = ['micmac-distmatching-create-config', '-i', 'Ori-'+gOri, '-e',
             'JPG', '-o', 'DistributedMatching.xml', '-f', 'DMatch', '-n',
-            numChunks, '--maltOptions', 
-            "DefCor=0 DoOrtho=1 UseGpu=1 SzW=1 NbProc=8 ZoomF=2"]
+            numChunks]#, '--maltOptions', 
+            #"DefCor=0 DoOrtho=1 UseGpu=1 SzW=1 NbProc=8 ZoomF=2"]
 
 call(pymicmac)
 
@@ -158,7 +158,7 @@ for subList in txtList:
     mvList = [newPIMs, newBasc, newOrtho, newTmpM, newTmpMO]
     toGo = list(zip(origList, mvList))
     [move(f[0], f[1]) for f in toGo] 
-    print(mvList+'moved')
+    print(mvList)
     
     
 

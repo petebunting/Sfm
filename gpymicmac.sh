@@ -248,31 +248,33 @@ fi
 rm -rf DMatch DistributedMatching.xml DistGpu 
  
 if [ "$gp" != none ]; then
-    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd -t Homol_mini --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 Regul=0.02 EZA=1 SzW=$win NbProc=$proc ZoomF=$ZoomF" 
+    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd #-t Homol_mini # --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 Regul=0.02 EZA=1 SzW=$win NbProc=$proc ZoomF=$ZoomF" 
     
 else
-    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd -t Homol_mini --maltOptions "DefCor=0 DoOrtho=1 SzW=$win Regul=0.02 EZA=1 NbProc=$proc ZoomF=$ZoomF"
+    micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd,$grd #-t Homol_mini #--maltOptions "DefCor=0 DoOrtho=1 SzW=$win Regul=0.02 EZA=1 NbProc=$proc ZoomF=$ZoomF"
       
 fi
   
 
 # Altered pymicmac writes seperate xml for Tawny as it is more efficient to run these all in parallel at the end as there
 # is not the same constraints on batch numbers 
-coeman-par-local -d . -c DistributedMatching.xml -e DistGpu  -n 8
+#coeman-par-local -d . -c DistributedMatching.xml -e DistGpu  -n 8
+
+MaltBatch.py -folder $PWD -algo UrbanMNE -num 3,3 -zr 0.01 -g 1 -nt 3 -p 4
 
 correct_mosaics.py -folder DistGpu
  
 # Here we loop through all the mosaic and add georef which is lost by MicMac
 echo "geo-reffing Orthos"
-for f in *tile*/*Ortho-MEC-Malt/*Mosaic*.tif; do
+for f in MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif; do
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
 done 
-  
+   
 # this works 
-find *tile*/*Ortho-MEC-Malt/*Mosaic*.tif | parallel "ossim-create-histo -i {}" 
+find MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif | parallel "ossim-create-histo -i {}" 
  
 # Max seems best
-ossim-orthoigen --combiner-type ossimMaxMosaic  *tile*/*Ortho-MEC-Malt/*Mosaic*.tif Orthomax.tif
+ossim-orthoigen --combiner-type ossimMaxMosaic  MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif Orthomax.tif
 
 #--writer-prop threads=20 
 #choices
@@ -292,17 +294,17 @@ ossim-orthoigen --combiner-type ossimMaxMosaic  *tile*/*Ortho-MEC-Malt/*Mosaic*.
 # georef the dsms.....
 echo "geo-reffing DSMs"  
 #finalDEMs=($(ls Z_Num*_DeZoom*_STD-MALT.tif)) 
-for f in *tile*/*MEC-Malt/Z_Num7_DeZoom2_STD-MALT.tif; do
+for f in MaltBatch/*tile*/*tile*/Z_Num7_DeZoom2_STD-MALT.tif; do
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
 done 
 
 # mask_dsm.py -folder $PWD -n 20 -z 1 -m 1
 #  This will assume a zoom level 2 
-mask_dsm.py -folder DistGpu 
+mask_dsm.py -folder MaltBatch 
 
 
-find *tile*/*MEC-Malt/Z_Num7_DeZoom2_STD-MALT.tif | parallel "ossim-create-histo -i {}" 
+find MaltBatch/*tile*/*tile*/Z_Num7_DeZoom2_STD-MALT.tif | parallel "ossim-create-histo -i {}" 
 
-ossim-orthoigen --combiner-type ossimMaxMosaic  *tile*/*MEC-Malt/Z_Num7_DeZoom2_STD-MALT.tif DSMmax.tif
+ossim-orthoigen --combiner-type ossimMaxMosaic  MaltBatch/*tile*/*tile*/Z_Num7_DeZoom2_STD-MALT.tif DSMmax.tif
 
 

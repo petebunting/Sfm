@@ -260,8 +260,8 @@ else:
 #                       mask=f[1]) for f in finalList)
 #else:
     
-wildCard1 = "*tile*/*MEC-Malt/Z_Num"+extraNum+"_DeZoom"+zoomF +"_STD-MALT.tif"
-wildCard2 = "*tile*/*MEC-Malt/AutoMask_STD-MALT_Num_"+maskN+".tif"
+wildCard1 = "*tile*/*tile*/Z_Num"+extraNum+"_DeZoom"+zoomF +"_STD-MALT.tif"
+wildCard2 = "*tile*/*tile*/AutoMask_STD-MALT_Num_"+maskN+".tif"
 
 
 fileListIm = glob(os.path.join(fl, wildCard1))
