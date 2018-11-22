@@ -209,11 +209,6 @@ mm3d Tapas FraserBasic .*$EXTENSION Out=Arbitrary SH=_mini
 #Transform to  RTL system
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 
-#This tends to screw things up - not required 
-#Bundle adjust using both camera positions and tie points (number in EmGPS option is the quality estimate of the GNSS data in meters)
-
-
-#Visualize Ground_RTL orientation
 
 
 #Change system to final cartographic system  
@@ -231,21 +226,8 @@ else
 
 fi
 
-
-#Correlation into DEM
-
-rm -rf DMatch DistributedMatching.xml DistGpu 
  
-#if [ "$gp" != none ]; then
-micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd #-t Homol_mini # --maltOptions "DefCor=0 DoOrtho=1 UseGpu=1 Regul=0.02 EZA=1 SzW=$win NbProc=$proc ZoomF=$ZoomF" 
-    
-#else
-    #micmac-distmatching-create-config -i Ori-Ground_UTM -e JPG -o DistributedMatching.xml -f DMatch -n $grd #-t Homol_mini #--maltOptions "DefCor=0 DoOrtho=1 SzW=$win Regul=0.02 EZA=1 NbProc=$proc ZoomF=$ZoomF"
-      
-#fi
-  
-
-# Parallel processing - best for a decent ortho later
+# Parallel processing - best for a decent ortho later 
 if [ "$gp" != none ]; then
     MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd -zr 0.01 -g 1 -nt $batch 
 else

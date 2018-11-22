@@ -100,7 +100,7 @@ else:
 
 if args.prc is None:
 # joblib is prettt srtict on the thread front so thread cannot even be allocated externally    
-    proc = 4 
+    proc = 1
 else:
     proc = args.prc
                         
@@ -148,7 +148,8 @@ call(pymicmac)
 #
 txtList = glob(path.join(DMatch,'*.list'))
 nameList = [path.split(i)[1] for i in txtList]
-
+txtList.sort()
+nameList .sort()
 #list mania - I am crap at writing code
 finalList = list(zip(txtList, nameList))
 
