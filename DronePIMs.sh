@@ -4,7 +4,8 @@
 # example:
 # ./DronePIMs.sh -e JPG -a Forest -u "30 +north" -csv 1 -g 1 zreg = 0.03 -t 1 -proc 2,2
 
-# Important NOTE - MicMac CPU based is FAR quicker than using the GPU, as it's memory management limits GPU processing to small chunks
+# Important NOTE - MicMac CPU based is FAR quicker than using the GPU,
+#  as it's memory management limits GPU processing to small chunks
  
 # add default values
 EXTENSION=JPG
@@ -223,14 +224,30 @@ if [ "$tile" != none ]; then
     
         #mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
         #cp PIMs-ORTHO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
-        cd PIMsBatch
-        for f in *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif; do 
+        
+        # Process the DSM--------------------------------------------
+        for f in PIMsBatch/*tile*/PIMs-TmpBasc/PIMs-Merged_Prof.tif; do 
             gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
         
-        find *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}"
+        for f in PIMsBatch/*tile*/PIMs-TmpBasc/PIMs-Merged_Masq.tif; do 
+            gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
         
-        ossim-orthoigen --combiner-type ossimFeatherMosaic *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif feather.tif
+        mask_dsm.py -folder $PWD -pims True 
         
+        find PIMsBatch/*tile*/PIMs-TmpBasc/PIMs-Merged_Prof.tif | parallel "ossim-create-histo -i {}"      
+        
+        ossim-orthoigen --combiner-type ossimMaxMosaic PIMsBatch/*tile*/PIMs-TmpBasc/PIMs-Merged_Prof.tif  PIMsBatch/DSM_final.tif
+        #ossim-orthoigen --combiner-type ossimFeatherMosaic PIMsBatch/*tile*/PIMs-TmpBasc/PIMs-Merged_Prof.tif  PIMsBatch/DSM_final_feather.tif
+         
+        # Process the Ortho-------------------------------------------- 
+        # Probably better to use Malt-Batch for this as it is MVS which works better for ortho
+        for f in PIMsBatch/*list*/*PIMs-ORTHO/*Orthophotomosaic*.tif; do 
+            gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
+        
+        find PIMsBatch/*tile*/*PIMs-ORTHO/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}"
+        
+        ossim-orthoigen --combiner-type ossimFeatherMosaic PIMsBatch/*tile*/*PIMs-ORTHO/*Orthophotomosaic*.tif PIMsBatch/feather.tif
+                
         echo 'Everything done - take a look!' 
         return
     
@@ -238,17 +255,28 @@ if [ "$tile" != none ]; then
     else 
         pims_subset.py -folder $PWD -algo $Algorithm -num $prc -zr $zreg 
         
-        mkdir OUTPUT    
+        # Process the DSM-------------------------------------------- 
     
-        #mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
-        #cp PIMs-ORTHO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
-        cd PIMsBatch
-        for f in *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif; do 
+        for f in PIMsBatch/*tile*/PIMs-TmpBasc/PIMs-Merged_Prof.tif; do 
+            gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
+            
+        for f in PIMsBatch/*tile*/PIMs-TmpBasc/PIMs-Merged_Masq.tif; do 
             gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
         
-        find *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}"
+        mask_dsm.py -folder $PWD -pims True
+         
+        find PIMsBatch/*tile*/PIMs-TmpBasc/PIMs-Merged_Prof.tif | parallel "ossim-create-histo -i {}"      
         
-        ossim-orthoigen --combiner-type ossimFeatherMosaic *list*/*PIMs-ORTHO/*Orthophotomosaic*.tif feather.tif
+        ossim-orthoigen --combiner-type ossimMaxMosaic PIMsBatch/*tile*/PIMs-TmpBasc/PIMs-Merged_Prof.tif  PIMsBatch/DSM_final.tif
+        # Process the Ortho-------------------------------------------- 
+        # Probably better to use Malt-Batch for this as it is MVS which works better for ortho
+        
+        for f in PIMsBatch/*list*/*PIMs-ORTHO/*Orthophotomosaic*.tif; do 
+            gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
+        
+        find PIMsBatch/*tile*/*PIMs-ORTHO/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}"
+        
+        ossim-orthoigen --combiner-type ossimFeatherMosaic PIMsBatch/*tile*/*PIMs-ORTHO/*Orthophotomosaic*.tif PIMsBatch/feather.tif
         
         echo 'Everything done - take a look!' 
        return
@@ -265,7 +293,7 @@ mm3d Pims2MNT $Algorithm ZReg=$zreg
 	#if [ "$DEQ" != none ]; then 
 	#	mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
 	#else
-	##	mm3d Tawny Ortho-MEC-Malt DEq=1
+	##	mm3d Tawny Ortho-MEC-Malt DEq=1 
 	#fi
 
 	# When images are large they will be tiled 
@@ -279,7 +307,7 @@ mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
     #cp PIMs-ORTHO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
     #gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" OUTPUT/OrthFinal.tif
 
-	 
+	  
 	# need if else for this 
 	#mm3d ConvertIm PIMs-TmpBasc/PIMs-Merged_Prof.tif Out=OUTPUT/DSM.tif
 
@@ -293,6 +321,8 @@ gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +n
 
 fi 
     #mask_dsm.py -folder $PWD -pims 1 
+    
+    
 # OSSIM - BASED MOSAICING ----------------------------------------------------------------------------
 # Just here as an alternative for putting together tiles 
 # This need GNU parallel

@@ -224,8 +224,8 @@ else
     mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
     mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
 
-fi
-
+#fi
+ 
  
 # Parallel processing - best for a decent ortho later 
 if [ "$gp" != none ]; then
