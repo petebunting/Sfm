@@ -204,7 +204,7 @@ fi
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1
 
 #Compute Relative orientation (Arbitrary system)
-mm3d Tapas FraserBasic .*$EXTENSION Out=Arbitrary SH=_mini
+mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
 
 #Transform to  RTL system
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
@@ -250,7 +250,7 @@ ossim-orthoigen --combiner-type ossimMaxMosaic  MaltBatch/*tile*/*Ortho-tile*/*O
 #--writer-prop threads=20 
 #choices
 #ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic 
-
+ 
 
 # georef the dsms.....
 echo "geo-reffing DSMs"  

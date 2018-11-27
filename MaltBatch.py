@@ -135,16 +135,14 @@ mkdir(bFolder)
 
 pk = str(proc)
 
-pymicmac = ['micmac-distmatching-create-config', '-i', 'Ori-'+gOri, '-e',
+pymicmac = ['tile.py', '-i', 'Ori-'+gOri, '-e',
             'JPG', '-o', 'DistributedMatching.xml', '-f', 'DMatch', '-n',
-            numChunks]#, '--maltOptions', 
-            #"DefCor=0 DoOrtho=1 UseGpu=1 SzW=1 NbProc="+pk+" ZoomF=2"]
+            numChunks]
 
 call(pymicmac)
 
 
-#origList = [path.join(fld, 'MEC-Malt'), 
-#            path.join(fld, 'Ortho-MEC-Malt')]
+
 #
 txtList = glob(path.join(DMatch,'*.list'))
 nameList = [path.split(i)[1] for i in txtList]
@@ -152,19 +150,6 @@ txtList.sort()
 nameList .sort()
 #list mania - I am crap at writing code
 finalList = list(zip(txtList, nameList))
-
-
-
-## Ok, a hacky solution for now. Either the result is farmed out via joblib or just lob them out directly via subprocess
-#def chunks(txtList, mp):
-#    # For item i in a range that is a length of txtList,
-#    for i in range(0, len(txtList), mp):
-#        # Create an index range for txtList of n items:
-#        yield txtList[i:i+mp]
-#
-#txtChunks = [chunks(txtList, mp)] 
-#nmChunks = [chunks(nameList, mp)] 
-
 
 
 # May revert to another way but lets see.....
@@ -179,7 +164,7 @@ def proc_malt(subList, subName, bFolder):
             "SzW=1", "DirMEC="+subName,
             "UseGpu="+gP, zoomF, zregu, "NbProc="+pk] #, 'SH=_mini']
     call(mm3d)
-    tawny = ['mm3d', 'Tawny', "Ortho-"+subName+'/', 'RadiomEgal=1',# 'DegRap=4',
+    tawny = ['mm3d', 'Tawny', "Ortho-"+subName+'/', 'RadiomEgal=1', 'DegRap=4',
              'Out=Orthophotomosaic.tif']
     call(tawny)
     mDir = path.join(fld, subName)
@@ -197,6 +182,11 @@ Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0],
     
 #
 
+def proc_tawny(file):
+    
+    tawny = ['mm3d', 'Tawny', file, 'RadiomEgal=1', 'DegRap=4',
+             'Out=Orthophotomosaic.tif']
+    call(tawny)
 
 
     

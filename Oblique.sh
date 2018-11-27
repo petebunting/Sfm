@@ -14,7 +14,7 @@ while getopts "e:a:smz:h" opt; do
   case $opt in
     h)
       echo "Run workflow for point cloud from culture 3d algo."
-      echo "usage: Oblique.sh -e JPG -a BigMac -z 1"
+      echo "usage: Oblique.sh -e JPG -a Statue -z 1"
       echo "	-e EXTENSION   : image file type (JPG, jpg, TIF, png..., default=JPG)."
       echo "	-a Algorithm   : type of algo eg BigMac, MicMac, Forest, Statue etc."
       echo "	-s             : Do not use 'Schnaps' optimised homologous points (does by default)."
@@ -66,7 +66,7 @@ if [ "$use_Schnaps" = true ]; then
 	mm3d Schnaps .*$EXTENSION MoveBadImgs=1
 fi
 #Compute Relative orientation (Arbitrary system)
-mm3d Tapas FraserBasic .*$EXTENSION Out=Arbitrary SH=_mini
+mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
 #Visualize relative orientation
 mm3d AperiCloud .*$EXTENSION Arbitrary SH=_mini
 

@@ -31,35 +31,11 @@ I have found it is best to install MicMac wthout the GPU as my main install and 
 
 Then I install a separate micmac with GPU support and add it as a variable in shell scripts or the absoulute path when needed
 
-Install my fork of pymicmac which has bits modified for creating tiles
-
-- Install pycoeman dependencies 
-.. code-block:: bash
-
-   sudo apt-get install libfreetype6-dev libssl-dev libffi-dev
-   
-- Install pycoeman
-.. code-block:: bash
-
-    pip install git+https://github.com/NLeSC/pycoeman
-    
-- Install noodles
-
-.. code-block:: bash
-
-    pip install git+https://github.com/NLeSC/noodles
-    
--  Install pymicmac
-
-.. code-block:: bash
-
-    pip install git+https://github.com/Ciaran1981/pymicmac
-
 Clone or download then make the folder or files executable in a terminal
 
 .. code-block:: bash
    
-   chmod +x Drone.sh
+   chmod +x Sfm/*.sh Sfm/*.py 
 
 Add to your .bashrc or .bash_profile if you wish to execute anywhere
 
@@ -76,13 +52,24 @@ Typically a DJI phantom or other such platform. This uses Malt for dense matchin
 
 - A script like the previous but using the PIMs algorithm
 
+**pims_subset.py**
+
+- Similar to gridproc, this processes data in tiles/chunks using the PIMs algorithm, where GPU support is optional
+- this script is an uinternal option in DronePIMs.sh
+
+
 **gridproc.sh**
 
 - Process a large dataset in tiles (this appears to be best for large ortho-mosaics)
 
-**pims_subset.py**
+**MaltBatch.py**
 
-- Similar to gpymicmac, this processes data in tiles/chunks using the PIMs algorithm, where GPU support is optional
+- This processes data in tiles/chunks using the Malt algorithm, where GPU support is optional
+- It is internal to gridproc
+
+
+
+
 
 Use
 ~~~~~~~~~~~~~~~~~
