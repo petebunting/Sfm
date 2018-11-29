@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """
-This ia a cut down adaptation of a script from the pymicmac lib
+This ia a cut down adaptation of a script from the pymicmac lib - credit tp those folks for doing that
 
 It produces lists of images per tile that are them processed by either
 pims_subset.py or MaltBatch.py depending on preference. 
@@ -156,11 +156,10 @@ def run(orientationFolder, homolFolder, imagesFormat,
             tileImageListOutputFile.close()
 
 
-#def argument_parser():
-#                 # define argument menu
+
 description = "Splits a large image dataset derived from MicMac into tiles - defined by user parameters - this is for nadir/pseudo-nadir imagery only"
 parser = argparse.ArgumentParser(description=description)
-# fill argument groups
+
 parser.add_argument(
     '-i',
     '--inputOrientation',
@@ -181,13 +180,6 @@ parser.add_argument(
     help='For each tile we consider the images whose XY camera position is in the tile and the K nearest images (default is 6) to each vertex of the tile',
     type=int,
     required=False)
-parser.add_argument(
-    '-o',
-    '--output',
-    default='',
-    help='pycoeman parallel commands XML configuration file',
-    type=str,
-    required=True)
 parser.add_argument(
     '-f',
     '--folder',
@@ -216,7 +208,7 @@ args = parser.parse_args()
 def main():
     try:
         run(args.inputOrientation, args.inputHomol, args.format,
-            args.neighbours, args.output, args.folder, args.num)
+            args.neighbours, args.folder, args.num)
     except Exception as e:
         print(e)
 
