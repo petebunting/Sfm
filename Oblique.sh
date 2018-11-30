@@ -5,7 +5,7 @@
 
 # add default values
 EXTENSION=JPG
-Algorithm=BigMac 
+Algorithm=Statue
 wait_for_mask=true
 ZOOM=2
 
@@ -93,8 +93,7 @@ mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree
 mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
 mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
 mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini  WithCam=0
-#Find Tie points using multi-resolution
-#mm3d Tapioca MulScale .*$EXTENSION 500 2000
+
 
 #if [ "$use_Schnaps" = true ]; then
 	#filter TiePoints (better distribution, avoid clogging)
@@ -104,7 +103,7 @@ mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini  WithCam=0
 if [ "$wait_for_mask" = true ]; then
     mm3d SaisieMasqQT AperiCloud_Ground_RTL__mini.ply
 	read -rsp $'Press any key to continue...\n' -n1 key
-fi
+fi 
 	
 #Do the correlation of the images
 
