@@ -53,7 +53,7 @@ done
 echo "using exif data"
 mm3d XifGps2Txt .*$EXTENSION
 #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
-mm3d XifGps2Xml .*$EXTENSION RAWGNSS
+mm3d XifGps2Xml .*$EXTENSION RAWGNSS_N
 mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
 
 #Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
@@ -81,31 +81,33 @@ mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 
 
 
+# This lot screws it up when not all nadir!!!! 
 #Change system to final cartographic system  
 #if [ $CSV != none ]; then 
-   # mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_UTM EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
+   # mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_UTM EmGPS=[RAWGNSS,1] AllFree=1 SH=_mini
     # For reasons unknown this screws it up from csv
     #mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
 #    mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
 
 #else
-mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
-mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
-mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
-mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini  WithCam=0
 
+#mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini
 
-#if [ "$use_Schnaps" = true ]; then
-	#filter TiePoints (better distribution, avoid clogging)
+# This lot here assumes a geographic coordinate system which we do not have with SaisieMasq output
+
+#mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
+#mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
+
+mm3d AperiCloud .*$EXTENSION Arbitrary SH=_mini  WithCam=0
 
  
 #HERE, MASKING COULD BE DONE!!!
 if [ "$wait_for_mask" = true ]; then
-    mm3d SaisieMasqQT AperiCloud_Ground_RTL__mini.ply
+    mm3d SaisieMasqQT AperiCloud_Arbitrary__mini.ply
 	read -rsp $'Press any key to continue...\n' -n1 key
 fi 
 	
 #Do the correlation of the images
 
-mm3d C3DC $Algorithm .*$EXTENSION Arbitrary ZoomF=$ZOOM Masq3D=AperiCloud_Ground_RTL__mini_polyg3d.xml
+mm3d C3DC $Algorithm .*$EXTENSION Arbitrary ZoomF=$ZOOM Masq3D=AperiCloud_Arbitrary__mini_polyg3d.xml
 
