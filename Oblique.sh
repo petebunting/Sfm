@@ -76,12 +76,13 @@ mm3d Schnaps .*$EXTENSION MoveBadImgs=1
 #Compute Relative orientation (Arbitrary system)
 mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
 
-#Transform to  RTL system
-mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 
 
 
 # This lot screws it up when not all nadir!!!! 
+#Transform to  RTL system
+#mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
+
 #Change system to final cartographic system  
 #if [ $CSV != none ]; then 
    # mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_UTM EmGPS=[RAWGNSS,1] AllFree=1 SH=_mini
@@ -100,7 +101,7 @@ mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 
 mm3d AperiCloud .*$EXTENSION Arbitrary SH=_mini  WithCam=0
 
- 
+  
 #HERE, MASKING COULD BE DONE!!!
 if [ "$wait_for_mask" = true ]; then
     mm3d SaisieMasqQT AperiCloud_Arbitrary__mini.ply
