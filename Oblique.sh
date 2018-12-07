@@ -65,7 +65,7 @@ mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWG
 ##    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 #else
 #    echo "using a default re-size of 2000 long axis on imgs"
-#    mogrify -resize 2000 *.JPG 
+mogrify -resize 2000 *.JPG 
 #    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 #fi 
 
