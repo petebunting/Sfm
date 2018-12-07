@@ -67,7 +67,12 @@ Typically a DJI phantom or other such platform. This uses Malt for dense matchin
 - This processes data in tiles/chunks using the Malt algorithm, where GPU support is optional
 - It is internal to gridproc
 
+**MicMac-LocalChantierDescripteur.xml**
+- This is a local descriptor of the camera in the C-Astral Bramor - alter the params for your own camera
 
+The folder ContrastEnhanceChant includes parameters to high pass imagery internally prior to key points (SIFT)
+
+It does not permanently alter the images - but this is possible (look up MicMac docs)
 
 
 
