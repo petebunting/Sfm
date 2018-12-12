@@ -39,6 +39,8 @@ Clone or download then make the folder or files executable in a terminal
 
 Add to your .bashrc or .bash_profile if you wish to execute anywhere
 
+You may need to edit the hashbangs at the top of the scripts!
+
 
 Contents
 ~~~~~~~~~~~~~~~~~

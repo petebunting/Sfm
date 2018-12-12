@@ -1,6 +1,8 @@
 # This is for oblique imagery - a work in progress
 
-#I would like to remind users that an angle of 10° between view angle is optimal.
+# Author Ciaran Robb
+# Little changed form L.Girod - credit to him!
+# Aberystwyth University
 
 
 # add default values

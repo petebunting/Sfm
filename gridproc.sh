@@ -1,8 +1,8 @@
 #
 
 #Created on Mon Oct  1 14:40:35 2018
-
-#@author: Ciaran Robb
+# Author Ciaran Robb
+# Aberystwyth University
 #""" 
 
 # This is a workflow intended for processing very large UAV datasets (eg > 500 images) with MicMac
@@ -10,18 +10,8 @@
 # some limitations are evident in the use of GPU aided processing which speeds
 # up processing considerably.
 
-# This requires an install of MicMac with GPU support and an install of pymicmac to handle job allocation  
- 
-# (Do the following once MicMac is installed) 
-
-# Install pycoeman dependencies 
-#sudo apt-get install libfreetype6-dev libssl-dev libffi-dev
-# Install pycoeman
-#pip install git+https://github.com/NLeSC/pycoeman
-# Install noodles
-#pip install git+https://github.com/NLeSC/noodles
-# Install pymicmac
-#pip install git+https://github.com/ImproPhoto/pymicmac
+# This requires an install of MicMac with  potional GPU support if you wish to use that
+  
 
 # A parallel processing tool for large scale Malt processing, uses single threads per tile with optional GPU support
 
@@ -72,7 +62,7 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:gpu:b:w:prc:csv:h" opt; do
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
       echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
       echo " -g grd           : Grid dimension x and y"
-      echo " -gpu gp          : Grid dimension x and y"
+      echo " -gpu gp          : GPU support 1 for use"
       echo " -b batch         : no of jobs at any one time"
       echo " -w win           : Correl window size"
       echo " -prc proc        : no of CPU thread used (needed even when using GPU)"
@@ -194,6 +184,7 @@ fi
 if [  "$size" != none ]; then
     echo "resizing to $size for tie point detection"
     mogrify -resize $size *.JPG
+    # mogrify -path Sharp -sharpen 0x3  *.JPG # this sharpens very well worth doing
     mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 else
     echo "using a default re-size of 2000 long axis on imgs"
@@ -229,9 +220,9 @@ else
  
 # Parallel processing - best for a decent ortho later 
 if [ "$gp" != none ]; then
-    MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd -zr 0.01 -g 1 -nt $batch 
+    MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd,$grd -zr 0.01 -g 1 -nt $batch 
 else
-    MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd -zr 0.01 -nt $batch 
+    MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd,$grd -zr 0.01 -nt $batch 
 
 #correct_mosaics.py -folder DistGpu
  

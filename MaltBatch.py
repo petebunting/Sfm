@@ -1,4 +1,8 @@
 #!/home/ciaran/anaconda3/bin/python
+
+# Author Ciaran Robb
+# Aberystwyth University
+
 # -*- coding: utf-8 -*-
 """
 Created on Tue May 29 16:20:58 2018
@@ -135,11 +139,11 @@ mkdir(bFolder)
 
 pk = str(proc)
 
-pymicmac = ['tile.py', '-i', 'Ori-'+gOri, '-e',
+tileIt = ['tile.py', '-i', 'Ori-'+gOri, '-e',
             'JPG', '-o', 'DistributedMatching.xml', '-f', 'DMatch', '-n',
             numChunks]
 
-call(pymicmac)
+call(tileIt)
 
 
 

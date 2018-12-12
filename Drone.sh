@@ -1,5 +1,8 @@
 # This is a generic workflow for drone imagery using the malt pipeline
 
+# Author Ciaran Robb
+# Aberystwyth University
+
 # example:
 # ./Drone.sh -e JPG -u "30 +north" -g 1 -w 2 -prc 20
 
@@ -145,6 +148,7 @@ fi
 if [  "$size" != none ]; then
     echo "resizing to $size for tie point detection"
     mogrify -resize $size *.JPG
+        # mogrify -path Sharp -sharpen 0x3  *.JPG # this sharpens very well worth doing
     mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 else
     echo "using a default re-size of 2000 long axis on imgs"

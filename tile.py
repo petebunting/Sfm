@@ -1,5 +1,8 @@
 #!/usr/bin/python
 """
+# Author Ciaran Robb
+# Aberystwyth University
+
 This ia a cut down adaptation of a script from the pymicmac lib - credit tp those folks for doing that
 
 It produces lists of images per tile that are them processed by either

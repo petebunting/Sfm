@@ -1,5 +1,7 @@
 # This is a generic workflow for DJI type platforms etc with embedded GNSS data
-# Modified from the original L.Girod script
+# # Author Ciaran Robb
+# Aberystwyth University
+
 
 # example:
 # ./DronePIMs.sh -e JPG -a Forest -u "30 +north" -csv 1 -g 1 zreg = 0.03 -t 1 -proc 2,2
@@ -165,6 +167,7 @@ fi
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 if [  "$size" != none ]; then
     echo "resizing to $size for tie point detection"
+    # mogrify -path Sharp -sharpen 0x3  *.JPG # this sharpens very well worth doing
     mogrify -resize $size *.JPG
     mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 else

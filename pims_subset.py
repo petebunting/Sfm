@@ -110,12 +110,11 @@ except OSError:
 
 mkdir(bFolder)
 # run tiling
-pymicmac = ['micmac-distmatching-create-config', '-i', 'Ori-'+gOri, '-e',
-            'JPG', '-o', 'DistributedMatching.xml', '-f', 'DMatch', '-n',
-            numChunks]#, '--maltOptions', 
-            #"DefCor=0 DoOrtho=1 UseGpu=1 SzW=1 NbProc=8 ZoomF=2"]
+tileIt = ['tile.py', '-i', 'Ori-'+gOri, '-e',
+            'JPG', '-f', 'DMatch', '-n',
+            numChunks]
 
-call(pymicmac)
+call(tileIt)
 
 
 origList = [path.join(fld, 'PIMs-'+algo), 
