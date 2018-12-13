@@ -18,7 +18,7 @@
             <Calcs>
                  <Arrite>  1 1 </Arrite>
                  <Direct>
-                       <PatternTransform> .*  </PatternTransform> <!-- Regular expressions of the group of images with the following camera model -->
+                       <PatternTransform> .*JPG  </PatternTransform> <!-- Regular expressions of the group of images with the following camera model -->
                        <CalcName> ILCE-6000 </CalcName> <!-- Name of the camera for these images -->
                  </Direct>
              </Calcs>
@@ -30,7 +30,7 @@
             <Calcs>
                  <Arrite>  1 1 </Arrite>
                  <Direct>
-                       <PatternTransform> .*  </PatternTransform> <!-- Regular expressions of the group of images with the following focal length -->
+                       <PatternTransform> .*JPG  </PatternTransform> <!-- Regular expressions of the group of images with the following focal length -->
                        <CalcName> 30 </CalcName>	<!-- See calibration report -->
                  </Direct>
              </Calcs>

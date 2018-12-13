@@ -9,7 +9,7 @@
         <CameraEntry>
               <Name> ILCE-6000 </Name>
               <SzCaptMm>  23.5 15.6 </SzCaptMm> <!-- Size of sensore (digital) or for analog, scanned film : MidSideFiducials or "MaxFidX-MinFidX MaxFidY-MinFidY"-->
-              <ShortName> aManualCam </ShortName>
+              <ShortName> ILCE-6000 </ShortName>
          </CameraEntry>		 
 		<!-- Add more <CameraEntry> if more cameras -->
     </LocCamDataBase>
@@ -31,6 +31,7 @@
                  <Arrite>  1 1 </Arrite>
                  <Direct>
                        <PatternTransform> .*JPG  </PatternTransform> <!-- Regular expressions of the group of images with the following focal length -->
+                       <CalcName> 30 </CalcName>
                        <CalcName> SFS </CalcName>	<!-- See calibration report -->
                  </Direct>
              </Calcs>

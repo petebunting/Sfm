@@ -35,7 +35,7 @@ while getopts "e:a:smz:h" opt; do
       ZOOM=$OPTARG
       ;;
 	s)
-      use_Schnaps=true
+      use_Schnaps=$OPTARG
       ;; 
 	m)
       wait_for_mask=true
@@ -73,13 +73,15 @@ mogrify -resize 2000 *.JPG
 
 mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 
-mm3d Schnaps .*$EXTENSION MoveBadImgs=1
 
-#Compute Relative orientation (Arbitrary system)
-mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
+if [ "use_Schnaps" = true ]; then
+    mm3d Schnaps .*$EXTENSION MoveBadImgs=1
 
-
-
+    #Compute Relative orientation (Arbitrary system)
+    mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
+else
+    mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary
+fi
 
 # This lot screws it up when not all nadir!!!! 
 #Transform to  RTL system
@@ -106,7 +108,7 @@ mm3d AperiCloud .*$EXTENSION Arbitrary SH=_mini  WithCam=0
   
 #HERE, MASKING COULD BE DONE!!!
 if [ "$wait_for_mask" = true ]; then
-    mm3d SaisieMasqQT AperiCloud_Arbitrary__mini.ply
+    mm3d SaisieMasqQT *.ply
 	read -rsp $'Press any key to continue...\n' -n1 key
 fi 
 	
