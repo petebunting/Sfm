@@ -185,12 +185,12 @@ Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0],
          i[1], bFolder) for i in finalList)    
     
 #
-
-def proc_tawny(file):
-    
-    tawny = ['mm3d', 'Tawny', file, 'RadiomEgal=1', 'DegRap=4',
-             'Out=Orthophotomosaic.tif']
-    call(tawny)
+#
+#def proc_tawny(file):
+#    
+#    tawny = ['mm3d', 'Tawny', file, 'RadiomEgal=1', 'DegRap=4',
+#             'Out=Orthophotomosaic.tif']
+#    call(tawny)
 
 
     
