@@ -24,12 +24,13 @@ sz=none
 CSV=none
 
  
-while getopts "e:x:y:u:sz:r:z:eq:g:w:proc:csv:h" opt; do  
+while getopts "e:m:x:y:u:sz:r:z:eq:g:w:proc:csv:h" opt; do  
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
       echo "usage: Drone.sh -e JPG -x 55000 -y 6600000 -u \"32 +north\" -p true -r 0.05"
       echo "	-e EXTENSION     : image file type (JPG, jpg, TIF, png..., default=JPG)."
+      echo "	-m match         : exaustive matching" 
       echo "	-x X_OFF         : X (easting) offset for ply file overflow issue (default=0)."
       echo "	-y Y_OFF         : Y (northing) offset for ply file overflow issue (default=0)."
       echo "	-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
@@ -42,11 +43,14 @@ while getopts "e:x:y:u:sz:r:z:eq:g:w:proc:csv:h" opt; do
       echo " -prc proc        : no of CPU thread used (needed even when using GPU)"
       echo " -csv -CSV        : whether to use a separate csv "
       echo "	-h	             : displays this message and exits."
-      echo " " 
+      echo " "  
       exit 0
       ;;    
 	e)
       EXTENSION=$OPTARG
+      ;;
+    m)
+      match=$OPTARG 
       ;;
 	u)
       UTM=$OPTARG
@@ -145,16 +149,22 @@ fi
 
 
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
+#Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 if [  "$size" != none ]; then
     echo "resizing to $size for tie point detection"
+    # mogrify -path Sharp -sharpen 0x3  *.JPG # this sharpens very well worth doing
     mogrify -resize $size *.JPG
-        # mogrify -path Sharp -sharpen 0x3  *.JPG # this sharpens very well worth doing
-    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 else
     echo "using a default re-size of 2000 long axis on imgs"
     mogrify -resize 2000 *.JPG 
-    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 fi 
+
+if [  "$match" != none ]; then
+    echo "exaustive matching"
+    mm3d Tapioca .*$EXTENSION All -1 @SFS
+else
+    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
+fi
 
 
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1

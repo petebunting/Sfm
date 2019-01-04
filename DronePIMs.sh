@@ -26,14 +26,16 @@ size=none
 prc=3,3
 gpu=1
 CSV=1
+match=none
  
-while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:g:proc:zr:t:h" opt; do
+while getopts "e:a:m:csv:x:y:u:sz:pao:r:z:eq:g:proc:zr:t:h" opt; do
   case $opt in
     h) 
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
       echo "usage: DronePIMs.sh -e JPG -a MicMac -u 30 +north -r 0.1"
       echo "	-e EXTENSION     : image file type (JPG, jpg, TIF, png..., default=JPG)."
       echo "	-a Algorithm     : type of algo eg BigMac, MicMac, Forest, Statue etc"
+      echo "	-m match         : exaustive matching" 
       echo "	-csv CSV         : Whether to use a csv file."
       echo "	-x X_OFF         : X (easting) offset for ply file overflow issue (default=0)."
       echo "	-y Y_OFF         : Y (northing) offset for ply file overflow issue (default=0)."
@@ -57,6 +59,9 @@ while getopts "e:a:csv:x:y:u:sz:spao:r:z:eq:g:proc:zr:t:h" opt; do
       ;;
     a)
       Algorithm=$OPTARG
+      ;;
+    m)
+      match=$OPTARG 
       ;;
     csv)
       CSV=$OPTARG
@@ -169,12 +174,18 @@ if [  "$size" != none ]; then
     echo "resizing to $size for tie point detection"
     # mogrify -path Sharp -sharpen 0x3  *.JPG # this sharpens very well worth doing
     mogrify -resize $size *.JPG
-    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 else
     echo "using a default re-size of 2000 long axis on imgs"
     mogrify -resize 2000 *.JPG 
-    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 fi 
+
+if [  "$match" != none ]; then
+    echo "exaustive matching"
+    mm3d Tapioca .*$EXTENSION All -1 @SFS
+else
+    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
+fi
+
 
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1 VeryStrict=1
 
