@@ -25,7 +25,7 @@ zreg=0.01
 size=none 
 prc=3,3
 gpu=1
-CSV=1
+CSV=none
 match=none
  
 while getopts "e:a:m:csv:x:y:u:sz:pao:r:z:eq:g:proc:zr:t:h" opt; do
@@ -181,7 +181,7 @@ fi
 
 if [  "$match" != none ]; then
     echo "exaustive matching"
-    mm3d Tapioca .*$EXTENSION All -1 @SFS
+    mm3d Tapioca All ".*JPG" -1 @SFS
 else
     mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 fi
