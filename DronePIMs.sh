@@ -297,9 +297,9 @@ if [ "$tile" != none ]; then
     fi
 else
 
-mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF ZReg=$zreg SH=_mini  
+    mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF ZReg=$zreg SH=_mini  
 
-mm3d Pims2MNT $Algorithm ZReg=$zreg
+    mm3d Pims2MNT $Algorithm ZReg=$zreg
 	 
 	 
 
@@ -312,12 +312,12 @@ mm3d Pims2MNT $Algorithm ZReg=$zreg
 
 	# When images are large they will be tiled 
 
-mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif
+    mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif
 
 	#Making OUTPUT folder
     #mkdir OUTPUT
 
-mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
+    mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
     #cp PIMs-ORTHO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
     #gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" OUTPUT/OrthFinal.tif
 
@@ -325,13 +325,13 @@ mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
 	# need if else for this 
 	#mm3d ConvertIm PIMs-TmpBasc/PIMs-Merged_Prof.tif Out=OUTPUT/DSM.tif
 
-cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/DSM.tfw
-cp PIMs-TmpBasc/PIMs-Merged_Prof.tif OUTPUT/DSM.tif
-cp PIMs-TmpBasc/PIMs-Merged_Masq.tif OUTPUT/Mask.tif
-cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/Mask.tfw
+    cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/DSM.tfw
+    cp PIMs-TmpBasc/PIMs-Merged_Prof.tif OUTPUT/DSM.tif
+    cp PIMs-TmpBasc/PIMs-Merged_Masq.tif OUTPUT/Mask.tif
+    cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/Mask.tfw
 
-gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" DSM.tif
-gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Mask.tif
+    gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" DSM.tif
+    gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Mask.tif
 
 fi 
     #mask_dsm.py -folder $PWD -pims 1 
