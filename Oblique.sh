@@ -11,17 +11,19 @@ Algorithm=Statue
 wait_for_mask=true
 ZOOM=2
 dist=5
+match=none
 
-while getopts "e:a:sdmz:h" opt; do
+while getopts "e:a:m:s:d:msk:z:h" opt; do
   case $opt in
     h)
       echo "Run workflow for point cloud from culture 3d algo."
       echo "usage: Oblique.sh -e JPG -a Statue -d 10 -z 1"
       echo "	-e EXTENSION   : image file type (JPG, jpg, TIF, png..., default=JPG)."
       echo "	-a Algorithm   : type of algo eg BigMac, MicMac, Forest, Statue etc."
+      echo "	-m match         : exaustive matching" 
       echo "	-s             : Do not use 'Schnaps' optimised homologous points (does by default)."
       echo "	-d             : distance between photos for image pairs"
-      echo "	-m             : Pause for Mask before correlation (does not by default)."
+      echo "	-msk             : Pause for Mask before correlation (does not by default)."
       echo "	-z ZOOM        : Zoom Level (default=2)"
       echo "	-h	  : displays this message and exits."
       echo " "
@@ -32,7 +34,10 @@ while getopts "e:a:sdmz:h" opt; do
       ;;
   algo)
       Algorithm=$OPTARG
-      ;;      
+      ;; 
+    m)
+      match=$OPTARG 
+      ;;     
 	z)
       ZOOM=$OPTARG
       ;;
@@ -42,7 +47,7 @@ while getopts "e:a:sdmz:h" opt; do
 	d)
       dist=$OPTARG
       ;; 
-	m)
+	msk)
       wait_for_mask=true
       ;;  
     \?)
@@ -78,7 +83,12 @@ mogrify -resize 2000 *.JPG
 #File FileImagesNeighbour.xml
 
 # If the camera positions are all over the shop its better to use the ALL option
-mm3d Tapioca All .*$EXTENSION  -1 @SFS
+if [  "$match" != none ]; then
+    echo "exaustive matching"
+    mm3d Tapioca All ".*JPG" -1 @SFS
+else
+    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
+fi
 
 
 #if [ "use_Schnaps" = true ]; then
