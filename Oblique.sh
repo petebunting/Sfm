@@ -1,7 +1,9 @@
 # This is for oblique imagery - a work in progress
+# The main difference here is using the C3DC algorithm at the end of the process to produce a point cloud
+# It has been written with testing things out in mind, with hefty datasets covered by the other scripts
 
 # Author Ciaran Robb
-# Based on the L.Girod original - credit to him!
+# Based on a L.Girod script - credit to him!
 # Aberystwyth University
 
 
@@ -85,6 +87,7 @@ echo "         </BSC>                                                           
 echo "</SystemeCoord>                                                                                             " >> SysUTM.xml
 
 if [  "$CSV"=1  ]; then 
+
     echo "using csv file"
     cs=*.csv
     mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1   
@@ -121,6 +124,8 @@ fi
 
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1 
 
+#Compute Relative orientation (Arbitrary system)
+mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
 
 # This lot screws it up when not all nadir!!!! 
 #Transform to  RTL system
