@@ -150,6 +150,8 @@ fi
 	
 #Do the correlation of the images
 
-mm3d C3DC $Algorithm .*$EXTENSION Arbitrary ZoomF=$ZOOM Masq3D=Arbitrary_polyg3d.xml
+mm3d C3DC $Algorithm .*$EXTENSION Arbitrary ZoomF=$ZOOM Masq3D=Arbitrary_polyg3d.xml Out=Dense.ply
 
-mm3d vTiPunch
+mm3d TiPunch Dense.ply Mode=$Algorithm Out=MeshOot.ply Pattern=.*$EXTENSION
+
+mm3d Tequila .*$EXTENSION Forest MeshOot.ply
