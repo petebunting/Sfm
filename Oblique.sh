@@ -15,8 +15,9 @@ ZOOM=2
 dist=5
 match=none
 CSV=0
+sz=none
 
-while getopts "e:a:m:csv:u:s:d:msk:z:h" opt; do
+while getopts "e:a:m:csv:u:sz:s:d:msk:z:h" opt; do
   case $opt in
     h)
       echo "Run workflow for point cloud from culture 3d algo."
@@ -48,7 +49,10 @@ while getopts "e:a:m:csv:u:s:d:msk:z:h" opt; do
       ;;
 	u)
       UTM=$OPTARG 
-      ;;   
+      ;; 
+ 	sz)
+      size=$OPTARG 
+      ;;     
 	z)
       ZOOM=$OPTARG
       ;;
@@ -101,6 +105,14 @@ else
 fi
 #Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
 
+if [  "$size"!=none ]; then
+    echo "resizing to $size for tie point detection"
+    mogrify -resize $size *.JPG
+    # mogrify -path Sharp -sharpen 0x3  *.JPG # this sharpens very well worth doing
+else
+    echo "using a default re-size of 2000 long axis on imgs"
+    mogrify -resize 2000 *.JPG 
+fi 
 
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 #if [  "$size" != none ]; then
@@ -154,4 +166,4 @@ mm3d C3DC $Algorithm .*$EXTENSION Arbitrary ZoomF=$ZOOM Masq3D=Arbitrary_polyg3d
 
 mm3d TiPunch Dense.ply Mode=$Algorithm Out=MeshOot.ply Pattern=.*$EXTENSION
 
-mm3d Tequila .*$EXTENSION Forest MeshOot.ply
+mm3d Tequila .*$EXTENSION Forest MeshOot.ply Filter=1
