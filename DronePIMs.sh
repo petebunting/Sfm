@@ -24,8 +24,9 @@ Algorithm=Forest
 zreg=0.01
 size=none 
 prc=3,3
-gpu=1
-CSV=none
+gpu=0
+tile=none
+CSV=0
 match=none
  
 while getopts "e:a:m:csv:x:y:u:sz:pao:r:z:eq:g:proc:zr:t:h" opt; do
@@ -128,7 +129,7 @@ if [ "$utm_set" = false ]; then
 	exit 1
 fi
 
-if [ "$gpu" != none ]; then
+if [ "$gpu" = 1 ]; then
 	echo "Using GPU support"
 else
  echo "Using CPU only"
@@ -153,7 +154,7 @@ echo "</SystemeCoord>                                                           
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
 
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-if [  "$CSV" != none  ]; then 
+if [  "$CSV"=1  ]; then 
     echo "using csv file"
     cs=*.csv
     mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
