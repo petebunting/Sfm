@@ -151,18 +151,19 @@ mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree
 mm3d AperiCloud .*$EXTENSION Arbitrary WithCam=0 SH=_mini Out=Arbitrary.ply
 mm3d AperiCloud .*$EXTENSION Ground_RTL SH=_mini Out=withcams.ply
 
-mm3d AperiCloud .*$EXTENSION Ground_RTL  WithCam=0 SH=_mini
+mm3d AperiCloud .*$EXTENSION Ground_RTL WithCam=0 Out=RTL.ply SH=_mini
 
   
 #HERE, MASKING COULD BE DONE!!!
 if [ "$wait_for_mask" = true ]; then
     mm3d SaisieMasqQT Arbitrary.ply
 	read -rsp $'Press any key to continue...\n' -n1 key
-fi 
-	
+	mm3d C3DC $Algorithm .*$EXTENSION Arbitrary ZoomF=$ZOOM Masq3D=Arbitrary_polyg3d.xml Out=Dense.ply
+else
+    mm3d C3DC $Algorithm .*$EXTENSION Ground_RTL ZoomF=$ZOOM Out=Dense.ply
+fi	
 #Do the correlation of the images
 
-mm3d C3DC $Algorithm .*$EXTENSION Arbitrary ZoomF=$ZOOM Masq3D=Arbitrary_polyg3d.xml Out=Dense.ply
 
 mm3d TiPunch Dense.ply Mode=$Algorithm Out=MeshOot.ply Pattern=.*$EXTENSION
 
