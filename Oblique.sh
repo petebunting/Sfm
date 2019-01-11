@@ -159,12 +159,18 @@ if [ "$wait_for_mask" = true ]; then
     mm3d SaisieMasqQT Arbitrary.ply
 	read -rsp $'Press any key to continue...\n' -n1 key
 	mm3d C3DC $Algorithm .*$EXTENSION Arbitrary ZoomF=$ZOOM Masq3D=Arbitrary_polyg3d.xml Out=Dense.ply
+	mm3d TiPunch Dense.ply Mode=$Algorithm Pattern=.*$EXTENSION
+
+     mm3d Tequila .*$EXTENSION Arbitrary MeshOot.ply Filter=1
 else
     mm3d C3DC $Algorithm .*$EXTENSION Ground_RTL ZoomF=$ZOOM Out=Dense.ply
+    mm3d TiPunch Dense.ply Mode=$Algorithm Pattern=.*$EXTENSION
+
+    mm3d Tequila .*$EXTENSION Ground_RTL C3DC$Algorithm_poisson_depth8.ply Filter=1
 fi	
 #Do the correlation of the images
 
 
 mm3d TiPunch Dense.ply Mode=$Algorithm Out=MeshOot.ply Pattern=.*$EXTENSION
 
-mm3d Tequila .*$EXTENSION Forest MeshOot.ply Filter=1
+mm3d Tequila .*$EXTENSION Arbitrary C3DC$Algorithm_poisson_depth8.ply Filter=1
