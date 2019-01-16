@@ -200,12 +200,6 @@ mm3d Tapas Fraser .*$EXTENSION Out=Arbitrary SH=_mini
 	
 mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 
-# Either this or the next stage is ruining stuff
-# Arbitrary  
-   
-#Visualize Ground_RTL orientation   
-
-  
    
 #  
 #Change system to final cartographic system  
@@ -221,10 +215,6 @@ else
     mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
 fi
 #Print out a text file with the camera positions (for use in external software, e.g. GIS)
-
- 
-
-# Important NOTE
  
  
 if [ "$tile" != none ]; then
@@ -302,29 +292,12 @@ else
 
     mm3d Pims2MNT $Algorithm ZReg=$zreg
 	 
-	 
-
-	#source deactivate pymicmac;
-	#if [ "$DEQ" != none ]; then 
-	#	mm3d Tawny Ortho-MEC-Malt DEq=$DEQ
-	#else
-	##	mm3d Tawny Ortho-MEC-Malt DEq=1 
-	#fi
-
-	# When images are large they will be tiled 
 
     mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif
 
-	#Making OUTPUT folder
-    #mkdir OUTPUT
 
     mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
-    #cp PIMs-ORTHO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
-    #gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" OUTPUT/OrthFinal.tif
 
-	  
-	# need if else for this 
-	#mm3d ConvertIm PIMs-TmpBasc/PIMs-Merged_Prof.tif Out=OUTPUT/DSM.tif
 
     cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/DSM.tfw
     cp PIMs-TmpBasc/PIMs-Merged_Prof.tif OUTPUT/DSM.tif

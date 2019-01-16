@@ -206,38 +206,9 @@ else
 	mm3d Malt UrbanMNE ".*.$EXTENSION" Ground_UTM UseGpu=0 EZA=1 DoOrtho=1 SzW=$win ZoomF=$ZoomF NbProc=$proc
 fi
 
-#if [ "$DEQ" ]; then 
-	
-#else
-#	mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 Out=Orthophotomosaic.tif DEq=1 
-	
-#fi
 
 mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 DegRap=4
 
-# TODO - Tawny is not great for a homogenous ortho
-
-# OSSIM - BASED MOSAICING ----------------------------------------------------------------------------
-# Just here as an alternative for putting together tiles 
-#for f in *.tif; 
-#do      
-#gdal_edit.py -a_srs "+proj=utm +zone=30 +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; 
-#done
-
-
-
-# Create some image histograms for ossim
-#ossim-create-histo -i *Ort**.tif;
-#GNU para
-# find **Ort_*.tif | parallel "ossim-create-histo -i {}"
- 
-# Basic ortho with ossim is:
-#ossim-orthoigen *Ort**.tif mosaic_plain.tif;
-
-#ossim-orthoigen --combiner-type ossimFeatherMosaic *tile*/*Ortho-MEC-Malt/*Orthophotomosaic*.tif feather.tif
-
-#choices
-#ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic 
 
 
 #Making OUTPUT folder
