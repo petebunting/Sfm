@@ -20,9 +20,10 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
+from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt
 from PyQt4.QtGui import QAction, QIcon, QPushButton
 from subprocess import check_call
+from PyQt4 import uic
 # Initialize Qt resources from file resources.py
 import resources
 # Import the code for the dialog
@@ -33,10 +34,14 @@ from qgis.core import QgsMessageLog
 
 import platform
 
+    
+    # Before we go any further, the OS must be identified
+    # as silly people using windows need a different start to the command check_call
+
 if platform.system() == 'WINDOWS':
     mm3d = 'mm3d.exe'
 else:
-    mm3d = "/home/ciaran/micmac/bin/mm3d"
+    mm3d = "/users/ciaranrobb/micmac/bin/mm3d"
 
 def sExif(mm3d):
 
@@ -158,13 +163,18 @@ class MicMac_SFM:
             self.plugin_dir,
             'i18n',
             'MicMac_SFM_{}.qm'.format(locale))
-
+        #TODO  The dock widget I hope - not working at present second arg an issue
+        #self.dock = MicMac_SFMDialog()
+        #self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dock )
+    
         if os.path.exists(locale_path):
+            
             self.translator = QTranslator()
             self.translator.load(locale_path)
 
             if qVersion() > '4.3.3':
                 QCoreApplication.installTranslator(self.translator)
+        
 
 
         # Declare instance attributes
@@ -275,9 +285,11 @@ class MicMac_SFM:
             text=self.tr(u'MicMac3D'),
             check_callback=self.run,
             parent=self.iface.mainWindow())
+    
+                      
         
-        self.dlg.setexif.clicked.connect(self.run)
-        self.dlg.gps2txt.clicked.connect(self.run)
+        self.dlg.setexif.clicked.connect(self.run1)
+        #self.dlg.gps2txt.clicked.connect(gp2txt(mm3d))
 
 
     def unload(self):
@@ -289,16 +301,152 @@ class MicMac_SFM:
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
-    
-    # Before we go any further, the OS must be identified
-    # as silly people using windows need a different start to the command check_call
+
         
     # Here define all the subprocess check_calls to the micmac qt commands
     # I imagine there is a less ugly way so will change infuture
     
-    # prelim
+    if platform.system() == 'WINDOWS':
+        mm3d = 'mm3d.exe'
+    else:
+        mm3d = "/users/ciaranrobb/micmac/bin/mm3d"
+
+    def sExif(self):
+        
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:            
+            cmd = [mm3d,'vSetExif']
+            check_call(cmd)
+        else:
+            pass
+        
+    def gp2txt(self):
+        
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:   
+        
+            cmd = [mm3d, 'vXifGps2Txt']
+            check_call(cmd)
+        else:
+            pass
     
-   
+    def gp2xml(self):
+        
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:   
+        
+            cmd = [mm3d, 'vXifGps2Xml']
+            check_call(cmd)
+        else:
+            pass
+    
+    def oriconv(self):
+        
+        cmd = [mm3d, 'vOriConvert']
+        check_call(cmd)
+    
+    # matching and orientation    
+    def tapi(self):
+        
+        cmd = [mm3d, 'vTapioca']
+        check_call(cmd)
+    
+    def schnap(self):
+        cmd = [mm3d, 'vSchnaps']
+        check_call(cmd)
+        
+    def taps(self):
+        
+        cmd = [mm3d, 'vTapas']
+        check_call(cmd)
+        
+    def campi(self):
+        
+        cmd = [mm3d, 'vCampari']
+        check_call(cmd)
+    
+    def centBasc(self):
+        
+        cmd = [mm3d, 'vCenterBascule']
+        check_call(cmd)
+        
+    def chSysCoord(self):
+        
+        cmd = [mm3d, 'vChgSysCo']
+        check_call(cmd)
+    
+    # editing
+    def saisemask(self):
+        
+        cmd = [mm3d, 'vSaisieMasqQT']
+        check_call(cmd)
+    
+    # dense cloud and DSM etc
+    def malT(self):
+        
+        cmd = [mm3d, 'vMalt']
+        check_call(cmd)
+    
+    def pimS(self):
+        
+        cmd = [mm3d, 'vPIMs']
+        check_call(cmd)
+        
+    def pm2mnt(self):
+        
+        cmd = [mm3d, 'vPIMs2MNT']
+        check_call(cmd)
+    
+    def c3d(self):
+        
+        cmd = [mm3d, 'vC3DC']
+        check_call(cmd)
+    
+    # point cloud and mesh generation
+    
+    def aperiC(self):
+        
+        cmd = [mm3d, 'vAperiCloud']
+        check_call(cmd)
+    
+    def nuageP(self):
+        
+        cmd = [mm3d, 'vNuage2PLY']
+        check_call(cmd)
+    
+    def tpunch(self):
+        
+        cmd = [mm3d, 'vTiPunch']
+        check_call(cmd)
+    
+    def tquila(self):
+        
+        cmd = [mm3d, 'vTequila']
+        check_call(cmd)
+        
+    def run1(self):
+        
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:            
+            sExif(mm3d)
+        else:
+            pass
+        
+        
+        
+        
 
         
     def run(self):
@@ -307,20 +455,21 @@ class MicMac_SFM:
         self.dlg.show()
         # Run the dialog event loop
         
-        
-        
         result = self.dlg.exec_()
+        
+
         # See if OK was pressed
 
         
         
         if result:
-            sExif(mm3d)
-            
-            gp2txt(mm3d)
-            
-        else:
+#            sExif(mm3d)
+#            
+#            gp2txt(mm3d)
+#            
+#        else:
 
             pass
- 
+    
+        
         
