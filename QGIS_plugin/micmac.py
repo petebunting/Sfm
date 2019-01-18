@@ -351,87 +351,209 @@ class MicMac_SFM:
     
     def oriconv(self):
         
-        cmd = [mm3d, 'vOriConvert']
-        check_call(cmd)
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:
+            
+            cmd = [mm3d, 'vOriConvert']
+            check_call(cmd)
+        else:
+            pass
     
     # matching and orientation    
     def tapi(self):
         
-        cmd = [mm3d, 'vTapioca']
-        check_call(cmd)
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:
+            
+            cmd = [mm3d, 'vTapioca']
+            check_call(cmd)
+        else:
+            pass
+        
     
     def schnap(self):
-        cmd = [mm3d, 'vSchnaps']
-        check_call(cmd)
+        
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:           
+        
+            cmd = [mm3d, 'vSchnaps']
+            check_call(cmd)
+        else:
+            pass
         
     def taps(self):
         
-        cmd = [mm3d, 'vTapas']
-        check_call(cmd)
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:
+            cmd = [mm3d, 'vTapas']
+            check_call(cmd)
+        else:
+            pass
         
     def campi(self):
         
-        cmd = [mm3d, 'vCampari']
-        check_call(cmd)
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:
+            cmd = [mm3d, 'vCampari']
+            check_call(cmd)
+        else:
+            pass
     
     def centBasc(self):
         
-        cmd = [mm3d, 'vCenterBascule']
-        check_call(cmd)
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:
+            cmd = [mm3d, 'vCenterBascule']
+            check_call(cmd)
+        else:
+            pass
         
     def chSysCoord(self):
         
-        cmd = [mm3d, 'vChgSysCo']
-        check_call(cmd)
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:
+            
+            cmd = [mm3d, 'vChgSysCo']
+            check_call(cmd)
+        else:
+            pass
     
     # editing
     def saisemask(self):
         
-        cmd = [mm3d, 'vSaisieMasqQT']
-        check_call(cmd)
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:
+            
+            cmd = [mm3d, 'vSaisieMasqQT']
+            check_call(cmd)
+        else:
+            pass
     
     # dense cloud and DSM etc
     def malT(self):
         
-        cmd = [mm3d, 'vMalt']
-        check_call(cmd)
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:
+            
+            cmd = [mm3d, 'vMalt']
+            check_call(cmd)
+        else:
+            pass
     
     def pimS(self):
         
-        cmd = [mm3d, 'vPIMs']
-        check_call(cmd)
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:
+            
+            cmd = [mm3d, 'vPIMs']
+            check_call(cmd)
+        else:
+            pass
         
     def pm2mnt(self):
         
-        cmd = [mm3d, 'vPIMs2MNT']
-        check_call(cmd)
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:
+            cmd = [mm3d, 'vPIMs2MNT']
+            check_call(cmd)
+        else:
+            pass
     
     def c3d(self):
         
-        cmd = [mm3d, 'vC3DC']
-        check_call(cmd)
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:
+        
+            cmd = [mm3d, 'vC3DC']
+            check_call(cmd)
+        else:
+            pass
     
     # point cloud and mesh generation
     
     def aperiC(self):
         
-        cmd = [mm3d, 'vAperiCloud']
-        check_call(cmd)
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:
+            cmd = [mm3d, 'vAperiCloud']
+            check_call(cmd)
+        else:
+            pass
     
     def nuageP(self):
         
-        cmd = [mm3d, 'vNuage2PLY']
-        check_call(cmd)
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:
+            cmd = [mm3d, 'vNuage2PLY']
+            check_call(cmd)
+        else:
+            pass
     
     def tpunch(self):
         
-        cmd = [mm3d, 'vTiPunch']
-        check_call(cmd)
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:
+            cmd = [mm3d, 'vTiPunch']
+            check_call(cmd)
+        else:
+            pass
     
     def tquila(self):
         
-        cmd = [mm3d, 'vTequila']
-        check_call(cmd)
+        self.dlg.show()
+        
+        result1 = self.dlg.exec_()
+        
+        if result1:
+            cmd = [mm3d, 'vTequila']
+            check_call(cmd)
+        else:
+            pass
         
     def run1(self):
         
