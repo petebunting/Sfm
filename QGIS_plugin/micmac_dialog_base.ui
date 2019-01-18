@@ -262,7 +262,7 @@
   <widget class="QGroupBox" name="dense">
    <property name="geometry">
     <rect>
-     <x>20</x>
+     <x>30</x>
      <y>490</y>
      <width>371</width>
      <height>211</height>
@@ -271,37 +271,11 @@
    <property name="title">
     <string>Dense Point Cloud and Ortho-rectification</string>
    </property>
-   <widget class="QPushButton" name="malt">
-    <property name="geometry">
-     <rect>
-      <x>250</x>
-      <y>60</y>
-      <width>103</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Malt</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="c3dc">
-    <property name="geometry">
-     <rect>
-      <x>130</x>
-      <y>60</y>
-      <width>103</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>C3DC</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="tawny">
     <property name="geometry">
      <rect>
       <x>90</x>
-      <y>170</y>
+      <y>150</y>
       <width>171</width>
       <height>32</height>
      </rect>
@@ -310,27 +284,47 @@
      <string>Ortho-mosaic (Tawny)</string>
     </property>
    </widget>
-   <widget class="QWidget" name="layoutWidget">
+   <widget class="QPushButton" name="pims2mnt">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>40</y>
+      <x>90</x>
+      <y>100</y>
       <width>103</width>
-      <height>134</height>
+      <height>32</height>
      </rect>
     </property>
-    <layout class="QGridLayout" name="gridLayout_2">
-     <item row="1" column="0">
+    <property name="text">
+     <string>PIMs2Mnt</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>50</y>
+      <width>223</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
       <widget class="QPushButton" name="pims">
        <property name="text">
         <string>PIMs</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QPushButton" name="pims2mnt">
+     <item>
+      <widget class="QPushButton" name="c3dc">
        <property name="text">
-        <string>PIMs2Mnt</string>
+        <string>C3DC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="malt">
+       <property name="text">
+        <string>Malt</string>
        </property>
       </widget>
      </item>
