@@ -43,103 +43,7 @@ if platform.system() == 'WINDOWS':
 else:
     mm3d = "/users/ciaranrobb/micmac/bin/mm3d"
 
-def sExif(mm3d):
 
-     cmd = [mm3d,'vSetExif']
-     check_call(cmd)
-                        
-def gp2txt(mm3d):
-    
-    cmd = [mm3d, 'vXifGps2Txt']
-    check_call(cmd)
-
-def gp2xml(mm3d):
-    
-    cmd = [mm3d, 'vXifGps2Xml']
-    check_call(cmd)
-
-def oriconv(mm3d):
-    
-    cmd = [mm3d, 'vOriConvert']
-    check_call(cmd)
-
-# matching and orientation    
-def tapi(mm3d):
-    
-    cmd = [mm3d, 'vTapioca']
-    check_call(cmd)
-
-def schnap(mm3d):
-    cmd = [mm3d, 'vSchnaps']
-    check_call(cmd)
-    
-def taps(mm3d):
-    
-    cmd = [mm3d, 'vTapas']
-    check_call(cmd)
-def campi(mm3d):
-    
-    cmd = [mm3d, 'vCampari']
-    check_call(cmd)
-
-def centBasc(mm3d):
-    
-    cmd = [mm3d, 'vCenterBascule']
-    check_call(cmd)
-    
-def chSysCoord(mm3d):
-    
-    cmd = [mm3d, 'vChgSysCo']
-    check_call(cmd)
-
-# editing
-def saisemask(mm3d):
-    
-    cmd = [mm3d, 'vSaisieMasqQT']
-    check_call(cmd)
-
-# dense cloud and DSM etc
-def malT(mm3d):
-    
-    cmd = [mm3d, 'vMalt']
-    check_call(cmd)
-
-def pimS(mm3d):
-    
-    cmd = [mm3d, 'vPIMs']
-    check_call(cmd)
-    
-def pm2mnt(mm3d):
-    
-    cmd = [mm3d, 'vPIMs2MNT']
-    check_call(cmd)
-
-def c3d(mm3d):
-    
-    cmd = [mm3d, 'vC3DC']
-    check_call(cmd)
-
-# point cloud and mesh generation
-
-def aperiC(mm3d):
-    
-    cmd = [mm3d, 'vAperiCloud']
-    check_call(cmd)
-
-def nuageP(mm3d):
-    
-    cmd = [mm3d, 'vNuage2PLY']
-    check_call(cmd)
-
-def tpunch(mm3d):
-    
-    cmd = [mm3d, 'vTiPunch']
-    check_call(cmd)
-
-def tquila(mm3d):
-    
-    cmd = [mm3d, 'vTequila']
-    check_call(cmd)
 
 
 class MicMac_SFM:
@@ -287,11 +191,29 @@ class MicMac_SFM:
             parent=self.iface.mainWindow())
     
                       
+        # initialize all the buttoms with functions
+        # Again this pretty ugly should be less lazy
+        self.dlg.setexif.clicked.connect(self.sExif)
+        self.dlg.gps2txt.clicked.connect(self.gp2txt)
+        self.dlg.gps2xml.clicked.connect(self.gp2xml)
+        self.dlg.oriconvert.clicked.connect(self.oriconv)
+        self.dlg.tapioca.clicked.connect(self.tapi)
+        self.dlg.schnaps.clicked.connect(self.schnap)
+        self.dlg.tapas.clicked.connect(self.taps)
+        self.dlg.campari.clicked.connect(self.campi)
+        self.dlg.cBask.clicked.connect(self.centBasc)
+        self.dlg.cSysCord.clicked.connect(self.chSysCoord)
+        self.dlg.saisiemasq.clicked.connect(self.saisemask)
+        self.dlg.malt.clicked.connect(self.malT)
+        self.dlg.pims.clicked.connect(self.pimS)
+        self.dlg.c3dc.clicked.connect(self.c3d)
+        self.dlg.pims2mnt.clicked.connect(self.pm2mnt)
+        self.dlg.tawny.clicked.connect(self.tawn)
+        self.dlg.aperi.clicked.connect(self.aperiC)
+        self.dlg.nuage.clicked.connect(self.tawn)
+        self.dlg.tipunch.clicked.connect(self.tpunch)
+        self.dlg.tequila.clicked.connect(self.tquila)
         
-        self.dlg.setexif.clicked.connect(self.run1)
-        #self.dlg.gps2txt.clicked.connect(gp2txt(mm3d))
-
-
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -305,9 +227,9 @@ class MicMac_SFM:
         
     # Here define all the subprocess check_calls to the micmac qt commands
     # I imagine there is a less ugly way so will change infuture
-    
+    #TODO  
     if platform.system() == 'WINDOWS':
-        mm3d = 'mm3d.exe'
+        mm3d = '\mm3d.exe'
     else:
         mm3d = "/users/ciaranrobb/micmac/bin/mm3d"
 
@@ -555,22 +477,17 @@ class MicMac_SFM:
         else:
             pass
         
-    def run1(self):
+    def tawn(self):
         
         self.dlg.show()
         
         result1 = self.dlg.exec_()
         
-        if result1:            
-            sExif(mm3d)
+        if result1:
+            cmd = [mm3d, 'vTawny']
+            check_call(cmd)
         else:
             pass
-        
-        
-        
-        
-
-        
     def run(self):
         """Run method that performs all the real work"""
         # show the dialog
