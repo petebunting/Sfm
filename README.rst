@@ -17,6 +17,8 @@ Sfm requires:
 
 - MicMac
 
+- OSSIM
+
 
 https://micmac.ensg.eu/index.php/Accueil
 
