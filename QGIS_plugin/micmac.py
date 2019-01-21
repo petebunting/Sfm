@@ -39,7 +39,7 @@ import platform
     # as silly people using windows need a different start to the command check_call
 
 if platform.system() == 'WINDOWS':
-    mm3d = 'mm3d.exe'
+    mm3d = 'mm3d'
 else:
     mm3d = "/home/ciaran/micmac/bin/mm3d"
 
