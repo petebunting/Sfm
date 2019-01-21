@@ -41,7 +41,7 @@ import platform
 if platform.system() == 'WINDOWS':
     mm3d = 'mm3d.exe'
 else:
-    mm3d = "/users/ciaranrobb/micmac/bin/mm3d"
+    mm3d = "/home/ciaran/micmac/bin/mm3d"
 
 
 
@@ -231,7 +231,7 @@ class MicMac_SFM:
     if platform.system() == 'WINDOWS':
         mm3d = '\mm3d.exe'
     else:
-        mm3d = "/users/ciaranrobb/micmac/bin/mm3d"
+        mm3d = "/home/ciaran/micmac/bin/mm3d"
 
     def sExif(self):
         
