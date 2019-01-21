@@ -224,7 +224,7 @@ if [ "$tile" != none ]; then
         # The only thing I wonder here is whether it is worth building the whole 'master'
          # PIMs folder and simply moving the Ortho part for later (this still involves
         # repetition of the PIMs2Mnt though
-        pims_subset.py -folder $PWD -algo $Algorithm -num $prc -zr $zreg -g 1
+        PimsBatch.py -folder $PWD -algo $Algorithm -num $prc -zr $zreg -g 1
         mkdir OUTPUT    
     
         #mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
@@ -258,7 +258,7 @@ if [ "$tile" != none ]; then
     
         #mask_dsm.py -folder $PWD -pims 1 
     else 
-        pims_subset.py -folder $PWD -algo $Algorithm -num $prc -zr $zreg 
+        PimsBatch.py -folder $PWD -algo $Algorithm -num $prc -zr $zreg 
         
         # Process the DSM-------------------------------------------- 
     

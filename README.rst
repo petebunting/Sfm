@@ -56,7 +56,7 @@ Typically a DJI phantom or other such platform. This uses Malt for dense matchin
 
 - A script like the previous but using the PIMs algorithm
 
-**pims_subset.py**
+**PimsBatch.py**
 
 - Similar to gridproc, this processes data in tiles/chunks using the PIMs algorithm, where GPU support is optional
 - this script is an uinternal option in DronePIMs.sh
