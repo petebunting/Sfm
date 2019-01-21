@@ -52,24 +52,26 @@ Contents
 - A script to process photographs with complete exif information outputting orthomosaic, DSM and point cloud (.ply) file
 Typically a DJI phantom or other such platform. This uses Malt for dense matching
 
+**gridproc.sh**
+
+- Process a large dataset (typically 100s-1000s of images) in tiles (this appears to be best for large ortho-mosaics)
+
+**MaltBatch.py**
+
+- This processes data in tiles/chunks using the Malt algorithm, where GPU support is optional
+
+- It is internal to gridproc
+
 **DronePIMs.sh**
 
 - A script like the previous but using the PIMs algorithm
 
 **PimsBatch.py**
 
-- Similar to gridproc, this processes data in tiles/chunks using the PIMs algorithm, where GPU support is optional
-- this script is an uinternal option in DronePIMs.sh
+- This processes data in tiles/chunks using the PIMs algorithm, where GPU support is optional
 
+- this script is an internal option in DronePIMs.sh
 
-**gridproc.sh**
-
-- Process a large dataset in tiles (this appears to be best for large ortho-mosaics)
-
-**MaltBatch.py**
-
-- This processes data in tiles/chunks using the Malt algorithm, where GPU support is optional
-- It is internal to gridproc
 
 **MicMac-LocalChantierDescripteur.xml**
 - This is a local descriptor of the camera in the C-Astral Bramor - alter the params for your own camera
