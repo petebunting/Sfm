@@ -11,7 +11,7 @@ Dependencies
 
 Sfm requires:
 
-- GNU/Linux or Mac OS only 
+- GNU/Linux or Mac OS for full functionality (python scripts are not platform dependent)
 
 - Python 3
 
@@ -25,14 +25,25 @@ https://micmac.ensg.eu/index.php/Accueil
 User installation
 ~~~~~~~~~~~~~~~~~
 
+**MicMac**
+
 See MicMac install instructions here:
 
 https://micmac.ensg.eu/index.php/Install
 
-I have found it is best to install MicMac wthout the GPU as my main install and add it to the path 
+- I have found it is best to install MicMac wthout the GPU as my main install and add it to the path 
 
-Then I install a separate micmac with GPU support and add it as a variable in shell scripts or the absoulute path when needed
+- Then I install a separate micmac with GPU support and add it as a variable in shell scripts or the absoulute path when needed
 
+**OSSIM**
+
+Install OSSIM via tha ubuntu GIS or equivalent repo 
+
+- Ensure the OSSIM preferences file is on you path, otherwise it will not recognise different projections
+
+- see here https://trac.osgeo.org/ossim/wiki/ossimPreferenceFile
+
+**The scripts**
 Clone or download then make the folder or files executable in a terminal
 
 .. code-block:: bash
@@ -41,8 +52,14 @@ Clone or download then make the folder or files executable in a terminal
 
 Add to your .bashrc or .bash_profile if you wish to execute anywhere
 
-You may need to edit the hashbangs at the top of the scripts!
 
+**QGIS plugin**
+
+To enable use of MicMac and scripts for those who fear the command line...
+
+NOT FINISHED!!! Please wait until I upload to the repo.....
+
+... Unles you wish to manually paste it into your plugin folder and alter the mm3d variable to your own micmac bin path
 
 Contents
 ~~~~~~~~~~~~~~~~~

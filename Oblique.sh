@@ -111,16 +111,16 @@ if [  "$size"!=none ]; then
     # mogrify -path Sharp -sharpen 0x3  *.JPG # this sharpens very well worth doing
 else
     echo "using a default re-size of 2000 long axis on imgs"
-    mogrify -resize 2000 *.JPG 
+    mogrify -resize 3000 *.JPG 
 fi 
-
+ 
 #Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
 #if [  "$size" != none ]; then
 #    echo "resizing to $size for tie point detection"
 ##    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 #else
 #    echo "using a default re-size of 2000 long axis on imgs"
-mogrify -resize 2000 *.JPG 
+#mogrify -resize 2000 *.JPG 
 #    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 #fi 
 #File FileImagesNeighbour.xml

@@ -1,4 +1,4 @@
-# This is a generic workflow for DJI type platforms etc with embedded GNSS data
+# This is a generic workflow for UAV platforms etc with embedded GNSS data
 # # Author Ciaran Robb
 # Aberystwyth University
 
@@ -177,7 +177,7 @@ if [  "$size" != none ]; then
     mogrify -resize $size *.JPG
 else
     echo "using a default re-size of 2000 long axis on imgs"
-    mogrify -resize 2000 *.JPG 
+    mogrify -resize 3000 *.JPG 
 fi 
 
 if [  "$match" != none ]; then

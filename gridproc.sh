@@ -188,7 +188,7 @@ if [  "$size" != none ]; then
     mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 else
     echo "using a default re-size of 2000 long axis on imgs"
-    mogrify -resize 2000 *.JPG 
+    mogrify -resize 3000 *.JPG 
     mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
 fi 
 

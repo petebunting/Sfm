@@ -156,7 +156,7 @@ if [  "$size" != none ]; then
     mogrify -resize $size *.JPG
 else
     echo "using a default re-size of 2000 long axis on imgs"
-    mogrify -resize 2000 *.JPG 
+    mogrify -resize 3000 *.JPG 
 fi 
 
 if [  "$match" != none ]; then
