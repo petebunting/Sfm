@@ -31,7 +31,7 @@ def getTileIndex(pX, pY, minX, minY, maxX, maxY, nX, nY):
 
 
 def run(orientationFolder, homolFolder, imagesFormat,
-        numNeighbours, outputFile, outputFolder, num, maltOptions):
+        numNeighbours, outputFolder, num):
 
     if not os.path.isdir(orientationFolder):
         raise Exception(orientationFolder + ' does not exist')
@@ -39,11 +39,6 @@ def run(orientationFolder, homolFolder, imagesFormat,
     if includeHomol and not os.path.isdir(homolFolder):
         raise Exception(homolFolder + ' does not exist')
 
-    if os.path.isfile(outputFile):
-        raise Exception(outputFile + ' already exists!')
-    if os.path.isdir(outputFolder):
-        raise Exception(outputFolder + ' already exists!')
-    # create output folder
     os.makedirs(outputFolder)
 
     mmLocalChanDescFile = 'MicMac-LocalChantierDescripteur.xml'

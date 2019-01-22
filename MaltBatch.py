@@ -140,7 +140,7 @@ mkdir(bFolder)
 pk = str(proc)
 
 tileIt = ['tile.py', '-i', 'Ori-'+gOri, '-e',
-            'JPG', '-o', 'DistributedMatching.xml', '-f', 'DMatch', '-n',
+            'JPG', '-f', 'DMatch', '-n',
             numChunks]
 
 call(tileIt)
