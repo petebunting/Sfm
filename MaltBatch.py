@@ -166,7 +166,7 @@ def proc_malt(subList, subName, bFolder):
             
     mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', gOri, "DefCor=0", "DoOrtho=1",
             "SzW=1", "DirMEC="+subName,
-            "UseGpu="+gP, zoomF, zregu, "NbProc="+pk] #, 'SH=_mini']
+            "UseGpu="+gP, zoomF, zregu, "NbProc="+pk, "EZA=1"] #, 'SH=_mini']
     call(mm3d)
     tawny = ['mm3d', 'Tawny', "Ortho-"+subName+'/', 'RadiomEgal=1', 'DegRap=4',
              'Out=Orthophotomosaic.tif']
