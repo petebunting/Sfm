@@ -85,7 +85,7 @@ def runMalt(fld, gOri= "Ground_UTM", numChunks='3,3', mp=-1, bFolder='MaltBatch'
                 
         mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', gOri, "DefCor=0", "DoOrtho=1",
                 "SzW=1", "DirMEC="+subName,
-                "UseGpu="+gP, zoomF, zregu, "NbProc=1"] #, 'SH=_mini']
+                "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1"] #, 'SH=_mini']
         call(mm3d)
         tawny = ['mm3d', 'Tawny', "Ortho-"+subName+'/', 'RadiomEgal=1', 'DegRap=4',
                  'Out=Orthophotomosaic.tif']
