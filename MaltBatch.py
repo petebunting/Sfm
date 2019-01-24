@@ -176,8 +176,12 @@ def proc_malt(subList, subName, bFolder):
     hd, tl = path.split(subList)
     subDir = path.join(bFolder, tl)
     mkdir(subDir)
-    move(mDir, subDir)
-    move(oDir, subDir)
+    if path.exists(mDir):
+        move(mDir, subDir)
+    elif path.exists(oDir):
+        move(oDir, subDir)
+    else:
+        pass
 
 
 
