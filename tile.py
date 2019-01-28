@@ -152,6 +152,8 @@ def run(orientationFolder, homolFolder, imagesFormat,
             tileImageListOutputFile = open(tileImageListOutputFileName, 'w')
             tileImageListOutputFile.write('\n'.join(sorted(imagesTileSet)))
             tileImageListOutputFile.close()
+            # Should this be added to give the option if feathering can be made to work
+            #'BoxTerrain=[' + ','.join([str(e) for e in (tMinX, tMinY, tMaxX, tMaxY)]) + ']"
 
 
 
