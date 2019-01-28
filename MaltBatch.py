@@ -178,7 +178,9 @@ def proc_malt(subList, subName, bFolder):
     mkdir(subDir)
     if path.exists(mDir):
         move(mDir, subDir)
-    elif path.exists(oDir):
+    else:
+        pass
+    if path.exists(oDir):
         move(oDir, subDir)
     else:
         pass
