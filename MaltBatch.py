@@ -15,7 +15,7 @@ This uses Malt which appear to be better for orthophoto generation
 
 Gpu use is optional
 
-Tends to overload 11gb GPU with around 30 images+
+GPU mem overload is dependent on a number of factors and does occur so will require a bit of testing
 
 Usage: 
     
@@ -155,7 +155,7 @@ nameList .sort()
 #list mania - I am crap at writing code
 finalList = list(zip(txtList, nameList))
 
-
+rejectList = []
 # May revert to another way but lets see.....
 def proc_malt(subList, subName, bFolder):
     
@@ -179,6 +179,7 @@ def proc_malt(subList, subName, bFolder):
     if path.exists(mDir):
         move(mDir, subDir)
     else:
+        rejectList.append(subName)
         pass
     if path.exists(oDir):
         move(oDir, subDir)
@@ -188,7 +189,10 @@ def proc_malt(subList, subName, bFolder):
 
 
 Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0], 
-         i[1], bFolder) for i in finalList)    
+         i[1], bFolder) for i in finalList) 
+
+print("Tiles missed for some reason were:")
+[print(s) for s in rejectList]   
     
 #
 #
