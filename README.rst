@@ -35,6 +35,26 @@ https://micmac.ensg.eu/index.php/Install
 
 - Then I install a separate micmac with GPU support and add it as a variable in shell scripts or the absoulute path when needed
 
+With reference to GPU supported compilation specifically, the following may help:
+
+- Replace the GpGpu.cmake file with the one supplied here as I have added the later Pascal 6.1 architecture
+
+- Make sure you install and use an older gcc compiler such as 5 or 6 for the cmake bit
+
+- Replace k with no of threads 
+
+.. code-block:: bash
+    
+cmake -DWITH_OPEN_MP=OFF
+      -DCMAKE_C_COMPILER=/usr/bin/gcc-5
+      -DCMAKE_CXX_COMPILER=/usr/bin/g++-5
+      -DCUDA_ENABLED=1
+      -DCUDA_SDK_ROOT_DIR=/path/to/NVIDIA_CUDA-9.2_Samples/common 
+      -DCUDA_SAMPLE_DIR=/path/to/NVIDIA_CUDA-9.2_Samples 
+      -DCUDA_CPP11THREAD_NOBOOSTTHREAD=ON ..
+
+make install -j k
+
 **OSSIM**
 
 Install OSSIM via tha ubuntu GIS or equivalent repo 
