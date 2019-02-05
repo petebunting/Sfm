@@ -45,13 +45,13 @@ With reference to GPU supported compilation specifically, the following may help
 
 .. code-block:: bash
     
-cmake -DWITH_OPEN_MP=OFF
-      -DCMAKE_C_COMPILER=/usr/bin/gcc-5
-      -DCMAKE_CXX_COMPILER=/usr/bin/g++-5
-      -DCUDA_ENABLED=1
-      -DCUDA_SDK_ROOT_DIR=/path/to/NVIDIA_CUDA-9.2_Samples/common 
-      -DCUDA_SAMPLE_DIR=/path/to/NVIDIA_CUDA-9.2_Samples 
-      -DCUDA_CPP11THREAD_NOBOOSTTHREAD=ON ..
+    cmake -DWITH_OPEN_MP=OFF
+          -DCMAKE_C_COMPILER=/usr/bin/gcc-5
+          -DCMAKE_CXX_COMPILER=/usr/bin/g++-5
+          -DCUDA_ENABLED=1
+          -DCUDA_SDK_ROOT_DIR=/path/to/NVIDIA_CUDA-9.2_Samples/common 
+          -DCUDA_SAMPLE_DIR=/path/to/NVIDIA_CUDA-9.2_Samples 
+          -DCUDA_CPP11THREAD_NOBOOSTTHREAD=ON ..
 
 make install -j k
 
