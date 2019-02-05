@@ -53,7 +53,7 @@ With reference to GPU supported compilation specifically, the following may help
           -DCUDA_SAMPLE_DIR=/path/to/NVIDIA_CUDA-9.2_Samples 
           -DCUDA_CPP11THREAD_NOBOOSTTHREAD=ON ..
 
-make install -j k
+    make install -j k
 
 **OSSIM**
 
