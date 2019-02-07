@@ -176,11 +176,8 @@ def proc_malt(subList, subName, bFolder):
             "SzW=1", "DirMEC="+subName,
             "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1", box]
     ret = call(mm3d)
-    if ret != 0:
-        rejectList.append(subList)
-        rejectList.append(subName)
-        
-        print(subName+" missed")
+    if ret != 0:        
+        print(subName+" missed, will pick it up later")
         pass
     else:       
         tawny = [mmgpu, 'Tawny', "Ortho-"+subName+'/', 'RadiomEgal=1', 
@@ -219,28 +216,33 @@ else:
 # This repeats the above sequentially to ensure no errors occur
 # (Suspect it is image magick related with muti-threading)
 
-# Look for unfinished tiles    
-rejectList = glob(path.join(fld,"*.list" ))
+# get a list of what has worked
+doneList = glob(path.join(bFolder, "*.list"))
+doneFinal = [path.split(d)[1] for d in doneList]
 
-if len(rejectList ==0):
+# get the difference between completed and listed tiles
+# set is a nice command for this purpose :D
+rejSet = set(nameList) - set(doneFinal)
+rejList = list(rejSet)
+
+if rejList is None:
     print('No tiles missed, all done!')
     pass
 else:
-    rejtxtList = [path.split(i)[1] for i in rejectList]
     print('The following tiles have been missed\n')    
-    [print(t) for t in rejtxtList]
+    [print(t) for t in rejList]
     print("\nRectifying this now...")
 
 # make list of txt image lists so we can access the pattern through the same
 # func below
-rejtxtFinal = [path.join(fld, "DMatch", p) for p in rejtxtList]
-
-finrejList = list(zip(rejtxtFinal, rejtxtList))
-
-[rmtree(k) for k in rejectList]
-
-for f in finrejList:
-    proc_malt(f[0], f[1], bFolder)
+    rejtxtFinal = [path.join(fld, "DMatch", p) for p in rejList]
+    
+    finrejList = list(zip(rejtxtFinal, rejList))
+    
+    #[rmtree(k) for k in rejList]
+    
+    for f in finrejList:
+        proc_malt(f[0], f[1], bFolder)
     
     
 
