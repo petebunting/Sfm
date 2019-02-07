@@ -150,10 +150,11 @@ nameList .sort()
 #list mania - I am crap at writing code
 finalList = list(zip(txtList, nameList))
 
-#rejectListA = []
+rejectList = []
 #rejectListB = []
+
 # May revert to another way but lets see.....
-def proc_malt(subList, subName, bFolder):#, rejectListA, rejectListB):
+def proc_malt(subList, subName, bFolder):
     # Yes all this string mucking about is not great but it is better than 
     # dealing with horrific xml, when the info is so simple
     flStr = open(subList).read()
@@ -167,23 +168,14 @@ def proc_malt(subList, subName, bFolder):#, rejectListA, rejectListB):
     sub = imgs.replace("\n", "|")
     print('the img subset is \n'+sub+'\n\n, the bounding box is '+box) 
     
-    
-    #This is getting messy....must find a way round this
-#    for im in imgSeq:  
-#        imNm = im+"_Ch3.tif"
-#        imNmF = path.join("Tmp-MM-Dir", imNm)
-#        imCmd = ["mm3d",  "MpDcraw",  imNmF, "Add16B8B=0",  "ConsCol=0",  
-#                 "ExtensionAbs=None","16B=0",  "CB=1",  
-#                 "NameOut=."+imNmF, "Gamma=2.2", "EpsLog=1.0"]
-#        call(imCmd)
-#        
+
     mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
             "SzW=1", "DirMEC="+subName,
             "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1", box]
     ret = call(mm3d)
     if ret != 0:
-        #rejectListA.append(sub)
-        #rejectListB.append(subName)
+        rejectList.append(subList)
+        rejectList.append(subName)
         
         print(subName+" missed")
         pass
@@ -204,21 +196,26 @@ def proc_malt(subList, subName, bFolder):#, rejectListA, rejectListB):
             move(oDir, subDir)
         else:
             pass
+        return rejectList
 
 if args.mx is None:
-    Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0], 
+    todoList = Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0], 
          i[1], bFolder) for i in finalList) 
 else:
     subFinal = finalList[0:args.mx]
-    Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0], 
+    todoList = Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0], 
              i[1], bFolder) for i in subFinal) 
 
 # This is here so we have some account of anything missed due to thread/gpu mem overload issues
 
-#print("Now processing any missing tiles\n Doing these in sequence to ensure success\n"
-#      "If no output follows it is assumed none have been missed")
-#   
-#procRejects = list(zip(rejectListA, rejectListB))
+print("Now processing any missing tiles\n Doing these in sequence to ensure success\n"
+      "If no output follows it is assumed none have been missed")
+# 
+if len(todoList)==0:
+    pass
+else: 
+    for t in todoList:
+        proc_malt(t[0], t[1], bFolder)
 #
 #for r in procRejects:
 #    mm3d = [mmgpu, "Malt", algo,'"'+r[0]+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
