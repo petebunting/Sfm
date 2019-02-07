@@ -18,6 +18,9 @@ Gpu use is optional
 GPU mem overload is dependent on a number of factors and does occur so will require a bit of testing
 Probably best to stick to a max of no physical CPUs for nt arg
 
+There are also issues related to the mutli thread use of image magick (used by micmac),
+which are hopefully recovered in the single thread clean-up at the end. 
+
 Usage: 
     
 MaltBatch.py -folder $PWD -algo UrbanMNE -num 3,3 -zr 0.01 -g 1 -nt 3 
@@ -64,7 +67,7 @@ parser.add_argument("-nt", "--noT", type=int, required=False,
 parser.add_argument("-max", "--mx", type=int, required=False, 
                     help="max no of chunks to do - this is for testing with a smaller subset")
 
-parser.add_argument("-clip", "--cl", type=bool, required=False, default=False, 
+parser.add_argument("-clip", "--cl", type=bool, required=False, default=True, 
                     help="Clip output to a bounding box - better if feathering mosaics")
 
 args = parser.parse_args() 
@@ -150,7 +153,7 @@ nameList .sort()
 #list mania - I am crap at writing code
 finalList = list(zip(txtList, nameList))
 
-rejectList = []
+
 #rejectListB = []
 
 # May revert to another way but lets see.....
@@ -196,7 +199,7 @@ def proc_malt(subList, subName, bFolder):
             move(oDir, subDir)
         else:
             pass
-        return rejectList
+        #return rejectList
 
 if args.mx is None:
     todoList = Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0], 
@@ -206,34 +209,40 @@ else:
     todoList = Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0], 
              i[1], bFolder) for i in subFinal) 
 
+
 # This is here so we have some account of anything missed due to thread/gpu mem overload issues
 
-print("Now processing any missing tiles\n Doing these in sequence to ensure success\n"
-      "If no output follows it is assumed none have been missed")
 # 
-if len(todoList)==0:
+
+# Please note this is a temporary quick and dirty solution 
+# to which there needs to be something more robust in the end
+# This repeats the above sequentially to ensure no errors occur
+# (Suspect it is image magick related with muti-threading)
+
+# Look for unfinished tiles    
+rejectList = glob(path.join(fld,"*.list" ))
+
+if len(rejectList ==0):
+    print('No tiles missed, all done!')
     pass
-else: 
-    for t in todoList:
-        proc_malt(t[0], t[1], bFolder)
-#
-#for r in procRejects:
-#    mm3d = [mmgpu, "Malt", algo,'"'+r[0]+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
-#            "SzW=1", "DirMEC="+r[1],
-#            "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1", box]
-#    call(mm3d)
+else:
+    rejtxtList = [path.split(i)[1] for i in rejectList]
+    print('The following tiles have been missed\n')    
+    [print(t) for t in rejtxtList]
+    print("\nRectifying this now...")
 
+# make list of txt image lists so we can access the pattern through the same
+# func below
+rejtxtFinal = [path.join(fld, "DMatch", p) for p in rejtxtList]
 
+finrejList = list(zip(rejtxtFinal, rejtxtList))
 
+[rmtree(k) for k in rejectList]
 
+for f in finrejList:
+    proc_malt(f[0], f[1], bFolder)
     
-#
-#
-#def proc_tawny(file):
-#    
-#    tawny = ['mm3d', 'Tawny', file, 'RadiomEgal=1', 'DegRap=4',
-#             'Out=Orthophotomosaic.tif']
-#    call(tawny)
+    
 
 
     
