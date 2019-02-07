@@ -147,13 +147,24 @@ def run(orientationFolder, homolFolder, imagesFormat,
 
             tileName = 'tile_' + str(i) + '_' + str(j)
 
+            tMaxY = tMaxY + 10
+            tMaxX = tMaxX + 10
+                
+            # Here is the bounding box in a very ugly expression from pymicmac orig
+            box = "BoxTerrain=[" + ",".join([str(e) for e in (tMinX, tMinY, tMaxX, tMaxY)]) + "]"
             # Dump the list of images for this tile
             tileImageListOutputFileName = outputFolder + '/' + tileName + '.list'
+            
+            
             tileImageListOutputFile = open(tileImageListOutputFileName, 'w')
+            
+            tileImageListOutputFile.write(box+'\n')
+            
             tileImageListOutputFile.write('\n'.join(sorted(imagesTileSet)))
             tileImageListOutputFile.close()
             # Should this be added to give the option if feathering can be made to work
-            #'BoxTerrain=[' + ','.join([str(e) for e in (tMinX, tMinY, tMaxX, tMaxY)]) + ']"
+            
+
 
 
 

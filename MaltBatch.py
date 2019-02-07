@@ -16,19 +16,20 @@ This uses Malt which appear to be better for orthophoto generation
 Gpu use is optional
 
 GPU mem overload is dependent on a number of factors and does occur so will require a bit of testing
+Probably best to stick to a max of no physical CPUs for nt arg
 
 Usage: 
     
-MaltBatch.py -folder $PWD -algo UrbanMNE -num 3,3 -zr 0.01 -g 1 -nt 3 -p 4
+MaltBatch.py -folder $PWD -algo UrbanMNE -num 3,3 -zr 0.01 -g 1 -nt 3 
 
-Here we are are using yhe UrbaMNE algorithm on a 3x3 grid of tiles, using the gpu,
-processing 3 tiles in parallel, with four threads allocated to each
+Here we are are using the UrbaMNE algorithm on a 3x3 grid of tiles, using the gpu,
+processing 3 tiles in parallel
 
 """
 
 #import pandas as pd
 import argparse
-from subprocess import call
+from subprocess import call#, check_call, run
 from glob2 import glob
 from os import path, mkdir, remove
 from shutil import rmtree, move
@@ -59,9 +60,10 @@ parser.add_argument("-g", "--gp", type=bool, required=False,
 
 parser.add_argument("-nt", "--noT", type=int, required=False, 
                     help="no of tiles at a time")
+# Not sure this works
+parser.add_argument("-max", "--mx", type=int, required=False, 
+                    help="max no of chunks to do - this is for testing with a smaller subset")
 
-parser.add_argument("-p", "--prc", type=bool, required=False, 
-                   help="no of threads per chunk")
 
 args = parser.parse_args() 
 
@@ -81,7 +83,7 @@ else:
     numChunks = args.noCh
 
 if args.zrg is None:
-   zregu='Regul=0.01'
+   zregu='Regul=0.02'
 else:
     zregu = 'Regul='+args.zrg
     
@@ -102,19 +104,15 @@ if args.noT is None:
 else:
     mp = args.noT
 
-if args.prc is None:
-# joblib is prettt srtict on the thread front so thread cannot even be allocated externally    
-    proc = 1
-else:
-    proc = args.prc
-                        
+
+
 
 fld = args.fld
 
 
 DMatch = path.join(fld, 'DMatch')
 bFolder = path.join(fld, 'MaltBatch')
-distMatch = path.join(fld, 'DistributedMatching.xml')
+
 
 binList = [DMatch, bFolder]
 
@@ -128,16 +126,11 @@ for crap in binList:
         
     except OSError:
         pass
-# files to bin
-try:
-    remove(distMatch)
-except OSError:
-        pass
+
 
 mkdir(bFolder)
 # run tiling
 
-pk = str(proc)
 
 tileIt = ['tile.py', '-i', 'Ori-'+gOri, '-e',
             'JPG', '-f', 'DMatch', '-n',
@@ -158,39 +151,64 @@ finalList = list(zip(txtList, nameList))
 rejectList = []
 # May revert to another way but lets see.....
 def proc_malt(subList, subName, bFolder):
-    
+    # Yes all this string mucking about is not great but it is better than 
+    # dealing with horrific xml, when the info is so simple
     flStr = open(subList).read()
-    flStr.replace("\n", "|")
-    sub = flStr.replace("\n", "|")
-    print('the img subset is \n'+sub+'\n\n')    
-            
-    mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', gOri, "DefCor=0", "DoOrtho=1",
+    # first we need the box terrain line
+    box = flStr.split('\n', 1)[0]
+    # then the images
+    imgs = flStr.split("\n", 1)[1]
+    # If on a repeat run this should avoid problems
+#    imgSeq = imgs.split()
+    imgs.replace("\n", "|")
+    sub = imgs.replace("\n", "|")
+    print('the img subset is \n'+sub+'\n\n, the bounding box is '+box) 
+    
+    
+    #This is getting messy....must find a way round this
+#    for im in imgSeq:  
+#        imNm = im+"_Ch3.tif"
+#        imNmF = path.join("Tmp-MM-Dir", imNm)
+#        imCmd = ["mm3d",  "MpDcraw",  imNmF, "Add16B8B=0",  "ConsCol=0",  
+#                 "ExtensionAbs=None","16B=0",  "CB=1",  
+#                 "NameOut=."+imNmF, "Gamma=2.2", "EpsLog=1.0"]
+#        call(imCmd)
+#        
+    mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
             "SzW=1", "DirMEC="+subName,
-            "UseGpu="+gP, zoomF, zregu, "NbProc="+pk, "EZA=1"] #, 'SH=_mini']
-    call(mm3d)
-    tawny = ['mm3d', 'Tawny', "Ortho-"+subName+'/', 'RadiomEgal=1', 'DegRap=4',
-             'Out=Orthophotomosaic.tif']
-    call(tawny)
-    mDir = path.join(fld, subName)
-    oDir = path.join(fld, "Ortho-"+subName) 
-    hd, tl = path.split(subList)
-    subDir = path.join(bFolder, tl)
-    mkdir(subDir)
-    if path.exists(mDir):
-        move(mDir, subDir)
-    else:
+            "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1", box]
+    ret = call(mm3d)
+    if ret != 0:
         rejectList.append(subName)
+        print(subName+" missed")
         pass
-    if path.exists(oDir):
-        move(oDir, subDir)
-    else:
-        pass
+    else:       
+        tawny = [mmgpu, 'Tawny', "Ortho-"+subName+'/', 'RadiomEgal=1', 
+                 'Out=Orthophotomosaic.tif']
+        call(tawny)
+        mDir = path.join(fld, subName)
+        oDir = path.join(fld, "Ortho-"+subName) 
+        hd, tl = path.split(subList)
+        subDir = path.join(bFolder, tl)
+        mkdir(subDir)
+        if path.exists(mDir):
+            move(mDir, subDir)
+        else:
+            pass
+        if path.exists(oDir):
+            move(oDir, subDir)
+        else:
+            pass
 
-
-
-Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0], 
+if args.mx is None:
+    Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0], 
          i[1], bFolder) for i in finalList) 
+else:
+    subFinal = finalList[0:args.mx]
+    Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0], 
+             i[1], bFolder) for i in subFinal) 
 
+# This is here so we have some account of anything missed due to thread/gpu mem overload issues
 print("Tiles missed for some reason were:")
 [print(s) for s in rejectList]   
     
