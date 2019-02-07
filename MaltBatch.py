@@ -64,6 +64,8 @@ parser.add_argument("-nt", "--noT", type=int, required=False,
 parser.add_argument("-max", "--mx", type=int, required=False, 
                     help="max no of chunks to do - this is for testing with a smaller subset")
 
+parser.add_argument("-clip", "--cl", type=bool, required=False, default=False, 
+                    help="Clip output to a bounding box - better if feathering mosaics")
 
 args = parser.parse_args() 
 
@@ -148,9 +150,10 @@ nameList .sort()
 #list mania - I am crap at writing code
 finalList = list(zip(txtList, nameList))
 
-rejectList = []
+#rejectListA = []
+#rejectListB = []
 # May revert to another way but lets see.....
-def proc_malt(subList, subName, bFolder):
+def proc_malt(subList, subName, bFolder):#, rejectListA, rejectListB):
     # Yes all this string mucking about is not great but it is better than 
     # dealing with horrific xml, when the info is so simple
     flStr = open(subList).read()
@@ -179,7 +182,9 @@ def proc_malt(subList, subName, bFolder):
             "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1", box]
     ret = call(mm3d)
     if ret != 0:
-        rejectList.append(subName)
+        #rejectListA.append(sub)
+        #rejectListB.append(subName)
+        
         print(subName+" missed")
         pass
     else:       
@@ -209,8 +214,21 @@ else:
              i[1], bFolder) for i in subFinal) 
 
 # This is here so we have some account of anything missed due to thread/gpu mem overload issues
-print("Tiles missed for some reason were:")
-[print(s) for s in rejectList]   
+
+#print("Now processing any missing tiles\n Doing these in sequence to ensure success\n"
+#      "If no output follows it is assumed none have been missed")
+#   
+#procRejects = list(zip(rejectListA, rejectListB))
+#
+#for r in procRejects:
+#    mm3d = [mmgpu, "Malt", algo,'"'+r[0]+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
+#            "SzW=1", "DirMEC="+r[1],
+#            "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1", box]
+#    call(mm3d)
+
+
+
+
     
 #
 #
