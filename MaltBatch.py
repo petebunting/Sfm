@@ -225,7 +225,7 @@ doneFinal = [path.split(d)[1] for d in doneList]
 rejSet = set(nameList) - set(doneFinal)
 rejList = list(rejSet)
 
-if rejList is None:
+if len(rejList) ==0:
     print('No tiles missed, all done!')
     pass
 else:
