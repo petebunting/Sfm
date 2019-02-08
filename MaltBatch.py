@@ -143,13 +143,17 @@ tileIt = ['tile.py', '-i', 'Ori-'+gOri, '-e',
 
 call(tileIt)
 
+# To avoid the inevitable problems with pyramids not being read
+# This is a sub step in PIMs, so it is assumed the simalr(ish) principle here,
+# it will solve the problem
+pyram = [mmgpu, 'MMPyram', '.*JPG', 'Ground_UTM']
 
-
+call(pyram)
 #
 txtList = glob(path.join(DMatch,'*.list'))
 nameList = [path.split(i)[1] for i in txtList]
-txtList.sort()
-nameList .sort()
+#txtList.sort()
+#nameList .sort()
 #list mania - I am crap at writing code
 finalList = list(zip(txtList, nameList))
 
@@ -173,7 +177,7 @@ def proc_malt(subList, subName, bFolder):
     
 
     mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
-            "SzW=1", "DirMEC="+subName,
+            "SzW=1", "DirMEC="+subName, 
             "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1", box]
     ret = call(mm3d)
     if ret != 0:        
@@ -185,6 +189,7 @@ def proc_malt(subList, subName, bFolder):
         call(tawny)
         mDir = path.join(fld, subName)
         oDir = path.join(fld, "Ortho-"+subName) 
+#        pDir= path.join(fld, subName+"pyram")
         hd, tl = path.split(subList)
         subDir = path.join(bFolder, tl)
         mkdir(subDir)
@@ -196,6 +201,10 @@ def proc_malt(subList, subName, bFolder):
             move(oDir, subDir)
         else:
             pass
+#        if path.exists(pDir):
+#            move(pDir, subDir)
+#        else:
+#            pass
         #return rejectList
 
 if args.mx is None:
