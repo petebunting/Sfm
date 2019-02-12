@@ -234,7 +234,7 @@ done
 find MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif | parallel "ossim-create-histo -i {}" 
  
 # Max seems best
-ossim-orthoigen --combiner-type ossimMaxMosaic  MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif Orthomax.tif
+ossim-orthoigen --combiner-type ossimFeatherMosaic  MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif Orthof.tif
 
 #--writer-prop threads=20 
 #choices

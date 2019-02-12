@@ -70,6 +70,7 @@ parser.add_argument("-max", "--mx", type=int, required=False,
 parser.add_argument("-clip", "--cl", type=bool, required=False, default=True, 
                     help="Clip output to a bounding box - better if feathering mosaics")
 
+
 args = parser.parse_args() 
 
 if args.oRI is None:
@@ -138,8 +139,8 @@ mkdir(bFolder)
 
 
 tileIt = ['tile.py', '-i', 'Ori-'+gOri, '-e',
-            'JPG', '-f', 'DMatch', '-n',
-            numChunks]
+            'JPG', '-f', 'DMatch', '-n', 
+            numChunks]#, '--neighbours', '9']
 
 call(tileIt)
 
@@ -161,7 +162,7 @@ finalList = list(zip(txtList, nameList))
 #rejectListB = []
 
 # May revert to another way but lets see.....
-def proc_malt(subList, subName, bFolder):
+def proc_malt(subList, subName, bFolder, gP='1'):
     # Yes all this string mucking about is not great but it is better than 
     # dealing with horrific xml, when the info is so simple
     flStr = open(subList).read()
@@ -195,10 +196,12 @@ def proc_malt(subList, subName, bFolder):
         mkdir(subDir)
         if path.exists(mDir):
             move(mDir, subDir)
+            print('subName done')
         else:
-            pass
+            pass            
         if path.exists(oDir):
             move(oDir, subDir)
+            print('subName mosaic done')
         else:
             pass
 #        if path.exists(pDir):
