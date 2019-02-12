@@ -19,7 +19,7 @@
 # Contains elements of L.Girod script - thanks 
 
 # example:
-# ./gridproc.sh -e JPG -u "30 +north" -g 6,6 -w 2 -prc 1 -gpu 1 -b 4
+# ./gridproc.sh -e JPG -u "30 +north" -g 6,6 -w 2 -gpu 1 -b 6
 
 
  
@@ -36,7 +36,6 @@ ZoomF=1
 DEQ=1
 obliqueFolder=none
 grd=6 
-proc=1  
 win=1
 batch=4
 gpu=none
@@ -65,7 +64,6 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:gpu:b:w:prc:csv:h" opt; do
       echo " -gpu gp          : GPU support 1 for use"
       echo " -b batch         : no of jobs at any one time"
       echo " -w win           : Correl window size"
-      echo " -prc proc        : no of CPU thread used (needed even when using GPU)"
       echo " -csv CSV         : a csv file of gnsss etc - default none - something if needed"
       echo "	-h	             : displays this message and exits."
       echo " " 
@@ -220,9 +218,9 @@ else
  
 # Parallel processing - best for a decent ortho later 
 if [ "$gp" != none ]; then
-    MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd,$grd -zr 0.01 -g 1 -nt $batch 
+    MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd -zr 0.02 -g 1 -nt $batch 
 else
-    MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd,$grd -zr 0.01 -nt $batch 
+    MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd -zr 0.02 -nt $batch 
 
 #correct_mosaics.py -folder DistGpu
  
