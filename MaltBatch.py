@@ -153,8 +153,8 @@ call(pyram)
 #
 txtList = glob(path.join(DMatch,'*.list'))
 nameList = [path.split(i)[1] for i in txtList]
-#txtList.sort()
-#nameList .sort()
+txtList.sort()
+nameList .sort()
 #list mania - I am crap at writing code
 finalList = list(zip(txtList, nameList))
 
@@ -162,7 +162,7 @@ finalList = list(zip(txtList, nameList))
 #rejectListB = []
 
 # May revert to another way but lets see.....
-def proc_malt(subList, subName, bFolder, gP='1'):
+def proc_malt(subList, subName, bFolder, gP='1', bbox=True):
     # Yes all this string mucking about is not great but it is better than 
     # dealing with horrific xml, when the info is so simple
     flStr = open(subList).read()
@@ -176,10 +176,14 @@ def proc_malt(subList, subName, bFolder, gP='1'):
     sub = imgs.replace("\n", "|")
     print('the img subset is \n'+sub+'\n\n, the bounding box is '+box) 
     
-
-    mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
-            "SzW=1", "DirMEC="+subName, 
-            "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1", box]
+    if bbox ==True:
+        mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
+                "SzW=1", "DirMEC="+subName, 
+                "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1", box]
+    else:
+        mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
+                "SzW=1", "DirMEC="+subName, 
+                "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1"]
     ret = call(mm3d)
     if ret != 0:        
         print(subName+" missed, will pick it up later")
@@ -254,7 +258,7 @@ else:
     #[rmtree(k) for k in rejList]
     
     for f in finrejList:
-        proc_malt(f[0], f[1], bFolder)
+        proc_malt(f[0], f[1], bFolder, bbox=False)
     
     
 
