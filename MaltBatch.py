@@ -70,7 +70,8 @@ parser.add_argument("-max", "--mx", type=int, required=False,
 parser.add_argument("-clip", "--cl", type=bool, required=False, default=True, 
                     help="Clip output to a bounding box - better if feathering mosaics")
 
-
+parser.add_argument("-ovLap", "--ov", type=str, required=False, default='10', 
+                    help="tile overlap")
 args = parser.parse_args() 
 
 if args.oRI is None:
@@ -140,7 +141,7 @@ mkdir(bFolder)
 
 tileIt = ['tile.py', '-i', 'Ori-'+gOri, '-e',
             'JPG', '-f', 'DMatch', '-n', 
-            numChunks]#, '--neighbours', '9']
+            numChunks, '-ovLap', str(args.ov)]#, '--neighbours', '9']
 
 call(tileIt)
 
@@ -238,8 +239,14 @@ doneFinal = [path.split(d)[1] for d in doneList]
 
 # get the difference between completed and listed tiles
 # set is a nice command for this purpose :D
-rejSet = set(nameList) - set(doneFinal)
-rejList = list(rejSet)
+
+if args.mx is None:
+    rejSet = set(nameList) - set(doneFinal)
+    rejList = list(rejSet)
+else:
+    nameList = [s[1] for s in subFinal] 
+    rejSet = set(nameList) - set(doneFinal)
+    rejList = list(rejSet)
 
 if len(rejList) ==0:
     print('No tiles missed, all done!')

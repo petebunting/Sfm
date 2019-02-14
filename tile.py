@@ -31,7 +31,7 @@ def getTileIndex(pX, pY, minX, minY, maxX, maxY, nX, nY):
 
 
 def run(orientationFolder, homolFolder, imagesFormat,
-        numNeighbours, outputFolder, num):
+        numNeighbours, outputFolder, num, overLap=10):
 
     if not os.path.isdir(orientationFolder):
         raise Exception(orientationFolder + ' does not exist')
@@ -147,8 +147,8 @@ def run(orientationFolder, homolFolder, imagesFormat,
 
             tileName = 'tile_' + str(i) + '_' + str(j)
 
-            tMaxY = tMaxY + 10
-            tMaxX = tMaxX + 10
+            tMaxY = tMaxY + overLap
+            tMaxX = tMaxX + overLap
                 
             # Here is the bounding box in a very ugly expression from pymicmac orig
             box = "BoxTerrain=[" + ",".join([str(e) for e in (tMinX, tMinY, tMaxX, tMaxY)]) + "]"
@@ -212,6 +212,13 @@ parser.add_argument(
     help='(Optional) Homol folder with the tie-points. If specified, for each tile we also consider the homol images of the images in the tile  [default is disabled]',
     type=str,
     required=False)
+parser.add_argument(
+    '-ovLap',
+    '--ovr',
+    default=10,
+    help='(Optional) The amount of overlap between each tile - default is 10',
+    type=int,
+    required=False)
 
 args = parser.parse_args() 
 
@@ -219,7 +226,7 @@ args = parser.parse_args()
 def main():
     try:
         run(args.inputOrientation, args.inputHomol, args.format,
-            args.neighbours, args.folder, args.num)
+            args.neighbours, args.folder, args.num, args.ovr)
     except Exception as e:
         print(e)
 

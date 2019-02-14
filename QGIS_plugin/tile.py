@@ -21,7 +21,7 @@ from scipy import spatial
 
 
 def runtile(orientationFolder, homolFolder, imagesFormat,
-        numNeighbours, outputFile, outputFolder, num, maltOptions):
+        numNeighbours, outputFile, outputFolder, num, maltOptions, overlap=10):
     
     def getTileIndex(pX, pY, minX, minY, maxX, maxY, nX, nY):
         xpos = int((pX - minX) * nX / (maxX - minX))
