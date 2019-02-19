@@ -37,6 +37,7 @@ from glob2 import glob
 from os import path, mkdir, remove
 from shutil import rmtree, move
 from joblib import Parallel, delayed#, parallel_backend
+import gdal
 
 parser = argparse.ArgumentParser()
 
@@ -72,6 +73,10 @@ parser.add_argument("-clip", "--cl", type=bool, required=False, default=True,
 
 parser.add_argument("-ovLap", "--ov", type=str, required=False, default='10', 
                     help="tile overlap")
+
+parser.add_argument("-bbox", "--bb", type=bool, required=False, default=True, 
+                    help="whether or not to box terrain - default is True")
+
 args = parser.parse_args() 
 
 if args.oRI is None:
@@ -217,11 +222,11 @@ def proc_malt(subList, subName, bFolder, gP='1', bbox=True):
 
 if args.mx is None:
     todoList = Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0], 
-         i[1], bFolder) for i in finalList) 
+         i[1], bFolder, bbox=args.bb) for i in finalList) 
 else:
     subFinal = finalList[0:args.mx]
     todoList = Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0], 
-             i[1], bFolder) for i in subFinal) 
+             i[1], bFolder, bbox=args.bb) for i in subFinal) 
 
 
 # This is here so we have some account of anything missed due to thread/gpu mem overload issues
@@ -265,7 +270,7 @@ else:
     #[rmtree(k) for k in rejList]
     
     for f in finrejList:
-        proc_malt(f[0], f[1], bFolder, bbox=False)
+        proc_malt(f[0], f[1], bFolder)#, bbox=False)
     
     
 
