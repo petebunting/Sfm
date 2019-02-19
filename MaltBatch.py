@@ -23,7 +23,7 @@ which are hopefully recovered in the single thread clean-up at the end.
 
 Usage: 
     
-MaltBatch.py -folder $PWD -algo UrbanMNE -num 3,3 -zr 0.01 -g 1 -nt 3 
+MaltBatch.py -folder $PWD -algo UrbanMNE -num 3,3 -zr 0.01 -g 1 -nt 3 -bbox False
 
 Here we are are using the UrbaMNE algorithm on a 3x3 grid of tiles, using the gpu,
 processing 3 tiles in parallel
@@ -37,7 +37,7 @@ from glob2 import glob
 from os import path, mkdir, remove
 from shutil import rmtree, move
 from joblib import Parallel, delayed#, parallel_backend
-import gdal
+#import gdal
 
 parser = argparse.ArgumentParser()
 
@@ -68,8 +68,6 @@ parser.add_argument("-nt", "--noT", type=int, required=False,
 parser.add_argument("-max", "--mx", type=int, required=False, 
                     help="max no of chunks to do - this is for testing with a smaller subset")
 
-parser.add_argument("-clip", "--cl", type=bool, required=False, default=True, 
-                    help="Clip output to a bounding box - better if feathering mosaics")
 
 parser.add_argument("-ovLap", "--ov", type=str, required=False, default='10', 
                     help="tile overlap")
