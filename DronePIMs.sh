@@ -290,7 +290,7 @@ else
 
     mm3d PIMs $Algorithm .*$EXTENSION Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF ZReg=$zreg SH=_mini  
 
-    mm3d Pims2MNT $Algorithm ZReg=$zreg
+    mm3d Pims2MNT $Algorithm ZReg=$zreg DoOrtho=1
 	 
 
     mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif

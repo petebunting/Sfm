@@ -13,7 +13,7 @@ This uses pymicmac functionality to tile the datset into a grid then processes i
 
 Usage: 
     
-pims_subset.py -folder $PWD -algo Forest -num 3,3 -zr 0.01 -g 1 
+PimsBatch.py -folder $PWD -algo Forest -num 3,3 -zr 0.01 -g 1 
 
 """
 
@@ -23,6 +23,7 @@ from subprocess import call
 from glob2 import glob
 from os import path, mkdir, remove
 from shutil import rmtree, move
+from joblib import Parallel, delayed
 parser = argparse.ArgumentParser()
 
 parser.add_argument("-folder", "--fld", type=str, required=True, 
@@ -45,6 +46,9 @@ parser.add_argument("-ori", "--oRI", type=str, required=False,
 
 parser.add_argument("-g", "--gp", type=bool, required=False, 
                     help="gpu use yes or no")
+
+parser.add_argument("-nt", "--noT", type=int, required=False, 
+                    help="no of tiles at a time")
 
 args = parser.parse_args() 
 
@@ -77,15 +81,20 @@ if args.gp is None:
     mmgpu = 'mm3d'
 else:
     mmgpu = '/home/ciaran/MicMacGPU/micmac/bin/mm3d'
+    
+if args.noT is None:
+    mp = 4 
+else:
+    mp = args.noT
 
                         
 #maxIm = args.noIm2
 
 fld = args.fld
 
-#imList = glob(path.join(fld, '*.JPG'))
+imList = glob(path.join(fld, '*.JPG'))
 
-#imList.sort()
+imList.sort()
 
 #sections = chunkIt(imList, numChunks)
 #subList = imList[minIm:maxIm]
@@ -127,38 +136,55 @@ txtList = glob(path.join(DMatch,'*.list'))
 
 
 # Some very ugly stuff going on in here
-for subList in txtList:
+
+#if gpu is true
+#for subList in txtList:
+def procPims(subList, bFolder):
     flStr = open(subList).read()
     flStr.replace("\n", "|")
     sub = flStr.replace("\n", "|")
     print('the img subset is \n'+sub+'\n\n')                 
-    mm3d = [mmgpu, "PIMs", algo,'"'+sub+'"', gOri, "DefCor=0",
-            "SzW=1",
-            "UseGpu=1", zoomF, zregu, 'SH=_mini']
-    call(mm3d)
-    pmsDir = path.join(fld,'PIMs-Forest')
+
+    #pmsDir = path.join(fld,'PIMs-'+algo)
     
     hd, tl = path.split(subList)
     subDir = path.join(bFolder, tl)
     mkdir(subDir)
+    
+    orDir = path.join(fld, '"'+sub+'"')
+    
+    
+    mm3d = [mmgpu, "PIMs", algo, orDir, gOri, "DefCor=0",
+        "SzW=1", zoomF, zregu, 'SH=_mini']
+    call(mm3d)
+    
     mnt = ['mm3d', 'PIMs2MNT', algo, 'DoOrtho=1', zregu]
     call(mnt)
   
-    tawny = ['mm3d', 'Tawny', 'PIMs-ORTHO/', 'RadiomEgal=1', 'DegRap=4',
+    tawny = ['mm3d', 'Tawny', 'PIMs-ORTHO/', 'RadiomEgal=1',# 'DegRap=4',
              'Out=Orthophotomosaic.tif']
     call(tawny)
     
     # sooooo ugly I am getting very lazy
-    newPIMs = path.join(subDir, 'PIMs-Forest')
+    #newPIMs = path.join(subDir, 'PIMs-'+algo)
     newBasc = path.join(subDir, 'PIMs-TmpBasc')
     newOrtho = path.join(subDir, 'PIMs-ORTHO')
     newTmpM = path.join(subDir, 'PIMs-TmpMnt')
     newTmpMO = path.join(subDir, 'PIMs-TmpMntOrtho')
-    mvList = [newPIMs, newBasc, newOrtho, newTmpM, newTmpMO]
+    mvList = [newBasc, newOrtho, newTmpM, newTmpMO] # newPIMs,
     toGo = list(zip(origList, mvList))
     [move(f[0], f[1]) for f in toGo] 
     print(mvList)
     
+#if args.mx is None:
+#    todoList = Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0], 
+#         i[1], bFolder, bbox=args.bb) for i in finalList) 
+#else:
+#    subFinal = finalList[0:args.mx]
     
+
+todoList = Parallel(n_jobs=mp,verbose=5)(delayed(procPims)(i,
+                    bFolder) for i in txtList)
+
 
 
