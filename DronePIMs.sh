@@ -293,10 +293,11 @@ else
     mm3d Pims2MNT $Algorithm ZReg=$zreg DoOrtho=1
 	 
 
-    mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif
+    #mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif
+    TawnyBatch.py -folder $PWD -num 20,20 -nt -1
 
 
-    mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
+    #mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
 
 
     cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/DSM.tfw
@@ -306,30 +307,22 @@ else
 
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" DSM.tif
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Mask.tif
+   
+    for f in TawnyBatch/**Orthophotomosaic*.tif; do     
+     gdal_edit.py -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
 
+ 
+    # Create some image histograms for ossim  
+    #
+    find TawnyBatch/**Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}" 
+ 
+
+    ossim-orthoigen --combiner-type ossimMaxMosaic TawnyBatch/**Orthophotomosaic*.tif OUTPUT/max.tif
 fi 
     #mask_dsm.py -folder $PWD -pims 1 
     
     
-# OSSIM - BASED MOSAICING ----------------------------------------------------------------------------
-# Just here as an alternative for putting together tiles 
-# This need GNU parallel
- 
-#for f in PIMs-ORTHO/*Ort_**.tif; 
-#do      
-# gdal_edit.py -a_srs "+proj=utm +zone=30 +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; 
-#done
-
- 
-# Create some image histograms for ossim  
-#
-#find PIMs-ORTHO/*Ort**.tif | parallel "ossim-create-histo -i {}" 
- 
-
-#ossim-orthoigen --combiner-type ossimMaxMosaic PIMs-ORTHO/**Ort**.tif OUTPUT/max.tif
-# Or more options
-
-#choices
+#choices to mosaic
 #ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic 
 
 
