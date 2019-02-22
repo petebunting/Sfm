@@ -151,9 +151,9 @@ call(tileIt)
 # To avoid the inevitable problems with pyramids not being read
 # This is a sub step in PIMs, so it is assumed the simalr(ish) principle here,
 # it will solve the problem
-pyram = [mmgpu, 'MMPyram', '.*JPG', 'Ground_UTM']
+#pyram = [mmgpu, 'MMPyram', '.*JPG', 'Ground_UTM']
 
-call(pyram)
+#call(pyram)
 #
 txtList = glob(path.join(DMatch,'*.list'))
 nameList = [path.split(i)[1] for i in txtList]
@@ -261,14 +261,14 @@ else:
 
 # make list of txt image lists so we can access the pattern through the same
 # func below
-    rejtxtFinal = [path.join(fld, "DMatch", p) for p in rejList]
-    
-    finrejList = list(zip(rejtxtFinal, rejList))
-    
-    #[rmtree(k) for k in rejList]
-    
-    for f in finrejList:
-        proc_malt(f[0], f[1], bFolder)#, bbox=False)
+#    rejtxtFinal = [path.join(fld, "DMatch", p) for p in rejList]
+#    
+#    finrejList = list(zip(rejtxtFinal, rejList))
+#    
+#    #[rmtree(k) for k in rejList]
+#    
+#    for f in finrejList:
+#        proc_malt(f[0], f[1], bFolder)#, bbox=False)
     
     
 

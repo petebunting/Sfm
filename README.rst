@@ -109,9 +109,9 @@ Typically a DJI phantom or other such platform. This uses Malt for dense matchin
 
 - this script is an internal option in DronePIMs.sh
 
-**TawnyBatch.py**
+**TawnyBatch.py - DO NOT USE -NOT FINISHED**
 
-- This processes mosaic data in tiles/chunks in preparation for using ossim for a near-seamless mosaic
+- This will process mosaic data in tiles/chunks in preparation for using ossim for a near-seamless mosaic
 
 - this script is an internal option in DronePIMs.sh
 

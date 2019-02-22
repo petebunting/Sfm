@@ -246,12 +246,12 @@ if [ "$tile" != none ]; then
          
         # Process the Ortho-------------------------------------------- 
         # Probably better to use Malt-Batch for this as it is MVS which works better for ortho
-        for f in PIMsBatch/*list*/*PIMs-ORTHO/*Orthophotomosaic*.tif; do 
+        for f in PIMsBatch/*list*/*PIMs-TmpMnt/*Orthophotomosaic*.tif; do 
             gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
         
-        find PIMsBatch/*tile*/*PIMs-ORTHO/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}"
+        find PIMsBatch/*tile*/*PIMs-TmpMnt/*Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}"
         
-        ossim-orthoigen --combiner-type ossimFeatherMosaic PIMsBatch/*tile*/*PIMs-ORTHO/*Orthophotomosaic*.tif PIMsBatch/feather.tif
+        ossim-orthoigen --combiner-type ossimMaxMosaic PIMsBatch/*tile*/*PIMs-TmpMnt/*Orthophotomosaic*.tif PIMsBatch/Max.tif
                 
         echo 'Everything done - take a look!' 
         return
