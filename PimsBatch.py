@@ -50,6 +50,9 @@ parser.add_argument("-g", "--gp", type=bool, required=False,
 parser.add_argument("-nt", "--noT", type=int, required=False, 
                     help="no of tiles at a time")
 
+parser.add_argument("-max", "--mx", type=int, required=False, 
+                    help="max no of chunks to do - this is for testing with a smaller subset")
+
 args = parser.parse_args() 
 
 if args.oRI is None:
@@ -133,7 +136,10 @@ origList = [path.join(fld, 'PIMs-'+algo),
             path.join(fld, 'PIMs-TmpMntOrtho')]
 #
 txtList = glob(path.join(DMatch,'*.list'))
-
+nameList = [path.split(i)[1] for i in txtList]
+txtList.sort()
+nameList.sort()
+finalList = list(zip(txtList, nameList))
 
 # Some very ugly stuff going on in here
 
@@ -142,7 +148,15 @@ txtList = glob(path.join(DMatch,'*.list'))
 def procPims(subList, bFolder):
     flStr = open(subList).read()
     flStr.replace("\n", "|")
-    sub = flStr.replace("\n", "|")
+    flStr = open(subList).read()
+    # first we need the box terrain line
+    box = flStr.split('\n', 1)[0]
+    # then the images
+    imgs = flStr.split("\n", 1)[1]
+    # If on a repeat run this should avoid problems
+#    imgSeq = imgs.split()
+    imgs.replace("\n", "|")
+    sub = imgs.replace("\n", "|")
     print('the img subset is \n'+sub+'\n\n')                 
 
     #pmsDir = path.join(fld,'PIMs-'+algo)
@@ -151,10 +165,10 @@ def procPims(subList, bFolder):
     subDir = path.join(bFolder, tl)
     mkdir(subDir)
     
-    orDir = path.join(fld, '"'+sub+'"')
+    #orDir = path.join(fld, '"'+sub+'"')
     
     
-    mm3d = [mmgpu, "PIMs", algo, orDir, gOri, "DefCor=0",
+    mm3d = [mmgpu, "PIMs", algo, sub,  gOri, "DefCor=0",
         "SzW=1", zoomF, zregu, 'SH=_mini']
     call(mm3d)
     
@@ -176,15 +190,22 @@ def procPims(subList, bFolder):
     [move(f[0], f[1]) for f in toGo] 
     print(mvList)
     
+
+
 #if args.mx is None:
 #    todoList = Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0], 
 #         i[1], bFolder, bbox=args.bb) for i in finalList) 
 #else:
 #    subFinal = finalList[0:args.mx]
     
+if args.mx is None:
+    [procPims(f, bFolder) for f in txtList]
+#    todoList = Parallel(n_jobs=mp,verbose=5)(delayed(procPims)(i,
+#                        bFolder) for i in txtList)
 
-todoList = Parallel(n_jobs=mp,verbose=5)(delayed(procPims)(i,
-                    bFolder) for i in txtList)
-
-
+else:
+    subFinal = txtList[0:args.mx]
+    [procPims(f, bFolder) for f in subFinal]
+#    todoList = Parallel(n_jobs=mp,verbose=5)(delayed(procPims)( 
+#             i, bFolder) for i in subFinal) 
 
