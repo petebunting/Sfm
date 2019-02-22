@@ -109,6 +109,11 @@ Typically a DJI phantom or other such platform. This uses Malt for dense matchin
 
 - this script is an internal option in DronePIMs.sh
 
+**TawnyBatch.py**
+
+- This processes mosaic data in tiles/chunks in preparation for using ossim for a near-seamless mosaic
+
+- this script is an internal option in DronePIMs.sh
 
 **MicMac-LocalChantierDescripteur.xml**
 - This is a local descriptor of the camera in the C-Astral Bramor - alter the params for your own camera

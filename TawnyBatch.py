@@ -9,17 +9,9 @@ Created on Tue May 29 16:20:58 2018
 
 @author: ciaran
 
-This scripts tiles large datsets for micmac and processes in parallel or sequnce depending 
+This script produces tiled orthomosaics for merging with ossim to produce near
+seampless large scale mosaics
 
-This uses Malt which appear to be better for orthophoto generation
-
-Gpu use is optional
-
-GPU mem overload is dependent on a number of factors and does occur so will require a bit of testing
-Probably best to stick to a max of no physical CPUs for nt arg
-
-There are also issues related to the mutli thread use of image magick (used by micmac),
-which are hopefully recovered in the single thread clean-up at the end. 
 
 Usage: 
     
