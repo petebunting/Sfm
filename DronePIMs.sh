@@ -293,8 +293,8 @@ else
     mm3d Pims2MNT $Algorithm ZReg=$zreg DoOrtho=1
 	 
 
-    #mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif
-    TawnyBatch.py -folder $PWD -num 20,20 -nt -1
+    mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif
+    #TawnyBatch.py -folder $PWD -num 20,20 -nt -1
 
 
     #mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
