@@ -22,12 +22,13 @@
 """
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, Qt
 from PyQt4.QtGui import QAction, QIcon, QPushButton
-from subprocess import check_call
+from subprocess import check_call, call
 from PyQt4 import uic
 # Initialize Qt resources from file resources.py
 import resources
 # Import the code for the dialog
 from micmac_dialog import MicMac_SFMDialog
+
 import os.path
 
 from qgis.core import QgsMessageLog
@@ -38,17 +39,19 @@ import platform
     # Before we go any further, the OS must be identified
     # as silly people using windows need a different start to the command check_call
 
-if platform.system() == 'WINDOWS':
-    mm3d = 'mm3d'
-else:
-    mm3d = "/home/ciaran/micmac/bin/mm3d"
+#if platform.system() == 'WINDOWS':
+#    mm3d = 'mm3d'
+#else:
+    
 
 
 
 
 class MicMac_SFM:
     """QGIS Plugin Implementation."""
-
+    
+    mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
+    
     def __init__(self, iface):
         """Constructor.
 
@@ -228,12 +231,13 @@ class MicMac_SFM:
     # Here define all the subprocess check_calls to the micmac qt commands
     # I imagine there is a less ugly way so will change infuture
     #TODO  
-    if platform.system() == 'WINDOWS':
-        mm3d = '\mm3d.exe'
-    else:
-        mm3d = "/home/ciaran/micmac/bin/mm3d"
+#    if platform.system() == 'WINDOWS':
+#        mm3d = '\mm3d.exe'
+#    else:
 
     def sExif(self):
+        
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
         
         self.dlg.show()
         
@@ -246,6 +250,8 @@ class MicMac_SFM:
             pass
         
     def gp2txt(self):
+        
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
         
         self.dlg.show()
         
@@ -260,6 +266,7 @@ class MicMac_SFM:
     
     def gp2xml(self):
         
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
         self.dlg.show()
         
         result1 = self.dlg.exec_()
@@ -272,6 +279,8 @@ class MicMac_SFM:
             pass
     
     def oriconv(self):
+        
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
         
         self.dlg.show()
         
@@ -287,6 +296,8 @@ class MicMac_SFM:
     # matching and orientation    
     def tapi(self):
         
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
+        
         self.dlg.show()
         
         result1 = self.dlg.exec_()
@@ -301,6 +312,8 @@ class MicMac_SFM:
     
     def schnap(self):
         
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
+        
         self.dlg.show()
         
         result1 = self.dlg.exec_()
@@ -314,6 +327,8 @@ class MicMac_SFM:
         
     def taps(self):
         
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
+        
         self.dlg.show()
         
         result1 = self.dlg.exec_()
@@ -325,6 +340,8 @@ class MicMac_SFM:
             pass
         
     def campi(self):
+        
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
         
         self.dlg.show()
         
@@ -338,6 +355,8 @@ class MicMac_SFM:
     
     def centBasc(self):
         
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
+        
         self.dlg.show()
         
         result1 = self.dlg.exec_()
@@ -349,6 +368,8 @@ class MicMac_SFM:
             pass
         
     def chSysCoord(self):
+        
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
         
         self.dlg.show()
         
@@ -364,6 +385,8 @@ class MicMac_SFM:
     # editing
     def saisemask(self):
         
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
+        
         self.dlg.show()
         
         result1 = self.dlg.exec_()
@@ -378,6 +401,8 @@ class MicMac_SFM:
     # dense cloud and DSM etc
     def malT(self):
         
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
+        
         self.dlg.show()
         
         result1 = self.dlg.exec_()
@@ -390,6 +415,8 @@ class MicMac_SFM:
             pass
     
     def pimS(self):
+        
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
         
         self.dlg.show()
         
@@ -404,6 +431,8 @@ class MicMac_SFM:
         
     def pm2mnt(self):
         
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
+        
         self.dlg.show()
         
         result1 = self.dlg.exec_()
@@ -415,6 +444,8 @@ class MicMac_SFM:
             pass
     
     def c3d(self):
+        
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
         
         self.dlg.show()
         
@@ -431,6 +462,8 @@ class MicMac_SFM:
     
     def aperiC(self):
         
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
+        
         self.dlg.show()
         
         result1 = self.dlg.exec_()
@@ -442,6 +475,8 @@ class MicMac_SFM:
             pass
     
     def nuageP(self):
+        
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
         
         self.dlg.show()
         
@@ -455,6 +490,8 @@ class MicMac_SFM:
     
     def tpunch(self):
         
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
+        
         self.dlg.show()
         
         result1 = self.dlg.exec_()
@@ -466,6 +503,8 @@ class MicMac_SFM:
             pass
     
     def tquila(self):
+        
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
         
         self.dlg.show()
         
@@ -479,6 +518,8 @@ class MicMac_SFM:
         
     def tawn(self):
         
+        mm3d =  os.path.join("Users", "ciaranrobb", "micmac", "bin", "mm3d")
+        
         self.dlg.show()
         
         result1 = self.dlg.exec_()
@@ -488,6 +529,7 @@ class MicMac_SFM:
             check_call(cmd)
         else:
             pass
+        
     def run(self):
         """Run method that performs all the real work"""
         # show the dialog
