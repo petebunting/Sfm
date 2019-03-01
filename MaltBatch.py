@@ -189,14 +189,15 @@ def proc_malt(subList, subName, bFolder, gP='1', bbox=True):
     else:
         mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
                 "SzW=1", "DirMEC="+subName, 
-                "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1", subName+'log.txt']
+                "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1", ">>",
+                subName+'log.txt']
     ret = call(mm3d)
     if ret != 0:        
         print(subName+" missed, will pick it up later")
         pass
     else:       
         tawny = [mmgpu, 'Tawny', "Ortho-"+subName+'/', 'RadiomEgal=1', 
-                 'Out=Orthophotomosaic.tif']
+                 'Out=Orthophotomosaic.tif', ">>", subName+'Tawnylog.txt']
         call(tawny)
         mDir = path.join(fld, subName)
         oDir = path.join(fld, "Ortho-"+subName) 
