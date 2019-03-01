@@ -180,14 +180,16 @@ def proc_malt(subList, subName, bFolder, gP='1', bbox=True):
     sub = imgs.replace("\n", "|")
     print('the img subset is \n'+sub+'\n\n, the bounding box is '+box) 
     
+    # Outputting mm3d output to txt as it is better to keep track of multi process log
     if bbox ==True:
         mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
                 "SzW=1", "DirMEC="+subName, 
-                "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1", box]
+                "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1", box, ">>", 
+                subName+'log.txt']
     else:
         mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
                 "SzW=1", "DirMEC="+subName, 
-                "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1"]
+                "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1", subName+'log.txt']
     ret = call(mm3d)
     if ret != 0:        
         print(subName+" missed, will pick it up later")

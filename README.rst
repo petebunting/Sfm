@@ -77,6 +77,8 @@ Add to your .bashrc or .bash_profile if you wish to execute anywhere
 
 To enable use of MicMac and scripts for those who fear the command line...
 
+This is just a front-end for the native MicMac QT menus at present. The scaled versions that utilise the script functionality are not done as yet, but will be added in due course. 
+
 NOT FINISHED!!! Please wait until I upload to the repo.....
 
 ... Unles you wish to manually paste it into your plugin folder and alter the mm3d variable to your own micmac bin path
