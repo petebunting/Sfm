@@ -3,6 +3,7 @@
 # Author Ciaran Robb
 # Aberystwyth University
 
+#https://github.com/Ciaran1981/Sfm
 # example:
 # ./Drone.sh -e JPG -u "30 +north" -g 1 -w 2 -prc 20
 

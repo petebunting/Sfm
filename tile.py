@@ -3,7 +3,9 @@
 # Author Ciaran Robb
 # Aberystwyth University
 
-This ia a cut down adaptation of a script from the pymicmac lib - credit tp those folks for doing that
+https://github.com/Ciaran1981/Sfm
+
+This ia a cut down adaptation of a script from the pymicmac lib - credit to those folks for doing that
 
 It produces lists of images per tile that are them processed by either
 PimsSubset.py or MaltBatch.py depending on preference. 

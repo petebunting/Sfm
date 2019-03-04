@@ -3,7 +3,9 @@
 """
 Created on Tue May 29 16:20:58 2018
 
-@author: ciaran
+@author: Ciaran Robb
+
+https://github.com/Ciaran1981/Sfm
 
 This scripts calls the MicMac PIMs function in chunks for large datasets - gpu use is optional
 

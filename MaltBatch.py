@@ -7,7 +7,9 @@
 """
 Created on Tue May 29 16:20:58 2018
 
-@author: ciaran
+@author: Ciaran Robb
+
+https://github.com/Ciaran1981/Sfm
 
 This scripts tiles large datsets for micmac and processes in parallel or sequnce depending 
 

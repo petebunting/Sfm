@@ -2,7 +2,9 @@
 # The main difference here is using the C3DC algorithm at the end of the process to produce a point cloud
 # It has been written with testing things out in mind, with hefty datasets covered by the other scripts
 
-# Author Ciaran Robb
+#@author: Ciaran Robb
+
+#https://github.com/Ciaran1981/Sfm
 # Based on a L.Girod script - credit to him!
 # Aberystwyth University
 

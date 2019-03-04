@@ -7,7 +7,9 @@
 """
 Created on Tue May 29 16:20:58 2018
 
-@author: ciaran
+@author: Ciaran Robb
+
+https://github.com/Ciaran1981/Sfm
 
 This script produces tiled orthomosaics for merging with ossim to produce near
 seampless large scale mosaics
