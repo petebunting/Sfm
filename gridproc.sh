@@ -224,37 +224,14 @@ else
 
 #correct_mosaics.py -folder DistGpu
  
-# Here we loop through all the mosaic and add georef which is lost by MicMac
-echo "geo-reffing Orthos"
-for f in MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif; do
-    gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
-done 
-   
-# this works 
-find MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif | parallel "ossim-create-histo -i {}" 
- 
-# Max seems best
-ossim-orthoigen --combiner-type ossimFeatherMosaic  MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif Orthof.tif
+orthomosaic.sh -f $PWD -u $UTM -mt ossimFeatherMosaic
 
-#--writer-prop threads=20 
+dsmmosaic.sh -f $PWD -u $UTM -mt ossimMaxMosaic
+
 #choices
 #ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic 
  
 
-# georef the dsms.....
-echo "geo-reffing DSMs"  
-#finalDEMs=($(ls Z_Num*_DeZoom*_STD-MALT.tif)) 
-for f in MaltBatch/*tile*/*tile*/Z_Num7_DeZoom2_STD-MALT.tif; do
-    gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
-done 
 
-# mask_dsm.py -folder $PWD -n 20 -z 1 -m 1
-#  This will assume a zoom level 2 
-mask_dsm.py -folder MaltBatch 
-
-
-find MaltBatch/*tile*/*tile*/Z_Num7_DeZoom2_STD-MALT.tif | parallel "ossim-create-histo -i {}" 
-
-ossim-orthoigen --combiner-type ossimMaxMosaic  MaltBatch/*tile*/*tile*/Z_Num7_DeZoom2_STD-MALT.tif DSMmax.tif
 
 

@@ -6,7 +6,7 @@
 
 # add default values
 FOLDER=$PWD  
-MTYPE=ossimFeatherMosaic
+MTYPE=ossimMaxMosaic
 utm_set=false
 
 
@@ -16,7 +16,7 @@ while getopts "f:u:mt:h" opt; do
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
-      echo "orthomosaic.sh -f $PWD -u '30 +north' -mt ossimFeatherMosaic "
+      echo "dsmmosaic.sh -f $PWD -u '30 +north' -mt ossimMaxMosaic "
       echo "	-f FOLDER     : MicMac working directory."
       echo "	-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
       echo " -mt MTYPE        : OSSIM mosaicing type e.g. ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic" 
@@ -45,15 +45,18 @@ while getopts "f:u:mt:h" opt; do
   esac
 done
 
-echo "geo-reffing  mini ortho-mosaics generated from Malt/Pims/TawnyBatch"
-for f in $FOLDER/MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif; do
+# georef the dsms.....
+echo "geo-reffing DSMs"  
+#finalDEMs=($(ls Z_Num*_DeZoom*_STD-MALT.tif)) 
+for f in $FOLDER/MaltBatch/*tile*/*tile*/Z_Num7_DeZoom2_STD-MALT.tif; do
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
 done 
-   
-# this works 
-echo "geo-reffing  mini ortho-mosaics generated from Malt/Pims/TawnyBatch"
-find $FOLDER/MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif | parallel "ossim-create-histo -i {}" 
- 
-# Max seems best
-echo "creating final mosaic"
-ossim-orthoigen --combiner-type $MTYPE  $FOLDER/MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif Orthof.tif
+
+# mask_dsm.py -folder $PWD -n 20 -z 1 -m 1
+#  This will assume a zoom level 2 
+mask_dsm.py -folder MaltBatch 
+
+
+find $FOLDER/MaltBatch/*tile*/*tile*/Z_Num7_DeZoom2_STD-MALT.tif | parallel "ossim-create-histo -i {}" 
+
+ossim-orthoigen --combiner-type ossimMaxMosaic  $FOLDER/MaltBatch/*tile*/*tile*/Z_Num7_DeZoom2_STD-MALT.tif DSMmax.tif
