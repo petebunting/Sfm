@@ -126,7 +126,6 @@ bFolder = path.join(fld, 'MaltBatch')
 
 binList = [DMatch, bFolder]
 
-
 # Some funcs for use later tile one from pymicmac
 
 # folders to bin
@@ -139,6 +138,13 @@ for crap in binList:
 
 
 mkdir(bFolder)
+
+tLog = path.join(bFolder, "TawnyLogs")
+mkdir(tLog)
+mLog = path.join(bFolder, "MaltLogs")
+mkdir(mLog)
+
+
 # run tiling
 
 
@@ -169,6 +175,10 @@ finalList = list(zip(txtList, nameList))
 def proc_malt(subList, subName, bFolder, gP='1', bbox=True):
     # Yes all this string mucking about is not great but it is better than 
     # dealing with horrific xml, when the info is so simple
+    tLog = path.join(bFolder, "TawnyLogs")
+    mkdir(tLog)
+    mLog = path.join(bFolder, "MaltLogs")
+    mkdir(mLog)
     flStr = open(subList).read()
     # first we need the box terrain line
     box = flStr.split('\n', 1)[0]
