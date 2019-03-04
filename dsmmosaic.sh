@@ -8,19 +8,21 @@
 FOLDER=$PWD  
 MTYPE=ossimMaxMosaic
 utm_set=false
-
+OUT=DSMmosaic.tif
 
 
  
-while getopts "f:u:mt:h" opt; do  
+while getopts "f:u:mt:o:h" opt; do  
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
-      echo "dsmmosaic.sh -f $PWD -u '30 +north' -mt ossimMaxMosaic "
+      echo "dsmmosaic.sh -f $PWD -u '30 +north' -mt ossimFeatherMosaic -o outmosaic.tif"
       echo "	-f FOLDER     : MicMac working directory."
       echo "	-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
       echo " -mt MTYPE        : OSSIM mosaicing type e.g. ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic" 
+      echo "	-o OUT       : Output mosaic e.g. mosaic.tif"      
       echo "	-h	             : displays this message and exits."
+      
       echo " " 
       exit 0
       ;;    
@@ -34,6 +36,9 @@ while getopts "f:u:mt:h" opt; do
 	mt)
       MTYPE=$OPTARG
       ;;                        
+	o)
+      OUT=$OPTARG
+      ;;        
     \?)
       echo "gpymicmac.sh: Invalid option: -$OPTARG" >&1
       exit 1
@@ -50,7 +55,6 @@ echo "geo-reffing DSMs"
 #finalDEMs=($(ls Z_Num*_DeZoom*_STD-MALT.tif)) 
 for f in $FOLDER/MaltBatch/*tile*/*tile*/Z_Num7_DeZoom2_STD-MALT.tif; do
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
-done 
 
 # mask_dsm.py -folder $PWD -n 20 -z 1 -m 1
 #  This will assume a zoom level 2 
@@ -59,4 +63,4 @@ mask_dsm.py -folder MaltBatch
 
 find $FOLDER/MaltBatch/*tile*/*tile*/Z_Num7_DeZoom2_STD-MALT.tif | parallel "ossim-create-histo -i {}" 
 
-ossim-orthoigen --combiner-type ossimMaxMosaic  $FOLDER/MaltBatch/*tile*/*tile*/Z_Num7_DeZoom2_STD-MALT.tif DSMmax.tif
+ossim-orthoigen --combiner-type ossimMaxMosaic  $FOLDER/MaltBatch/*tile*/*tile*/Z_Num7_DeZoom2_STD-MALT.tif $OUT

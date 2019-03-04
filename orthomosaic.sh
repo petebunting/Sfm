@@ -8,19 +8,21 @@
 FOLDER=$PWD  
 MTYPE=ossimFeatherMosaic
 utm_set=false
-
+OUT=BigMosaic.tif
 
 
  
-while getopts "f:u:mt:h" opt; do  
+while getopts "f:u:mt:o:h" opt; do  
   case $opt in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
-      echo "orthomosaic.sh -f $PWD -u '30 +north' -mt ossimFeatherMosaic "
+      echo "orthomosaic.sh -f $PWD -u '30 +north' -mt ossimFeatherMosaic -o outmosaic.tif"
       echo "	-f FOLDER     : MicMac working directory."
       echo "	-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
       echo " -mt MTYPE        : OSSIM mosaicing type e.g. ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic" 
+      echo "	-o OUT       : Output mosaic e.g. mosaic.tif"      
       echo "	-h	             : displays this message and exits."
+      
       echo " " 
       exit 0
       ;;    
@@ -34,6 +36,9 @@ while getopts "f:u:mt:h" opt; do
 	mt)
       MTYPE=$OPTARG
       ;;                        
+	o)
+      OUT=$OPTARG
+      ;;        
     \?)
       echo "gpymicmac.sh: Invalid option: -$OPTARG" >&1
       exit 1
@@ -48,7 +53,7 @@ done
 echo "geo-reffing  mini ortho-mosaics generated from Malt/Pims/TawnyBatch"
 for f in $FOLDER/MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif; do
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
-done 
+
    
 # this works 
 echo "geo-reffing  mini ortho-mosaics generated from Malt/Pims/TawnyBatch"
@@ -56,4 +61,4 @@ find $FOLDER/MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif | parallel "oss
  
 # Max seems best
 echo "creating final mosaic"
-ossim-orthoigen --combiner-type $MTYPE  $FOLDER/MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif Orthof.tif
+ossim-orthoigen --combiner-type $MTYPE  $FOLDER/MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif $OUT
