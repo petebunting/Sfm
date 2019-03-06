@@ -66,12 +66,11 @@ parser.add_argument("-g", "--gp", type=bool, required=False,
 
 parser.add_argument("-nt", "--noT", type=int, required=False, 
                     help="no of tiles at a time")
-# Not sure this works
+
 parser.add_argument("-max", "--mx", type=int, required=False, 
                     help="max no of chunks to do - this is for testing with a smaller subset")
 
-
-parser.add_argument("-ovLap", "--ov", type=str, required=False, default='10', 
+parser.add_argument("-ovLap", "--ov", type=str, required=False, default='50', 
                     help="tile overlap")
 
 parser.add_argument("-bbox", "--bb", type=bool, required=False, default=True, 
