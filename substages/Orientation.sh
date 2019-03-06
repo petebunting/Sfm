@@ -19,6 +19,7 @@ obliqueFolder=none
 sz=none
 CSV=none
 CALIB=Fraser
+match=none
  
 while getopts "e:m:x:y:u:sz:cal:csv:h" opt; do  
   case $opt in
@@ -100,23 +101,22 @@ echo "</SystemeCoord>                                                           
 # mogrify -resize 30% *.JPG
 #mogrify -resize 2000 *.JPG
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-if [  "$CSV" != none  ]; then 
+if [  "$CSV"!=none  ]; then 
         echo "using csv file"  
     cs=*.csv   
-    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1   
-    SysCort_make.py(cs)
-else
+    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
+    SysCort_make.py -csv $cs   
+else 
     echo "using exif data"
     mm3d XifGps2Txt .*$EXTENSION
     #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
     mm3d XifGps2Xml .*$EXTENSION RAWGNSS
-    mm3d OriConvert "#F=N X Y Z" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
+    mm3d OriConvert "#F=N X Y Z K W P" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
 fi 
 #Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
 
 
-#Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
-#Find Tie points using 1/2 resolution image (best value for RGB bayer sensor)
+
 if [  "$size" != none ]; then
     echo "resizing to $size for tie point detection"
     # mogrify -path Sharp -sharpen 0x3  *.JPG # this sharpens very well worth doing
@@ -159,7 +159,7 @@ if [ $CSV != none ]; then
     # For reasons unknown this screws it up from csv
     #mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
 else
-    mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini | tee | tee GnssBundle.txt
+    mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini | tee GnssBundle.txt
     mm3d ChgSysCo  .*$EXTENSION Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
     mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
 fi

@@ -6,7 +6,7 @@
 #https://github.com/Ciaran1981/Sfm
 
 # example:
-# ./DronePIMs.sh -e JPG -a Forest -u "30 +north" -csv 1 -g 1 zreg = 0.03 -t 1 -proc 2,2
+# ./DronePIMs.sh -e JPG -a Forest -u "30 +north" -csv 1 -g 0 zreg = 0.03 -t 1 -proc 2,2
 
 # Important NOTE - MicMac CPU based is FAR quicker than using the GPU,
 #  as it's memory management limits GPU processing to small chunks

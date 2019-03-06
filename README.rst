@@ -85,6 +85,8 @@ NOT FINISHED!!! Please wait until I upload to the repo.....
 
 Contents
 ~~~~~~~~~~~~~~~~~
+**All in one scripts**
+These process the entire Sfm workflow
 
 **Drone.sh**
 
@@ -104,6 +106,19 @@ Typically a DJI phantom or other such platform. This uses Malt for dense matchin
 **DronePIMs.sh**
 
 - A script like the previous but using the PIMs algorithm
+
+**Sub-stage scripts**
+
+These divide the workflow into Orientation, dense cloud/DSM processing and mosaic generation. 
+All areinternal to the complete workflows.
+
+
+**Orientation.sh**
+
+- This performs feature detection, relative orientation, orienation with GNSS and sparse cloud generation
+
+- outputs the orientation results as .txt files and the sparse cloud 
+
 
 **PimsBatch.py**
 
