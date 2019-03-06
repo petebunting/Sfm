@@ -60,7 +60,8 @@ for f in $FOLDER/MaltBatch/*tile*/*tile*/Z_Num7_DeZoom2_STD-MALT.tif; do
 #  This will assume a zoom level 2 
 mask_dsm.py -folder MaltBatch 
 
-
+echo "generating image histograms"
 find $FOLDER/MaltBatch/*tile*/*tile*/Z_Num7_DeZoom2_STD-MALT.tif | parallel "ossim-create-histo -i {}" 
 
+echo "constructing large mosaic"
 ossim-orthoigen --combiner-type ossimMaxMosaic  $FOLDER/MaltBatch/*tile*/*tile*/Z_Num7_DeZoom2_STD-MALT.tif $OUT

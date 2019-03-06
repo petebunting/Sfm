@@ -56,7 +56,7 @@ for f in $FOLDER/MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif; do
 
    
 # this works 
-echo "geo-reffing  mini ortho-mosaics generated from Malt/Pims/TawnyBatch"
+echo "generating image histograms"
 find $FOLDER/MaltBatch/*tile*/*Ortho-tile*/*Orthophotomosaic.tif | parallel "ossim-create-histo -i {}" 
  
 # Max seems best

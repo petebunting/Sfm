@@ -20,19 +20,21 @@ parser.add_argument("-folder", "--fld", type=str, required=True,
 parser.add_argument("-algo", "--algotype", type=str, required=False, 
                     help="Micmac algo type eg RadialBasic")
 
-parser.add_argument("-start", "--noIm", type=int, required=False, 
-                    help="index of first image")
-
-parser.add_argument("-end", "--noIm2", type=int, required=False, 
-                    help="index of last image")
+#parser.add_argument("-start", "--noIm", type=int, required=False, 
+#                    help="index of first image")
+#
+#parser.add_argument("-end", "--noIm2", type=int, required=False, 
+#                    help="index of last image")
 
 args = parser.parse_args() 
 
 if args.algotype is None:
-   algo= "MicMac"
+   algo= "Fraser"
 else:
     algo = args.algotype
        
+
+
 
 minIm = args.noIm
 maxIm = args.noIm2
