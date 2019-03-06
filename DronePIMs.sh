@@ -30,10 +30,11 @@ gpu=0
 tile=none
 CSV=0
 match=none
+EG=0
  
-while getopts "e:a:m:csv:x:y:u:sz:pao:r:z:eq:g:proc:zr:t:h" opt; do
+while getopts "e:a:m:csv:x:y:u:sz:pao:r:z:egal:eq:g:proc:zr:t:h" opt; do
   case $opt in
-    h) 
+    h)  
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
       echo "usage: DronePIMs.sh -e JPG -a MicMac -u 30 +north -r 0.1"
       echo "	-e EXTENSION     : image file type (JPG, jpg, TIF, png..., default=JPG)."
@@ -49,6 +50,7 @@ while getopts "e:a:m:csv:x:y:u:sz:pao:r:z:eq:g:proc:zr:t:h" opt; do
       echo "	-o obliqueFolder : Folder with oblique imagery to help orientation (will be entierely copied then deleted during process)."
       echo "	-r RESOL         : Ground resolution (in meters)"
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
+      echo "	-egal EG         : Whether or not to perform radiometric eq 1 = yes 0 = no"
       echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
       echo " -g gpu           : Whether to use GPU support, default false"
       echo " -proc            : no chunks to split the data into for gpu processing"
@@ -100,6 +102,9 @@ while getopts "e:a:m:csv:x:y:u:sz:pao:r:z:eq:g:proc:zr:t:h" opt; do
       ;;	
 	z)
       ZoomF=$OPTARG
+      ;;
+	egal)
+      EG=$OPTARG
       ;;
 	eq)
       DEQ=$OPTARG  
@@ -223,12 +228,12 @@ else
     mm3d Pims2MNT $Algorithm ZReg=$zreg DoOrtho=1
 	 
 
-    mm3d Tawny PIMs-ORTHO/ RadiomEgal=1 Out=Orthophotomosaic.tif
+    mm3d Tawny PIMs-ORTHO/ RadiomEgal=$EG Out=Orthophotomosaic.tif
     #TawnyBatch.py -folder $PWD -num 20,20 -nt -1
 
 
-    #mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
-
+    mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
+    cp PIMs-ORTHO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
 
     cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/DSM.tfw
     cp PIMs-TmpBasc/PIMs-Merged_Prof.tif OUTPUT/DSM.tif
@@ -238,16 +243,16 @@ else
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" DSM.tif
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Mask.tif
    
-    for f in TawnyBatch/**Orthophotomosaic*.tif; do     
-     gdal_edit.py -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; done
+    #for f in TawnyBatch/**Orthophotomosaic*.tif; do     
+    gdal_edit.py -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" OUTPUT/OrthFinal.tif
 
  
     # Create some image histograms for ossim  
     #
-    find TawnyBatch/**Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}" 
+    #find TawnyBatch/**Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}" 
  
 
-    ossim-orthoigen --combiner-type ossimMaxMosaic TawnyBatch/**Orthophotomosaic*.tif OUTPUT/max.tif
+    #ossim-orthoigen --combiner-type ossimMaxMosaic TawnyBatch/**Orthophotomosaic*.tif OUTPUT/max.tif
 fi 
     #mask_dsm.py -folder $PWD -pims 1 
     
