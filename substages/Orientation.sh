@@ -151,7 +151,7 @@ mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 #Bundle adjust using both camera positions and tie points (number in EmGPS option is the quality estimate of the GNSS data in meters)
 
 #Visualize Ground_RTL orientation
-mm3d AperiCloud .*$EXTENSION Ori-Ground_RTL SH=_mini
+mm3d AperiCloud .*$EXTENSION Ori-Ground_Init_RTL SH=_mini
 
 #Change system to final cartographic system  
 if [ $CSV != none ]; then 
