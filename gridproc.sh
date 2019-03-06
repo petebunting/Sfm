@@ -83,15 +83,6 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:gpu:b:w:prc:csv:h" opt; do
       RESOL=$OPTARG
       resol_set=true
       ;;  
-	s)
-      use_Schnaps=false
-      ;;   	
-    p)
-      do_ply=false
-      ;; 
-    a)
-      do_AperiCloud=false
-      ;; 
 	o)
       obliqueFolder=$OPTARG
       ;;
@@ -103,9 +94,6 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:gpu:b:w:prc:csv:h" opt; do
       ;;	
 	z)
       ZoomF=$OPTARG
-      ;;
-	eq)
-      DEQ=$OPTARG  
       ;;
 	g)
       grd=$OPTARG
@@ -159,9 +147,9 @@ else
  
 # Parallel processing - best for a decent ortho later 
 if [ "$gp" != none ]; then
-    MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd -zr 0.02 -g 1 -nt $batch 
+    MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd -zr 0.02 -g 1 -nt $batch -zoom $ZoomF 
 else
-    MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd -zr 0.02 -nt $batch 
+    MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd -zr 0.02 -nt $batch -zoom $ZoomF
 
 #correct_mosaics.py -folder DistGpu
  

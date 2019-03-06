@@ -85,7 +85,10 @@ NOT FINISHED!!! Please wait until I upload to the repo.....
 
 Contents
 ~~~~~~~~~~~~~~~~~
-**All in one scripts**
+
+All in one scripts
+~~~~~~~~~~~~~~~~~~
+
 These process the entire Sfm workflow
 
 **Drone.sh**
@@ -107,7 +110,8 @@ Typically a DJI phantom or other such platform. This uses Malt for dense matchin
 
 - A script like the previous but using the PIMs algorithm
 
-**Sub-stage scripts**
+Sub-stage scripts
+~~~~~~~~~~~~~~~~~
 
 These divide the workflow into Orientation, dense cloud/DSM processing and mosaic generation. 
 All areinternal to the complete workflows.

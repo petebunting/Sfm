@@ -252,23 +252,6 @@ fi
     #mask_dsm.py -folder $PWD -pims 1 
     
     
-# OSSIM - BASED MOSAICING ----------------------------------------------------------------------------
-# Just here as an alternative for putting together tiles 
-# This need GNU parallel
- 
-#for f in PIMs-ORTHO/*Ort_**.tif; 
-#do      
-# gdal_edit.py -a_srs "+proj=utm +zone=30 +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs" "$f"; 
-#done
-
- 
-# Create some image histograms for ossim  
-#
-#find PIMs-ORTHO/*Ort**.tif | parallel "ossim-create-histo -i {}" 
- 
-
-#ossim-orthoigen --combiner-type ossimMaxMosaic PIMs-ORTHO/**Ort**.tif OUTPUT/max.tif
-# Or more options
 
 #choices
 #ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic 
