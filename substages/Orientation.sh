@@ -100,13 +100,12 @@ if [  "$CSV"!=none  ]; then
     sysCort_make.py -csv $cs   
 else 
     echo "using exif data"
-    mm3d XifGps2Txt .*$EXTENSION
+    mm3d XifGps2Txt .*$EXTENSION 
     #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
     mm3d XifGps2Xml .*$EXTENSION RAWGNSS
     mm3d OriConvert "#F=N X Y Z K W P" GpsCoordinatesFromExif.txt RAWGNSS_N ChSys=DegreeWGS84@RTLFromExif.xml MTD1=1 NameCple=FileImagesNeighbour.xml CalcV=1
 fi 
 #Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
-
 
 
 if [  "$size"!=none ]; then
@@ -120,17 +119,23 @@ fi
 
 #if [  "$match"=1 ]; then
    # echo "exaustive matching"
-   # mm3d Tapioca All ".*JPG" -1 @SFS
+   # mm3d Tapioca All ".*JPG" -1 InOri=Martini @SFS
 #else
+
     echo "matching based on gps"
-mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
+mm3d Tapioca File FileImagesNeighbour.xml -1  @SFS
 #fi
 
 
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1
 
 #Compute Relative orientation (Arbitrary system)
-mm3d Tapas $CALIB .*$EXTENSION Out=Arbitrary SH=_mini | tee RelBundle.txt
+
+mm3d Martini .*$EXTENSION
+
+mm3d AperiCloud .*$EXTENSION Martini
+
+mm3d Tapas $CALIB .*$EXTENSION InOri=Martini Out=Arbitrary SH=_mini | tee RelBundle.txt
 
 #Visualize relative orientation, if apericloud is not working, run 
 

@@ -146,8 +146,8 @@ finalList = list(zip(txtList, nameList))
 # Some very ugly stuff going on in here
 
 #if gpu is true
-#for subList in txtList:
-def procPims(subList, bFolder):
+for subList in txtList:
+#def procPims(subList, bFolder):
     flStr = open(subList).read()
     flStr.replace("\n", "|")
     flStr = open(subList).read()
@@ -182,12 +182,12 @@ def procPims(subList, bFolder):
     call(tawny)
     
     # sooooo ugly I am getting very lazy
-    #newPIMs = path.join(subDir, 'PIMs-'+algo)
+    newPIMs = path.join(subDir, 'PIMs-'+algo)
     newBasc = path.join(subDir, 'PIMs-TmpBasc')
     newOrtho = path.join(subDir, 'PIMs-ORTHO')
     newTmpM = path.join(subDir, 'PIMs-TmpMnt')
     newTmpMO = path.join(subDir, 'PIMs-TmpMntOrtho')
-    mvList = [newBasc, newOrtho, newTmpM, newTmpMO] # newPIMs,
+    mvList = [newBasc, newOrtho, newTmpM, newTmpMO, newPIMs]
     toGo = list(zip(origList, mvList))
     [move(f[0], f[1]) for f in toGo] 
     print(mvList)
@@ -200,14 +200,14 @@ def procPims(subList, bFolder):
 #else:
 #    subFinal = finalList[0:args.mx]
     
-if args.mx is None:
-    [procPims(f, bFolder) for f in txtList]
-#    todoList = Parallel(n_jobs=mp,verbose=5)(delayed(procPims)(i,
-#                        bFolder) for i in txtList)
-
-else:
-    subFinal = txtList[0:args.mx]
-    [procPims(f, bFolder) for f in subFinal]
+#if args.mx is None:
+#    [procPims(f, bFolder) for f in txtList]
+##    todoList = Parallel(n_jobs=mp,verbose=5)(delayed(procPims)(i,
+##                        bFolder) for i in txtList)
+#
+#else:
+#    subFinal = txtList[0:args.mx]
+#    [procPims(f, bFolder) for f in subFinal]
 #    todoList = Parallel(n_jobs=mp,verbose=5)(delayed(procPims)( 
 #             i, bFolder) for i in subFinal) 
 
