@@ -16,10 +16,10 @@ X_OFF=0;
 Y_OFF=0;
 utm_set=false
 obliqueFolder=none
-sz=none
+size=3000
 CSV=none
 CALIB=Fraser
-match=none
+match=0
  
 while getopts "e:m:x:y:u:sz:cal:csv:h" opt; do  
   case $opt in
@@ -71,14 +71,6 @@ if [ "$utm_set" = false ]; then
 fi
 
 
-if [ "$gpu" = 0 ]; then
-	echo "Using CPU only"
-	echo "$proc CPU threads to be used during dense matching"
-fi
-if [ "$gpu" = 1 ]; then
-    echo "$proc CPU threads to be used during dense matching"
-	echo "Using GPU support" 
-fi 
 
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
 # magick mogrify -resize 50%
@@ -105,7 +97,7 @@ if [  "$CSV"!=none  ]; then
         echo "using csv file"  
     cs=*.csv   
     mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
-    SysCort_make.py -csv $cs   
+    sysCort_make.py -csv $cs   
 else 
     echo "using exif data"
     mm3d XifGps2Txt .*$EXTENSION
@@ -117,7 +109,7 @@ fi
 
 
 
-if [  "$size" != none ]; then
+if [  "$size"!=none ]; then
     echo "resizing to $size for tie point detection"
     # mogrify -path Sharp -sharpen 0x3  *.JPG # this sharpens very well worth doing
     mogrify -resize $size *.JPG
@@ -126,12 +118,13 @@ else
     mogrify -resize 3000 *.JPG 
 fi 
 
-if [  "$match" != none ]; then
-    echo "exaustive matching"
-    mm3d Tapioca All ".*JPG" -1 @SFS
-else
-    mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
-fi
+#if [  "$match"=1 ]; then
+   # echo "exaustive matching"
+   # mm3d Tapioca All ".*JPG" -1 @SFS
+#else
+    echo "matching based on gps"
+mm3d Tapioca File FileImagesNeighbour.xml -1 @SFS
+#fi
 
 
 mm3d Schnaps .*$EXTENSION MoveBadImgs=1
@@ -154,7 +147,7 @@ mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 mm3d AperiCloud .*$EXTENSION Ori-Ground_Init_RTL SH=_mini
 
 #Change system to final cartographic system  
-if [ $CSV != none ]; then 
+if [ $CSV!=none ]; then 
     mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_UTM EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini | tee GnssBundle.txt
     # For reasons unknown this screws it up from csv
     #mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
