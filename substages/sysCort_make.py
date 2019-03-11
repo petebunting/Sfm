@@ -37,19 +37,34 @@ def make_xml(csvFile):
     f3 = E.AuxRUnite
 
     
-    csv = pd.read_table(csvFile)
+    csv = pd.read_table(csvFile, delimiter=" ")
+#    if len(csv.columns) == 1:
+#        csv = pd.read_table(csvFile, delimiter=" ")
+        
     x = str(csv.X[0])
     y = str(csv.Y[0])
-    z = str(csv.Z[0])    
-    # Bloody hell this is better than etree at least
+    z = str(csv.Z[0])
     
-        
-    xmlDoc = (root(doc(f1('eTC_RTL'),f2(x),
+    # if we are including yaw pitch and roll (k,w,p)
+    if len(csv.columns) == 7:            
+        k = str(csv.K[0])
+        w = str(csv.W[0])
+        p = str(csv.Z[0])          
+    # Bloody hell this is better than etree at least       
+        xmlDoc = (root(doc(f1('eTC_RTL'),f2(x),
+                           f2(y),
+                           f2(z), 
+                           f2(k),
+                           f2(w),
+                           f2(p),),
+                doc(f1('eTC_WGS84'),
+                               f3('eUniteAngleDegre'))))
+    else:
+        xmlDoc = (root(doc(f1('eTC_RTL'),f2(x),
                        f2(y),
-                       f2(z),),
+                       f2(z),), 
             doc(f1('eTC_WGS84'),
                            f3('eUniteAngleDegre'))))
-    
     
     et = lxml.etree.ElementTree(xmlDoc)
     et.write('SysCoRTL.xml', pretty_print=True)
