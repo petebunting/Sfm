@@ -117,13 +117,16 @@ bandName = meta.get_item('XMP:BandName')
 
 #Converting raw images to Radiance
 radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-plotutils.plotwithcolorbar(V,'Vignette Factor')
-plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
+# not required just for show
+#plotutils.plotwithcolorbar(V,'Vignette Factor')
+#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
+#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
+#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
+#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
 
 #Mask to panel and calculate radiance
+
+#TODO Problem appears here - no bloody image
 markedImg = radianceImage.copy()
 ulx = 530 # upper left column (x coordinate) of panel area
 uly = 340 # upper left row (y coordinate) of panel area
@@ -158,11 +161,11 @@ bandName = meta.get_item('XMP:BandName')
 
 #Converting raw images to Radiance
 radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-plotutils.plotwithcolorbar(V,'Vignette Factor')
-plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
+#plotutils.plotwithcolorbar(V,'Vignette Factor')
+#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
+#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
+#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
+#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
 
 #Mask to panel and calculate radiance
 markedImg = radianceImage.copy()
@@ -199,11 +202,11 @@ bandName = meta.get_item('XMP:BandName')
 
 #Converting raw images to Radiance
 radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-plotutils.plotwithcolorbar(V,'Vignette Factor')
-plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
+#plotutils.plotwithcolorbar(V,'Vignette Factor')
+#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
+#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
+#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
+#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
 
 #Mask to panel and calculate radiance
 markedImg = radianceImage.copy()
@@ -240,11 +243,11 @@ bandName = meta.get_item('XMP:BandName')
 
 #Converting raw images to Radiance
 radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-plotutils.plotwithcolorbar(V,'Vignette Factor')
-plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
+#plotutils.plotwithcolorbar(V,'Vignette Factor')
+#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
+#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
+#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
+#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
 
 #Mask to panel and calculate radiance
 markedImg = radianceImage.copy()
@@ -293,11 +296,11 @@ bandName = meta.get_item('XMP:BandName')
 
 #Converting raw images to Radiance
 radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-plotutils.plotwithcolorbar(V,'Vignette Factor')
-plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
+#plotutils.plotwithcolorbar(V,'Vignette Factor')
+#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
+#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
+#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
+#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
 
 #Mask to panel and calculate radiance
 markedImg = radianceImage.copy()
@@ -334,11 +337,11 @@ bandName = meta.get_item('XMP:BandName')
 
 #Converting raw images to Radiance
 radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-plotutils.plotwithcolorbar(V,'Vignette Factor')
-plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
+#plotutils.plotwithcolorbar(V,'Vignette Factor')
+#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
+#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
+#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
+#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
 
 #Mask to panel and calculate radiance
 markedImg = radianceImage.copy()
@@ -375,11 +378,11 @@ bandName = meta.get_item('XMP:BandName')
 
 #Converting raw images to Radiance
 radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-plotutils.plotwithcolorbar(V,'Vignette Factor')
-plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
+#plotutils.plotwithcolorbar(V,'Vignette Factor')
+#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
+#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
+#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
+#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
 
 #Mask to panel and calculate radiance
 markedImg = radianceImage.copy()
@@ -416,11 +419,11 @@ bandName = meta.get_item('XMP:BandName')
 
 #Converting raw images to Radiance
 radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-plotutils.plotwithcolorbar(V,'Vignette Factor')
-plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
+#plotutils.plotwithcolorbar(V,'Vignette Factor')
+#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
+#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
+#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
+#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
 
 #Mask to panel and calculate radiance
 markedImg = radianceImage.copy()
@@ -457,11 +460,11 @@ bandName = meta.get_item('XMP:BandName')
 
 #Converting raw images to Radiance
 radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-plotutils.plotwithcolorbar(V,'Vignette Factor')
-plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
+#plotutils.plotwithcolorbar(V,'Vignette Factor')
+#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
+#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
+#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
+#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
 
 #Mask to panel and calculate radiance
 markedImg = radianceImage.copy()
