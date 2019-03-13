@@ -131,11 +131,9 @@ mm3d Schnaps .*$EXTENSION MoveBadImgs=1
 
 #Compute Relative orientation (Arbitrary system)
 
-mm3d Martini .*$EXTENSION
+calib_subset.py -folder $PWD -algo Fraser  -csv calib.csv
 
-mm3d AperiCloud .*$EXTENSION Martini
-
-mm3d Tapas $CALIB .*$EXTENSION InOri=Martini Out=Arbitrary SH=_mini | tee RelBundle.txt
+mm3d Tapas $CALIB .*$EXTENSION InCal=Calib Out=Arbitrary SH=_mini | tee RelBundle.txt
 
 #Visualize relative orientation, if apericloud is not working, run 
 
