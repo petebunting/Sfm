@@ -21,17 +21,18 @@ CSV=none
 CALIB=Fraser
 match=0
  
-while getopts "e:m:x:y:u:sz:cal:csv:h" opt; do  
+while getopts "e:m:x:y:u:sz:cal:csv:sub:h" opt; do  
   case $opt in
     h)
-      echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
+      echo "Carry out feature extraction and orientation of images"
       echo "Usage: Orientation.sh -e JPG -u 30 +north" 
       echo "	-e EXTENSION     : image file type (JPG, jpg, TIF, png..., default=JPG)."
       echo "	-m match         : exaustive matching" 
       echo "	-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
       echo "	-sz size         : resize of imagery eg - 2000"
       echo "	-cal CALIB        : Camera calibration model - e.g. RadialBasic, Fraser etc"
-      echo " -csv -CSV        : whether to use a separate csv "
+      echo " -csv -CSV        : The path to a csv if used"
+      echo " -sub -SUB        : a subset  csv for pre-calibration of orientation"      
       echo "	-h	             : displays this message and exits."
       echo " "  
       exit 0
@@ -95,8 +96,8 @@ echo "</SystemeCoord>                                                           
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
 if [  "$CSV"!=none  ]; then 
         echo "using csv file"  
-    cs=*.csv   
-    mm3d OriConvert OriTxtInFile $cs RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
+    #cs=*.csv   
+    mm3d OriConvert OriTxtInFile $CSV RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
     sysCort_make.py -csv $cs   
 else 
     echo "using exif data"
@@ -131,10 +132,15 @@ mm3d Schnaps .*$EXTENSION MoveBadImgs=1
 
 #Compute Relative orientation (Arbitrary system)
 
-calib_subset.py -folder $PWD -algo Fraser  -csv calib.csv
+if [  "$SUB"!=none ]; then
+    echo "using calibration subset"
+    calib_subset.py -folder $PWD -algo Fraser  -csv calib.csv
 
-mm3d Tapas $CALIB .*$EXTENSION InCal=Calib Out=Arbitrary SH=_mini | tee RelBundle.txt
-
+    mm3d Tapas $CALIB .*$EXTENSION InCal=Calib Out=Arbitrary SH=_mini | tee RelBundle.txt
+else
+    mm3d Tapas $CALIB .*$EXTENSION Out=Arbitrary SH=_mini | tee RelBundle.txt
+    echo " orientation using whole dataset"
+fi    
 #Visualize relative orientation, if apericloud is not working, run 
 
 mm3d AperiCloud .*$EXTENSION Ori-Arbitrary SH=_mini
