@@ -20,7 +20,7 @@ size=3000
 CSV=none
 CALIB=Fraser
 match=0
- 
+SUB=none 
 while getopts "e:m:x:y:u:sz:cal:csv:sub:h" opt; do  
   case $opt in
     h)
@@ -55,7 +55,10 @@ while getopts "e:m:x:y:u:sz:cal:csv:sub:h" opt; do
       ;;        
     csv)
       CSV=$OPTARG 
-      ;;         
+      ;; 
+    sub)
+      SUB=$OPTARG 
+      ;;            
     \?)
       echo "Orientation.sh: Invalid option: -$OPTARG" >&1
       exit 1
@@ -134,7 +137,7 @@ mm3d Schnaps .*$EXTENSION MoveBadImgs=1
 
 if [  "$SUB"!=none ]; then
     echo "using calibration subset"
-    calib_subset.py -folder $PWD -algo Fraser  -csv calib.csv
+    calib_subset.py -folder $PWD -algo $CALIB  -csv $SUB
 
     mm3d Tapas $CALIB .*$EXTENSION InCal=Calib Out=Arbitrary SH=_mini | tee RelBundle.txt
 else
@@ -151,7 +154,7 @@ mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 
 #This tends to screw things up - not required 
 #Bundle adjust using both camera positions and tie points (number in EmGPS option is the quality estimate of the GNSS data in meters)
-
+ 
 #Visualize Ground_RTL orientation
 mm3d AperiCloud .*$EXTENSION Ori-Ground_Init_RTL SH=_mini
 
