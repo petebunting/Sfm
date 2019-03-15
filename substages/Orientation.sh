@@ -9,7 +9,7 @@
 # ./Orientation.sh -e JPG -u "30 +north" -cal Fraser
 
  
-
+ 
 # add default values 
 EXTENSION=JPG
 X_OFF=0;
@@ -21,11 +21,12 @@ CSV=none
 CALIB=Fraser
 match=0
 SUB=none 
+
 while getopts "e:m:x:y:u:sz:cal:csv:sub:h" opt; do  
   case $opt in
     h)
       echo "Carry out feature extraction and orientation of images"
-      echo "Usage: Orientation.sh -e JPG -u 30 +north" 
+      echo "Usage: Orientation.sh -e JPG -u 30 +north -sub sub.csv " 
       echo "	-e EXTENSION     : image file type (JPG, jpg, TIF, png..., default=JPG)."
       echo "	-m match         : exaustive matching" 
       echo "	-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
@@ -75,7 +76,6 @@ if [ "$utm_set" = false ]; then
 fi
 
 
-
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
 # magick mogrify -resize 50%
 
@@ -97,12 +97,13 @@ echo "</SystemeCoord>                                                           
 # mogrify -resize 30% *.JPG
 #mogrify -resize 2000 *.JPG
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-if [  "$CSV"!=none  ]; then 
-        echo "using csv file"  
+if [  "$CSV" != none  ]; then 
+    echo "using csv file"  
     #cs=*.csv   
     mm3d OriConvert OriTxtInFile $CSV RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
-    sysCort_make.py -csv $cs   
+    sysCort_make.py -csv $CSV   
 else 
+
     echo "using exif data"
     mm3d XifGps2Txt .*$EXTENSION 
     #Get the GNSS data out of the images and convert it to a xml orientation folder (Ori-RAWGNSS), also create a good RTL (Local Radial Tangential) system.
@@ -112,7 +113,7 @@ fi
 #Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
 
 
-if [  "$size"!=none ]; then
+if [  "$size" != none ]; then
     echo "resizing to $size for tie point detection"
     # mogrify -path Sharp -sharpen 0x3  *.JPG # this sharpens very well worth doing
     mogrify -resize $size *.JPG
@@ -121,7 +122,7 @@ else
     mogrify -resize 3000 *.JPG 
 fi 
 
-#if [  "$match"=1 ]; then
+#if [  "$match" = 1 ]; then
    # echo "exaustive matching"
    # mm3d Tapioca All ".*JPG" -1 InOri=Martini @SFS
 #else
@@ -159,7 +160,7 @@ mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 mm3d AperiCloud .*$EXTENSION Ori-Ground_Init_RTL SH=_mini
 
 #Change system to final cartographic system  
-if [ $CSV!=none ]; then 
+if [  "$CSV" != none  ]; then 
     mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_UTM EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini | tee GnssBundle.txt
     # For reasons unknown this screws it up from csv
     #mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM

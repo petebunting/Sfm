@@ -1,31 +1,39 @@
-#Imports
-import os,glob
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Mar 12 15:35:40 2019
 
-import cv2 #openCV
-import exiftool
-exiftoolPath = None
-#import numpy as np
-import matplotlib.pyplot as plt  #%matplotlib inline
-#import math
+@author: Ciaran Robb
+
+A script for processing to surface reflectance 
+"""
+import os, sys
+import matplotlib.pyplot as plt
 from PIL import Image
-import micasense.plotutils as plotutils #Micasense utility modules
 import micasense.metadata as metadata
 import micasense.utils as msutils
-
-##############################################################################
-#Part 1
-
-#Set folder paths
-
+#import micasense.plotutils as plotutils
+import micasense.imageutils as imageutils
+import micasense.capture as capture
+from micasense.panel import Panel
+from micasense.image import Image as MImage
+import numpy as np
+import micasense.imageset as imageset
+from glob2 import glob
 import argparse
-parser = argparse.ArgumentParser()
+from subprocess import call
+#import gdal, gdal_array
+#from joblib import Parallel, delayed
 
+exiftoolPath=None
+
+parser = argparse.ArgumentParser()
 
 parser.add_argument("-precal", "--pcal", type=str, required=True, 
                     help="path to pre flight calibration images")
 
-parser.add_argument("-postcal", "--pstcal", type=str, required=True, 
-                    help="path to post flight calibration images")
+parser.add_argument("-postcal", "--pstcal", type=str, required=False,
+                    default=None, help="path to post flight calibration images")
 
 parser.add_argument("-img", "--fimages", type=str, required=True, 
                     help="path to flight images")
@@ -33,522 +41,156 @@ parser.add_argument("-img", "--fimages", type=str, required=True,
 parser.add_argument("-o", "--rimages", type=str, required=True, 
                     help="path to output reflectance directory")
 
+parser.add_argument("-alIm", "--alg", type=int, required=False, default=-1, 
+                    help="no of threads to use - defaults to all")
 
 args = parser.parse_args() 
 
-CalibrationFolder_preflight = os.path.abspath(args.pcal)
-
-
-CalibrationFolder_postflight = os.path.abspath(args.pstcal)
-
-
-ImagesFolder = os.path.abspath(args.fimages)
-
-
-ReflectanceImagesFolder = os.path.abspath(args.images)
-
-
-#import Micasense panel reflectance data
-panelCalibration = { 
-    "Blue": 0.61, 
-    "Green": 0.61, 
-    "Red": 0.61, 
-    "Red edge": 0.60, 
-    "NIR": 0.56 
-}
-
-##############################################################################
-#Calculate Radiance to Reflectance Conversion for Each Band using the Calibration Panel Images
-    #Need to perform manually for each band because masked panel area shifts
-
-#PREFLIGHT CALIBRATION IMAGES
-##############
-#Band 1 (Blue)
-#Plotting
-imageName = os.path.join(CalibrationFolder_preflight, 'IMG_0002_1.tif')
-imageRaw=plt.imread(imageName).T  # Read raw image DN values - 16 bit tif only
-plt.imshow(imageRaw.T, cmap='gray')
-plotutils.colormap('viridis'); # Optional: pick a color map: 'gray, viridis, plasma, inferno, magma, nipy_spectral'
-fig = plotutils.plotwithcolorbar(imageRaw.T, title='Raw image values with colorbar')
-
-#Image metadata
-meta = metadata.Metadata(imageName, exiftoolPath=exiftoolPath)
-bandName = meta.get_item('XMP:BandName')
-
-#Converting raw images to Radiance
-radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-plotutils.plotwithcolorbar(V,'Vignette Factor')
-plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
-
-#Mask to panel and calculate radiance
-markedImg = radianceImage.copy()
-ulx = 510 # upper left column (x coordinate) of panel area
-uly = 350 # upper left row (y coordinate) of panel area
-lrx = 710 # lower right column (x coordinate) of panel area
-lry = 550 # lower right row (y coordinate) of panel area
-cv2.rectangle(markedImg,(ulx,uly),(lrx,lry),(0,255,0),3)
-panelRegion = radianceImage[uly:lry, ulx:lrx]
-plotutils.plotwithcolorbar(markedImg, 'Panel region in radiance image')
-
-meanRadiance = panelRegion.mean()
-print('Mean Radiance in panel region: {:1.3f} W/m^2/nm/sr'.format(meanRadiance))
-panelReflectance = panelCalibration[bandName]
-radianceToReflectance_B1 = panelReflectance / meanRadiance
-print('Radiance to reflectance conversion factor: {:1.3f}'.format(radianceToReflectance_B1))
-
-reflectanceImage = radianceImage * radianceToReflectance_B1
-plotutils.plotwithcolorbar(reflectanceImage, 'Converted Reflectane Image')
-
-
-##############
-#Band 2 (Green)
-#Plotting
-imageName = os.path.join(CalibrationFolder_preflight,'IMG_0002_2.tif')
-imageRaw=plt.imread(imageName).T  # Read raw image DN values - 16 bit tif only
-plt.imshow(imageRaw.T, cmap='gray')
-plotutils.colormap('viridis'); # Optional: pick a color map: 'gray, viridis, plasma, inferno, magma, nipy_spectral'
-fig = plotutils.plotwithcolorbar(imageRaw.T, title='Raw image values with colorbar')
-#Image metadata
-meta = metadata.Metadata(imageName, exiftoolPath=exiftoolPath)
-bandName = meta.get_item('XMP:BandName')
-
-#Converting raw images to Radiance
-radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-# not required just for show
-#plotutils.plotwithcolorbar(V,'Vignette Factor')
-#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
-
-#Mask to panel and calculate radiance
-
-#TODO Problem appears here - no bloody image
-markedImg = radianceImage.copy()
-ulx = 530 # upper left column (x coordinate) of panel area
-uly = 340 # upper left row (y coordinate) of panel area
-lrx = 730 # lower right column (x coordinate) of panel area
-lry = 540 # lower right row (y coordinate) of panel area
-cv2.rectangle(markedImg,(ulx,uly),(lrx,lry),(0,255,0),3)
-panelRegion = radianceImage[uly:lry, ulx:lrx]
-plotutils.plotwithcolorbar(markedImg, 'Panel region in radiance image')
-
-meanRadiance = panelRegion.mean()
-print('Mean Radiance in panel region: {:1.3f} W/m^2/nm/sr'.format(meanRadiance))
-panelReflectance = panelCalibration[bandName]
-radianceToReflectance_B2 = panelReflectance / meanRadiance
-print('Radiance to reflectance conversion factor: {:1.3f}'.format(radianceToReflectance_B2))
-
-reflectanceImage = radianceImage * radianceToReflectance_B2
-plotutils.plotwithcolorbar(reflectanceImage, 'Converted Reflectane Image')
-
-
-##############
-#Band 3 (Red)
-#Plotting
-imageName = os.path.join(CalibrationFolder_preflight,'IMG_0002_3.tif')
-imageRaw=plt.imread(imageName).T  # Read raw image DN values - 16 bit tif only
-plt.imshow(imageRaw.T, cmap='gray')
-plotutils.colormap('viridis'); # Optional: pick a color map: 'gray, viridis, plasma, inferno, magma, nipy_spectral'
-fig = plotutils.plotwithcolorbar(imageRaw.T, title='Raw image values with colorbar')
-
-#Image metadata
-meta = metadata.Metadata(imageName, exiftoolPath=exiftoolPath)
-bandName = meta.get_item('XMP:BandName')
-
-#Converting raw images to Radiance
-radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-#plotutils.plotwithcolorbar(V,'Vignette Factor')
-#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
-
-#Mask to panel and calculate radiance
-markedImg = radianceImage.copy()
-ulx = 550 # upper left column (x coordinate) of panel area
-uly = 300 # upper left row (y coordinate) of panel area
-lrx = 750 # lower right column (x coordinate) of panel area
-lry = 500 # lower right row (y coordinate) of panel area
-cv2.rectangle(markedImg,(ulx,uly),(lrx,lry),(0,255,0),3)
-panelRegion = radianceImage[uly:lry, ulx:lrx]
-plotutils.plotwithcolorbar(markedImg, 'Panel region in radiance image')
-
-meanRadiance = panelRegion.mean()
-print('Mean Radiance in panel region: {:1.3f} W/m^2/nm/sr'.format(meanRadiance))
-panelReflectance = panelCalibration[bandName]
-radianceToReflectance_B3 = panelReflectance / meanRadiance
-print('Radiance to reflectance conversion factor: {:1.3f}'.format(radianceToReflectance_B3))
-
-reflectanceImage = radianceImage * radianceToReflectance_B3
-plotutils.plotwithcolorbar(reflectanceImage, 'Converted Reflectane Image')
-
-
-##############
-#Band 4 (NIR)
-#Plotting
-imageName = os.path.join(CalibrationFolder_preflight,'IMG_0002_4.tif')
-imageRaw=plt.imread(imageName).T  # Read raw image DN values - 16 bit tif only
-plt.imshow(imageRaw.T, cmap='gray')
-plotutils.colormap('viridis'); # Optional: pick a color map: 'gray, viridis, plasma, inferno, magma, nipy_spectral'
-fig = plotutils.plotwithcolorbar(imageRaw.T, title='Raw image values with colorbar')
-
-#Image metadata
-meta = metadata.Metadata(imageName, exiftoolPath=exiftoolPath)
-bandName = meta.get_item('XMP:BandName')
-
-#Converting raw images to Radiance
-radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-#plotutils.plotwithcolorbar(V,'Vignette Factor')
-#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
-
-#Mask to panel and calculate radiance
-markedImg = radianceImage.copy()
-ulx = 510 # upper left column (x coordinate) of panel area
-uly = 330 # upper left row (y coordinate) of panel area
-lrx = 710 # lower right column (x coordinate) of panel area
-lry = 530 # lower right row (y coordinate) of panel area
-cv2.rectangle(markedImg,(ulx,uly),(lrx,lry),(0,255,0),3)
-panelRegion = radianceImage[uly:lry, ulx:lrx]
-plotutils.plotwithcolorbar(markedImg, 'Panel region in radiance image')
-
-meanRadiance = panelRegion.mean()
-print('Mean Radiance in panel region: {:1.3f} W/m^2/nm/sr'.format(meanRadiance))
-panelReflectance = panelCalibration[bandName]
-radianceToReflectance_B4 = panelReflectance / meanRadiance
-print('Radiance to reflectance conversion factor: {:1.3f}'.format(radianceToReflectance_B4))
-
-reflectanceImage = radianceImage * radianceToReflectance_B4
-plotutils.plotwithcolorbar(reflectanceImage, 'Converted Reflectane Image')
-
-
-##############
-#Band 5 (Red edge)
-#Plotting
-imageName = os.path.join(CalibrationFolder_preflight,'IMG_0002_5.tif')
-imageRaw=plt.imread(imageName).T  # Read raw image DN values - 16 bit tif only
-plt.imshow(imageRaw.T, cmap='gray')
-plotutils.colormap('viridis'); # Optional: pick a color map: 'gray, viridis, plasma, inferno, magma, nipy_spectral'
-fig = plotutils.plotwithcolorbar(imageRaw.T, title='Raw image values with colorbar')
-
-#Image metadata
-meta = metadata.Metadata(imageName, exiftoolPath=exiftoolPath)
-bandName = meta.get_item('XMP:BandName')
-
-#Converting raw images to Radiance
-radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-#plotutils.plotwithcolorbar(V,'Vignette Factor')
-#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
-
-#Mask to panel and calculate radiance
-markedImg = radianceImage.copy()
-ulx = 520 # upper left column (x coordinate) of panel area
-uly = 320 # upper left row (y coordinate) of panel area
-lrx = 720 # lower right column (x coordinate) of panel area
-lry = 520 # lower right row (y coordinate) of panel area
-cv2.rectangle(markedImg,(ulx,uly),(lrx,lry),(0,255,0),3)
-panelRegion = radianceImage[uly:lry, ulx:lrx]
-plotutils.plotwithcolorbar(markedImg, 'Panel region in radiance image')
-
-meanRadiance = panelRegion.mean()
-print('Mean Radiance in panel region: {:1.3f} W/m^2/nm/sr'.format(meanRadiance))
-panelReflectance = panelCalibration[bandName]
-radianceToReflectance_B5 = panelReflectance / meanRadiance
-print('Radiance to reflectance conversion factor: {:1.3f}'.format(radianceToReflectance_B5))
-
-reflectanceImage = radianceImage * radianceToReflectance_B5
-plotutils.plotwithcolorbar(reflectanceImage, 'Converted Reflectane Image')
-
-
-#Check Radiance to Reflectance conversion for each band
-print('Blue: {:1.3f}'.format(radianceToReflectance_B1))
-print('Green: {:1.3f}'.format(radianceToReflectance_B2))
-print('Red: {:1.3f}'.format(radianceToReflectance_B3))
-print('NIR: {:1.3f}'.format(radianceToReflectance_B4))
-print('Red edge: {:1.3f}'.format(radianceToReflectance_B5))
-
-
-
-#POSTFLIGHT
-##############################################################################
-#Calculate Radiance to Reflectance Conversion for Each Band using the Calibration Panel Images
-##############
-#Band 1 (Blue)
-#Plotting
-imageName = os.path.join(CalibrationFolder_postflight,'IMG_0119_1.tif')
-imageRaw=plt.imread(imageName).T  # Read raw image DN values - 16 bit tif only
-plt.imshow(imageRaw.T, cmap='gray')
-plotutils.colormap('viridis'); # Optional: pick a color map: 'gray, viridis, plasma, inferno, magma, nipy_spectral'
-fig = plotutils.plotwithcolorbar(imageRaw.T, title='Raw image values with colorbar')
-
-#Image metadata
-meta = metadata.Metadata(imageName, exiftoolPath=exiftoolPath)
-bandName = meta.get_item('XMP:BandName')
-
-#Converting raw images to Radiance
-radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-#plotutils.plotwithcolorbar(V,'Vignette Factor')
-#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
-
-#Mask to panel and calculate radiance
-markedImg = radianceImage.copy()
-ulx = 460 # upper left column (x coordinate) of panel area
-uly = 550 # upper left row (y coordinate) of panel area
-lrx = 600 # lower right column (x coordinate) of panel area
-lry = 700 # lower right row (y coordinate) of panel area
-cv2.rectangle(markedImg,(ulx,uly),(lrx,lry),(0,255,0),3)
-panelRegion = radianceImage[uly:lry, ulx:lrx]
-plotutils.plotwithcolorbar(markedImg, 'Panel region in radiance image')
-
-meanRadiance = panelRegion.mean()
-print('Mean Radiance in panel region: {:1.3f} W/m^2/nm/sr'.format(meanRadiance))
-panelReflectance = panelCalibration[bandName]
-radianceToReflectance_B1_post = panelReflectance / meanRadiance
-print('Radiance to reflectance conversion factor: {:1.3f}'.format(radianceToReflectance_B1_post))
-
-reflectanceImage = radianceImage * radianceToReflectance_B1_post
-plotutils.plotwithcolorbar(reflectanceImage, 'Converted Reflectane Image')
-
-
-##############
-#Band 2 (Green)
-#Plotting
-imageName = os.path.join(CalibrationFolder_postflight,'IMG_0119_2.tif')
-imageRaw=plt.imread(imageName).T  # Read raw image DN values - 16 bit tif only
-plt.imshow(imageRaw.T, cmap='gray')
-plotutils.colormap('viridis'); # Optional: pick a color map: 'gray, viridis, plasma, inferno, magma, nipy_spectral'
-fig = plotutils.plotwithcolorbar(imageRaw.T, title='Raw image values with colorbar')
-
-#Image metadata
-meta = metadata.Metadata(imageName, exiftoolPath=exiftoolPath)
-bandName = meta.get_item('XMP:BandName')
-
-#Converting raw images to Radiance
-radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-#plotutils.plotwithcolorbar(V,'Vignette Factor')
-#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
-
-#Mask to panel and calculate radiance
-markedImg = radianceImage.copy()
-ulx = 470 # upper left column (x coordinate) of panel area
-uly = 540 # upper left row (y coordinate) of panel area
-lrx = 610 # lower right column (x coordinate) of panel area
-lry = 690 # lower right row (y coordinate) of panel area
-cv2.rectangle(markedImg,(ulx,uly),(lrx,lry),(0,255,0),3)
-panelRegion = radianceImage[uly:lry, ulx:lrx]
-plotutils.plotwithcolorbar(markedImg, 'Panel region in radiance image')
-
-meanRadiance = panelRegion.mean()
-print('Mean Radiance in panel region: {:1.3f} W/m^2/nm/sr'.format(meanRadiance))
-panelReflectance = panelCalibration[bandName]
-radianceToReflectance_B2_post = panelReflectance / meanRadiance
-print('Radiance to reflectance conversion factor: {:1.3f}'.format(radianceToReflectance_B2_post))
-
-reflectanceImage = radianceImage * radianceToReflectance_B2_post
-plotutils.plotwithcolorbar(reflectanceImage, 'Converted Reflectane Image')
-
-
-##############
-#Band 3 (Red)
-#Plotting
-imageName = os.path.join(CalibrationFolder_postflight,'IMG_0119_3.tif')
-imageRaw=plt.imread(imageName).T  # Read raw image DN values - 16 bit tif only
-plt.imshow(imageRaw.T, cmap='gray')
-plotutils.colormap('viridis'); # Optional: pick a color map: 'gray, viridis, plasma, inferno, magma, nipy_spectral'
-fig = plotutils.plotwithcolorbar(imageRaw.T, title='Raw image values with colorbar')
-
-#Image metadata
-meta = metadata.Metadata(imageName, exiftoolPath=exiftoolPath)
-bandName = meta.get_item('XMP:BandName')
-
-#Converting raw images to Radiance
-radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-#plotutils.plotwithcolorbar(V,'Vignette Factor')
-#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
-
-#Mask to panel and calculate radiance
-markedImg = radianceImage.copy()
-ulx = 480 # upper left column (x coordinate) of panel area
-uly = 520 # upper left row (y coordinate) of panel area
-lrx = 620 # lower right column (x coordinate) of panel area
-lry = 670 # lower right row (y coordinate) of panel area
-cv2.rectangle(markedImg,(ulx,uly),(lrx,lry),(0,255,0),3)
-panelRegion = radianceImage[uly:lry, ulx:lrx]
-plotutils.plotwithcolorbar(markedImg, 'Panel region in radiance image')
-
-meanRadiance = panelRegion.mean()
-print('Mean Radiance in panel region: {:1.3f} W/m^2/nm/sr'.format(meanRadiance))
-panelReflectance = panelCalibration[bandName]
-radianceToReflectance_B3_post = panelReflectance / meanRadiance
-print('Radiance to reflectance conversion factor: {:1.3f}'.format(radianceToReflectance_B3_post))
-
-reflectanceImage = radianceImage * radianceToReflectance_B3_post
-plotutils.plotwithcolorbar(reflectanceImage, 'Converted Reflectane Image')
-
-
-##############
-#Band 4 (NIR)
-#Plotting
-imageName = os.path.join(CalibrationFolder_postflight,'IMG_0119_4.tif')
-imageRaw=plt.imread(imageName).T  # Read raw image DN values - 16 bit tif only
-plt.imshow(imageRaw.T, cmap='gray')
-plotutils.colormap('viridis'); # Optional: pick a color map: 'gray, viridis, plasma, inferno, magma, nipy_spectral'
-fig = plotutils.plotwithcolorbar(imageRaw.T, title='Raw image values with colorbar')
-
-#Image metadata
-meta = metadata.Metadata(imageName, exiftoolPath=exiftoolPath)
-bandName = meta.get_item('XMP:BandName')
-
-#Converting raw images to Radiance
-radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-#plotutils.plotwithcolorbar(V,'Vignette Factor')
-#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
-
-#Mask to panel and calculate radiance
-markedImg = radianceImage.copy()
-ulx = 460 # upper left column (x coordinate) of panel area
-uly = 530 # upper left row (y coordinate) of panel area
-lrx = 600 # lower right column (x coordinate) of panel area
-lry = 680 # lower right row (y coordinate) of panel area
-cv2.rectangle(markedImg,(ulx,uly),(lrx,lry),(0,255,0),3)
-panelRegion = radianceImage[uly:lry, ulx:lrx]
-plotutils.plotwithcolorbar(markedImg, 'Panel region in radiance image')
-
-meanRadiance = panelRegion.mean()
-print('Mean Radiance in panel region: {:1.3f} W/m^2/nm/sr'.format(meanRadiance))
-panelReflectance = panelCalibration[bandName]
-radianceToReflectance_B4_post = panelReflectance / meanRadiance
-print('Radiance to reflectance conversion factor: {:1.3f}'.format(radianceToReflectance_B4_post))
-
-reflectanceImage = radianceImage * radianceToReflectance_B4_post
-plotutils.plotwithcolorbar(reflectanceImage, 'Converted Reflectane Image')
-
-
-##############
-#Band 5 (Red edge)
-#Plotting
-imageName = os.path.join(CalibrationFolder_postflight,'IMG_0119_5.tif')
-imageRaw=plt.imread(imageName).T  # Read raw image DN values - 16 bit tif only
-plt.imshow(imageRaw.T, cmap='gray')
-plotutils.colormap('viridis'); # Optional: pick a color map: 'gray, viridis, plasma, inferno, magma, nipy_spectral'
-fig = plotutils.plotwithcolorbar(imageRaw.T, title='Raw image values with colorbar')
-
-#Image metadata
-meta = metadata.Metadata(imageName, exiftoolPath=exiftoolPath)
-bandName = meta.get_item('XMP:BandName')
-
-#Converting raw images to Radiance
-radianceImage, L, V, R = msutils.raw_image_to_radiance(meta, imageRaw.T)
-#plotutils.plotwithcolorbar(V,'Vignette Factor')
-#plotutils.plotwithcolorbar(R,'Row Gradient Factor')
-#plotutils.plotwithcolorbar(V*R,'Combined Corrections')
-#plotutils.plotwithcolorbar(L,'Vignette and row gradient corrected raw values')
-#plotutils.plotwithcolorbar(radianceImage,'All factors applied and scaled to radiance')
-
-#Mask to panel and calculate radiance
-markedImg = radianceImage.copy()
-ulx = 470 # upper left column (x coordinate) of panel area
-uly = 520 # upper left row (y coordinate) of panel area
-lrx = 610 # lower right column (x coordinate) of panel area
-lry = 670 # lower right row (y coordinate) of panel area
-cv2.rectangle(markedImg,(ulx,uly),(lrx,lry),(0,255,0),3)
-panelRegion = radianceImage[uly:lry, ulx:lrx]
-plotutils.plotwithcolorbar(markedImg, 'Panel region in radiance image')
-
-meanRadiance = panelRegion.mean()
-print('Mean Radiance in panel region: {:1.3f} W/m^2/nm/sr'.format(meanRadiance))
-panelReflectance = panelCalibration[bandName]
-radianceToReflectance_B5_post = panelReflectance / meanRadiance
-print('Radiance to reflectance conversion factor: {:1.3f}'.format(radianceToReflectance_B5_post))
-
-reflectanceImage = radianceImage * radianceToReflectance_B5_post
-plotutils.plotwithcolorbar(reflectanceImage, 'Converted Reflectane Image')
-
-#Check Radiance to Reflectance conversion for each band
-print('Blue: {:1.3f}'.format(radianceToReflectance_B1_post))
-print('Green: {:1.3f}'.format(radianceToReflectance_B2_post))
-print('Red: {:1.3f}'.format(radianceToReflectance_B3_post))
-print('NIR: {:1.3f}'.format(radianceToReflectance_B4_post))
-print('Red edge: {:1.3f}'.format(radianceToReflectance_B5_post))
-
-#################################################################
-#AVG Pre and Post Flight Calibration
-#Check Radiance to Reflectance conversion for each band
-radianceToReflectance_B1_avg = (radianceToReflectance_B1 + radianceToReflectance_B1_post)/2
-radianceToReflectance_B2_avg = (radianceToReflectance_B2 + radianceToReflectance_B2_post)/2
-radianceToReflectance_B3_avg = (radianceToReflectance_B3 + radianceToReflectance_B3_post)/2
-radianceToReflectance_B4_avg = (radianceToReflectance_B4 + radianceToReflectance_B4_post)/2
-radianceToReflectance_B5_avg = (radianceToReflectance_B5 + radianceToReflectance_B5_post)/2
-
-##############################################################################
-##############################################################################
-#Part 2
-
-#Write function to read band
-def get_band(image):
-    meta = metadata.Metadata(image, exiftoolPath=exiftoolPath)
-    band = meta.get_item('XMP:BandName')
-    return band
-
-#Begin loop to process raw images to reflectance
-for image in os.listdir(ImagesFolder):
-#Ignore all but TIF
-    if os.path.splitext(image)[-1] == ".tif":
-#Read images and get metadata
-        imagepath = os.path.join(ImagesFolder, image)
-        band = get_band(imagepath)
-        meta = metadata.Metadata(imagepath, exiftoolPath=exiftoolPath)
-        ImageRaw=plt.imread(imagepath)
-#Convert DN to Radiance
-        flightRadianceImage, _, _, _ = msutils.raw_image_to_radiance(meta, ImageRaw)
-        #plotutils.plotwithcolorbar(flightRadianceImage, 'Radiance Image')
-#Convert Radiance to Reflectance
-        if band == "Blue":
-            flightReflectanceImage = flightRadianceImage * radianceToReflectance_B1_avg
-        elif band == "Green":
-            flightReflectanceImage = flightRadianceImage * radianceToReflectance_B2_avg
-        elif band == "Red":
-            flightReflectanceImage = flightRadianceImage * radianceToReflectance_B3_avg
-        elif band == "NIR":
-            flightReflectanceImage = flightRadianceImage * radianceToReflectance_B4_avg
-        elif band == "Red edge":
-            flightReflectanceImage = flightRadianceImage * radianceToReflectance_B5_avg
-        else:
-            print("error")
-#Export TIFF
-        if not os.path.exists(ReflectanceImagesFolder):
-            os.makedirs(ReflectanceImagesFolder)
-        outfile = os.path.join(ReflectanceImagesFolder, image)
-        im = Image.fromarray(flightReflectanceImage)
-        im.save(outfile)
-        #End loop
-
-#############################################################################  
-#############################################################################
-#Part 3
-#Transfer metadata
-#Pathways must not have spaces
-#Copy the following to the command prompt
-
-#exiftool -tagsFromFile C:\Users\username\GitHubRepository\batch-imageprocessing\test_images\images_calibration\images_raw\%f.tif -file:all -iptc:all -exif:all -xmp -Composite:all C:\Users\username\GitHubRepository\batch-imageprocessing\test_images\images_reflectance -overwrite_original
+calibPre = os.path.abspath(args.pcal)
+
+if args.pstcal != None:
+    calibPost = os.path.abspath(args.pstcal)
+
+
+imagesFolder = os.path.abspath(args.fimages)
+
+
+ReflectanceimagesFolder = os.path.abspath(args.rimages)
+
+nt = args.noT
+
+
+print("Alinging images. Depending on settings this can take from a few seconds to many minutes")
+# Increase max_iterations to 1000+ for better results, but much longer runtimes
+'''
+Right so each capture means each set of bands 1-5
+This requires the image list to be sorted in a way that can be aligned
+It appears as though micasense have done this with their lib
+
+'''
+
+#capture = capture.Capture.from_filelist(imagesFolder)
+##
+##
+#warp_matrices, alignment_pairs = imageutils.align_capture(capture, max_iterations=100)
+##
+#print("Finished Aligning, warp matrices:")
+#for i,mat in enumerate(warp_matrices):
+#    print("Band {}:\n{}".format(i,mat))
+
+panel_ref = [0.67, 0.69, 0.68, 0.61, 0.67]
+
+imgset = imageset.ImageSet.from_directory(imagesFolder)
+
+
+preCapList = glob(os.path.join(calibPre, "*.tif"))
+preCapList.sort()
+pCapPre = capture.Capture.from_filelist(preCapList) 
+pPreIr = pCapPre.panel_irradiance(panel_ref)
+
+if args.pstcal != None:
+    pCapPost = capture.Capture.from_filelist(glob(calibPost, "*.tif")) 
+
+    pPostIr = pCapPost.panel_irradiance(panel_ref)
+
+    panel_irradiance = (pPreIr + pPostIr) / 2
+else:
+    panel_irradiance = pPreIr
+ #RedEdge band_index order
+
+# First we must find an image with decent features from which a band alignment 
+# can be applied to the whole dataset
+ 
+wildCrd = "IMG_0007"+args.alg+"*.tif"
+algList = glob(os.path.join('000', wildCrd))
+algList.sort()
+imAl = capture.Capture.from_filelist(algList) 
+imAl.compute_reflectance(panel_irradiance)
+imAl.plot_undistorted_reflectance(panel_irradiance)
+
+def align_template(imAl, mx):
+    warp_matrices, alignment_pairs = imageutils.align_capture(imAl, max_iterations=mx)
+    for x,mat in enumerate(warp_matrices):
+        print("Band {}:\n{}".format(x,mat))
+    dist_coeffs = []
+    cam_mats = []
+    # create lists of the distortion coefficients and camera matricies
+    for im,img in enumerate(imAl.images):
+        dist_coeffs.append(img.cv2_distortion_coeff())
+        cam_mats.append(img.cv2_camera_matrix())
+    # cropped_dimensions is of the form:
+    # (first column with overlapping pixels present in all images, 
+    #  first row with overlapping pixels present in all images, 
+    #  number of columns with overlapping pixels in all images, 
+    #  number of rows with overlapping pixels in all images   )
+    cropped_dimensions = imageutils.find_crop_bounds(imAl.images[0].size(), 
+                                                     warp_matrices, 
+                                                     dist_coeffs, 
+                                                     cam_mats)
+    
+    im_aligned = imageutils.aligned_capture(warp_matrices, alignment_pairs, cropped_dimensions)
+    im_display = np.zeros((im_aligned.shape[0],im_aligned.shape[1],5), dtype=np.float32 )
+    
+    for i in range(0,im_aligned.shape[2]):
+        im_display[:,:,i] =  imageutils.normalize(im_aligned[:,:,i])
+        
+    rgb = im_display[:,:,[2,1,0]] 
+    cir = im_display[:,:,[3,2,1]] 
+    fig, axes = plt.subplots(1, 2, figsize=(16,16)) 
+    plt.title("Red-Green-Blue Composite") 
+    axes[0].imshow(rgb) 
+    plt.title("Color Infrared (CIR) Composite") 
+    axes[1].imshow(cir) 
+    plt.show()
+    
+    return warp_matrices, alignment_pairs, dist_coeffs, cam_mats, cropped_dimensions
+
+for i in imgset.captures: 
+    i.compute_reflectance(panel_irradiance) 
+    #i.plot_undistorted_reflectance(panel_irradiance)  
+    #warp_matrices, alignment_pairs = imageutils.align_capture(i, max_iterations=1000)
+    for x,mat in enumerate(warp_matrices):
+        print("Band {}:\n{}".format(x,mat))
+    dist_coeffs = []
+    cam_mats = []
+    # create lists of the distortion coefficients and camera matricies
+    for im,img in enumerate(i.images):
+        dist_coeffs.append(img.cv2_distortion_coeff())
+        cam_mats.append(img.cv2_camera_matrix())
+    # cropped_dimensions is of the form:
+    # (first column with overlapping pixels present in all images, 
+    #  first row with overlapping pixels present in all images, 
+    #  number of columns with overlapping pixels in all images, 
+    #  number of rows with overlapping pixels in all images   )
+    cropped_dimensions = imageutils.find_crop_bounds(i.images[0].size(), 
+                                                     warp_matrices, 
+                                                     dist_coeffs, 
+                                                     cam_mats)
+
+    im_aligned = imageutils.aligned_capture(warp_matrices, alignment_pairs, cropped_dimensions)
+    im_display = np.zeros((im_aligned.shape[0],im_aligned.shape[1],5), dtype=np.float32)
+    
+
+    for k in range(0,im_aligned.shape[2]):
+        im_display[:,:,k] =  imageutils.normalize(im_aligned[:,:,k])
+# Only here for experimentation
+#    rgb = im_display[:,:,[2,1,0]]
+#    cir = im_display[:,:,[3,2,1]]
+#    fig, axes = plt.subplots(1, 2, figsize=(16,16))
+#    plt.title("Red-Green-Blue Composite")
+#    axes[0].imshow(rgb)
+#    plt.title("Color Infrared (CIR) Composite")
+#    axes[1].imshow(cir)
+#    plt.show()
+#    rows, cols, bands = im_display.shape
+#    driver = gdal.GetDriverByName('GTiff')
+#    outRaster = driver.Create("bgren.tiff", 
+#                              cols, rows, bands, gdal.GDT_Float32)
+#    
+#    
+#    for ras in range(0,bands):
+#        outband = outRaster.GetRasterBand(ras+1)
+#        outband.WriteArray(im_aligned[:,:,ras])
+#        outband.FlushCache()
+#    
+#    outRaster = None
