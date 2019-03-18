@@ -7,21 +7,24 @@ Created on Tue Mar 12 15:35:40 2019
 
 A script for processing to surface reflectance 
 """
-import os, sys
+import os#, sys
 import matplotlib.pyplot as plt
-from PIL import Image
+#from PIL import Image
 import micasense.metadata as metadata
-import micasense.utils as msutils
+#import micasense.utils as msutils
 #import micasense.plotutils as plotutils
 import micasense.imageutils as imageutils
 import micasense.capture as capture
-from micasense.panel import Panel
-from micasense.image import Image as MImage
+#from micasense.panel import Panel
+#from micasense.image import Image as MImage
 import numpy as np
 import micasense.imageset as imageset
 from glob2 import glob
+import imageio
 import argparse
-from subprocess import call
+from scipy.misc import bytescale
+import cv2
+#from subprocess import call
 #import gdal, gdal_array
 #from joblib import Parallel, delayed
 
@@ -41,8 +44,14 @@ parser.add_argument("-img", "--fimages", type=str, required=True,
 parser.add_argument("-o", "--rimages", type=str, required=True, 
                     help="path to output reflectance directory")
 
-parser.add_argument("-alIm", "--alg", type=int, required=False, default=-1, 
-                    help="no of threads to use - defaults to all")
+parser.add_argument("-alIm", "--alg", type=str, required=True, 
+                    help="alignment image")
+
+parser.add_argument("-refBnd", "--rB", type=int, required=True, default=3, 
+                    help="band to which others are aligned")
+
+parser.add_argument("-mx", "--mxiter", type=int, required=False, default=100, 
+                    help="max iterations in alignment of bands")
 
 args = parser.parse_args() 
 
@@ -55,9 +64,9 @@ if args.pstcal != None:
 imagesFolder = os.path.abspath(args.fimages)
 
 
-ReflectanceimagesFolder = os.path.abspath(args.rimages)
+reflFolder = os.path.abspath(args.rimages)
 
-nt = args.noT
+#nt = args.noT
 
 
 print("Alinging images. Depending on settings this can take from a few seconds to many minutes")
@@ -66,6 +75,9 @@ print("Alinging images. Depending on settings this can take from a few seconds t
 Right so each capture means each set of bands 1-5
 This requires the image list to be sorted in a way that can be aligned
 It appears as though micasense have done this with their lib
+
+The git site author claims the warp can be applied to whole image set after choosing a decent calib image
+I doubt this based on results!!! Just using using unwarped images results in non-aligned images
 
 '''
 
@@ -101,15 +113,20 @@ else:
 # First we must find an image with decent features from which a band alignment 
 # can be applied to the whole dataset
  
-wildCrd = "IMG_0007"+args.alg+"*.tif"
+wildCrd = "IMG_"+args.alg+"*.tif"
 algList = glob(os.path.join('000', wildCrd))
-algList.sort()
+#algList.sort()
 imAl = capture.Capture.from_filelist(algList) 
 imAl.compute_reflectance(panel_irradiance)
 imAl.plot_undistorted_reflectance(panel_irradiance)
 
-def align_template(imAl, mx):
-    warp_matrices, alignment_pairs = imageutils.align_capture(imAl, max_iterations=mx)
+
+rf = args.rB
+def align_template(imAl, mx, reflFolder, ref_ind=rf):
+    warp_matrices, alignment_pairs = imageutils.align_capture(imAl,
+                                                              ref_index=ref_ind, 
+                                                              warp_mode=cv2.MOTION_AFFINE,
+                                                              max_iterations=mx)
     for x,mat in enumerate(warp_matrices):
         print("Band {}:\n{}".format(x,mat))
     dist_coeffs = []
@@ -136,14 +153,28 @@ def align_template(imAl, mx):
         
     rgb = im_display[:,:,[2,1,0]] 
     cir = im_display[:,:,[3,2,1]] 
-    fig, axes = plt.subplots(1, 2, figsize=(16,16)) 
+    grRE = im_display[:,:,[4,2,1]] 
+    fig, axes = plt.subplots(1, 3, figsize=(16,16)) 
     plt.title("Red-Green-Blue Composite") 
     axes[0].imshow(rgb) 
     plt.title("Color Infrared (CIR) Composite") 
     axes[1].imshow(cir) 
+    plt.title("Red edge-Green-Red (ReGR) Composite") 
+    axes[2].imshow(grRE) 
     plt.show()
     
+    prevList = [rgb, cir, grRE]
+    nmList = ['rgb.jpg', 'cir.jpg', 'grRE.jpg']
+    names = [os.path.join(reflFolder, pv) for pv in nmList]
+    
+    for ind, p in enumerate(prevList):
+        img8 = bytescale(p)
+        imageio.imwrite(names[ind], img8)
+    
     return warp_matrices, alignment_pairs, dist_coeffs, cam_mats, cropped_dimensions
+
+warp_matrices, alignment_pairs, dist_coeffs, cam_mats, cropped_dimensions = align_template(imAl, args.mxiter)
+
 
 for i in imgset.captures: 
     i.compute_reflectance(panel_irradiance) 
@@ -168,11 +199,21 @@ for i in imgset.captures:
                                                      cam_mats)
 
     im_aligned = imageutils.aligned_capture(warp_matrices, alignment_pairs, cropped_dimensions)
-    im_display = np.zeros((im_aligned.shape[0],im_aligned.shape[1],5), dtype=np.float32)
+    #im_display = np.zeros((im_aligned.shape[0],im_aligned.shape[1],5), dtype=np.float32)
+    #im = Image.fromarray(flightReflectanceImage)
+    #im.save(outfile)
     
-
     for k in range(0,im_aligned.shape[2]):
-        im_display[:,:,k] =  imageutils.normalize(im_aligned[:,:,k])
+         img8 = bytescale = im_aligned[:,:,k]
+         imageio.imwrite(outfile, img8)
+    
+    cmd = ["exiftool", "-tagsFromFile", image,  "-file:all", "-iptc:all",
+           "-exif:all",  "-xmp", "-Composite:all", outfile, 
+           "-overwrite_original"]
+    call(cmd)
+
+    #for k in range(0,im_aligned.shape[2]):
+        #im_display[:,:,k] =  imageutils.normalize(im_aligned[:,:,k])
 # Only here for experimentation
 #    rgb = im_display[:,:,[2,1,0]]
 #    cir = im_display[:,:,[3,2,1]]
@@ -194,3 +235,13 @@ for i in imgset.captures:
 #        outband.FlushCache()
 #    
 #    outRaster = None
+#im = Image.fromarray(flightReflectanceImage)
+#    #im.save(outfile)
+#    
+#    img8 = bytescale(flightReflectanceImage)
+#    imageio.imwrite(outfile, img8)
+#    
+#    cmd = ["exiftool", "-tagsFromFile", image,  "-file:all", "-iptc:all",
+#           "-exif:all",  "-xmp", "-Composite:all", outfile, 
+#           "-overwrite_original"]
+#    call(cmd)

@@ -20,6 +20,10 @@ from micasense.image import Image as MImage
 from glob2 import glob
 import argparse
 from subprocess import call
+#import cv2
+import imageio
+from scipy.misc import bytescale
+
 #import gdal, gdal_array
 #from joblib import Parallel, delayed
 
@@ -191,7 +195,11 @@ def saveIm(image, r2rB1, r2rB2, r2rB3, r2rB4, r2rB5):
     hd, tl = os.path.split(image)
     outfile = os.path.join(ReflectanceimagesFolder, tl)
     im = Image.fromarray(flightReflectanceImage)
-    im.save(outfile)
+    #im.save(outfile)
+    
+    img8 = bytescale(flightReflectanceImage)
+    imageio.imwrite(outfile, img8)
+    
     cmd = ["exiftool", "-tagsFromFile", image,  "-file:all", "-iptc:all",
            "-exif:all",  "-xmp", "-Composite:all", outfile, 
            "-overwrite_original"]
