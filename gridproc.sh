@@ -40,7 +40,8 @@ win=1
 batch=4
 gpu=none
 sz=none
-CSV=none
+csv_set=false
+gpu_set=false
 
 
  
@@ -100,6 +101,7 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:gpu:b:w:prc:csv:h" opt; do
       ;;
     gpu)
       gp=$OPTARG
+      gpu_set=true
       ;;
 	w)
       win=$OPTARG
@@ -108,7 +110,8 @@ while getopts "e:x:y:u:sz:spao:r:z:eq:g:gpu:b:w:prc:csv:h" opt; do
       proc=$OPTARG  
       ;;
      csv)
-      CSV=$OPTARG 
+      CSV=$OPTARG
+      csv_set=true 
       ;; 
      b)
       batch=$OPTARG 
@@ -138,7 +141,7 @@ echo "Using GPU support"
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
 # magick convert .*$EXTENSION -resize 50% .*$EXTENSION 
 
-if [  "$CSV" != none  ]; then 
+if [  "$csv_set" = true  ]; then 
     Orientation.sh -e JPG -u $UTMZONE -cal Fraser -sz $size -csv $CSV
 else
     Orientation.sh -e JPG -u $UTMZONE -cal Fraser -sz $size
@@ -146,7 +149,7 @@ else
  
  
 # Parallel processing - best for a decent ortho later 
-if [ "$gp" != none ]; then
+if [ "$gpu_set" = true ]; then
     MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd -zr 0.02 -g 1 -nt $batch -zoom $ZoomF 
 else
     MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd -zr 0.02 -nt $batch -zoom $ZoomF

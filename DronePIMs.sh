@@ -26,8 +26,8 @@ Algorithm=Forest
 zreg=0.01
 size=none 
 prc=3,3
-gpu=0
-tile=none
+gpu_set=false
+tile_set=false
 CSV=0
 match=none
 EG=0
@@ -110,7 +110,8 @@ while getopts "e:a:m:csv:x:y:u:sz:pao:r:z:egal:eq:g:proc:zr:t:h" opt; do
       DEQ=$OPTARG  
       ;;
 	g)
-      gpu=$OPTARG 
+      gpu=$OPTARG
+      gpu_set=true 
       ;; 
     proc)
       prc=$OPTARG
@@ -120,6 +121,7 @@ while getopts "e:a:m:csv:x:y:u:sz:pao:r:z:egal:eq:g:proc:zr:t:h" opt; do
       ;;
     t)
       tile=$OPTARG
+      tile_set=true
       ;;
     \?)
       echo "DronePIMs.sh: Invalid option: -$OPTARG" >&1
@@ -145,16 +147,16 @@ fi
 echo "Using $Algorithm algorithm for PIMs dense matching"  
 
 #create UTM file (after deleting any existing one)
-if [  "$CSV" != none  ]; then 
+if [  "$csv_set" = true  ]; then 
     Orientation.sh -e JPG -u $UTMZONE -cal Fraser -sz $size -csv $CSV
 else
     Orientation.sh -e JPG -u $UTMZONE -cal Fraser -sz $size
 #Print out a text file with the camera positions (for use in external software, e.g. GIS)
  
  
-if [ "$tile" != none ]; then
+if [ "$tile_set" = true ]; then
     
-    if [ "$gpu" != none ]; then
+    if [ "$gpu_set" = true ]; then
     
         # The only thing I wonder here is whether it is worth building the whole 'master'
          # PIMs folder and simply moving the Ortho part for later (this still involves

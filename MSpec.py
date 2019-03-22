@@ -5,12 +5,21 @@ Created on Tue Mar 12 15:35:40 2019
 
 @author: Ciaran Robb
 
-A script for processing to surface reflectance 
+https://github.com/Ciaran1981/Sfm
+
+
+A script for processing to surface reflectance and aligning bands on Micasense
+Rededge
+
+Based on the material on the micasense lib git site, though this uses the 
+micasense lib with multiprocessing disabled as multiprocessing is ised in this
+scirpt via joblib. 
+
 """
 import os#, sys
 import matplotlib.pyplot as plt
 #from PIL import Image
-import micasense.metadata as metadata
+#import micasense.metadata as metadata
 #import micasense.utils as msutils
 #import micasense.plotutils as plotutils
 import micasense.imageutils as imageutils
@@ -18,15 +27,17 @@ import micasense.capture as capture
 #from micasense.panel import Panel
 #from micasense.image import Image as MImage
 import numpy as np
-import micasense.imageset as imageset
+import micasense_old.imageset as imageset
 from glob2 import glob
 import imageio
 import argparse
 from scipy.misc import bytescale
 import cv2
-#from subprocess import call
+from tqdm import tqdm
+from subprocess import call
+from joblib import Parallel, delayed
 #import gdal, gdal_array
-#from joblib import Parallel, delayed
+
 
 exiftoolPath=None
 
@@ -47,11 +58,14 @@ parser.add_argument("-o", "--rimages", type=str, required=True,
 parser.add_argument("-alIm", "--alg", type=str, required=True, 
                     help="alignment image")
 
-parser.add_argument("-refBnd", "--rB", type=int, required=True, default=3, 
+parser.add_argument("-refBnd", "--rB", type=int, required=False, default=1, 
                     help="band to which others are aligned")
 
 parser.add_argument("-mx", "--mxiter", type=int, required=False, default=100, 
                     help="max iterations in alignment of bands")
+
+parser.add_argument("-nt", "--noT", type=int, required=False, default=-1,
+                    help="no of tiles at a time")
 
 args = parser.parse_args() 
 
@@ -69,7 +83,7 @@ reflFolder = os.path.abspath(args.rimages)
 #nt = args.noT
 
 
-print("Alinging images. Depending on settings this can take from a few seconds to many minutes")
+print("Aligning images, may take a while...")
 # Increase max_iterations to 1000+ for better results, but much longer runtimes
 '''
 Right so each capture means each set of bands 1-5
@@ -81,14 +95,7 @@ I doubt this based on results!!! Just using using unwarped images results in non
 
 '''
 
-#capture = capture.Capture.from_filelist(imagesFolder)
-##
-##
-#warp_matrices, alignment_pairs = imageutils.align_capture(capture, max_iterations=100)
-##
-#print("Finished Aligning, warp matrices:")
-#for i,mat in enumerate(warp_matrices):
-#    print("Band {}:\n{}".format(i,mat))
+
 
 panel_ref = [0.67, 0.69, 0.68, 0.61, 0.67]
 
@@ -118,50 +125,61 @@ algList = glob(os.path.join('000', wildCrd))
 #algList.sort()
 imAl = capture.Capture.from_filelist(algList) 
 imAl.compute_reflectance(panel_irradiance)
-imAl.plot_undistorted_reflectance(panel_irradiance)
+#imAl.plot_undistorted_reflectance(panel_irradiance)
 
 
 rf = args.rB
+
+# func to align and display the result. 
 def align_template(imAl, mx, reflFolder, ref_ind=rf):
+
+    
     warp_matrices, alignment_pairs = imageutils.align_capture(imAl,
                                                               ref_index=ref_ind, 
-                                                              warp_mode=cv2.MOTION_AFFINE,
+                                                              warp_mode=cv2.MOTION_HOMOGRAPHY,
                                                               max_iterations=mx)
     for x,mat in enumerate(warp_matrices):
         print("Band {}:\n{}".format(x,mat))
-    dist_coeffs = []
-    cam_mats = []
-    # create lists of the distortion coefficients and camera matricies
-    for im,img in enumerate(imAl.images):
-        dist_coeffs.append(img.cv2_distortion_coeff())
-        cam_mats.append(img.cv2_camera_matrix())
+
     # cropped_dimensions is of the form:
     # (first column with overlapping pixels present in all images, 
     #  first row with overlapping pixels present in all images, 
     #  number of columns with overlapping pixels in all images, 
     #  number of rows with overlapping pixels in all images   )
-    cropped_dimensions = imageutils.find_crop_bounds(imAl.images[0].size(), 
-                                                     warp_matrices, 
-                                                     dist_coeffs, 
-                                                     cam_mats)
+    dist_coeffs = []
+    cam_mats = []
+# create lists of the distortion coefficients and camera matricies
+    for i,img in enumerate(imAl.images):
+        dist_coeffs.append(img.cv2_distortion_coeff())
+        cam_mats.append(img.cv2_camera_matrix())
+        
+    warp_mode = cv2.MOTION_HOMOGRAPHY #alignment_pairs[0]['warp_mode']
+    match_index = alignment_pairs[0]['ref_index']
     
-    im_aligned = imageutils.aligned_capture(warp_matrices, alignment_pairs, cropped_dimensions)
+    cropped_dimensions, edges = imageutils.find_crop_bounds(imAl, 
+                                                            warp_matrices,
+                                                            warp_mode=cv2.MOTION_HOMOGRAPHY)
+   # capture, warp_matrices, cv2.MOTION_HOMOGRAPHY, cropped_dimensions, None, img_type="reflectance",
+    im_aligned = imageutils.aligned_capture(imAl, warp_matrices, warp_mode,
+                                            cropped_dimensions, match_index,
+                                            img_type="reflectance")
+    
     im_display = np.zeros((im_aligned.shape[0],im_aligned.shape[1],5), dtype=np.float32 )
     
-    for i in range(0,im_aligned.shape[2]):
-        im_display[:,:,i] =  imageutils.normalize(im_aligned[:,:,i])
+    for iM in range(0,im_aligned.shape[2]):
+        im_display[:,:,iM] =  imageutils.normalize(im_aligned[:,:,iM])
         
     rgb = im_display[:,:,[2,1,0]] 
     cir = im_display[:,:,[3,2,1]] 
     grRE = im_display[:,:,[4,2,1]] 
-    fig, axes = plt.subplots(1, 3, figsize=(16,16)) 
-    plt.title("Red-Green-Blue Composite") 
-    axes[0].imshow(rgb) 
-    plt.title("Color Infrared (CIR) Composite") 
-    axes[1].imshow(cir) 
-    plt.title("Red edge-Green-Red (ReGR) Composite") 
-    axes[2].imshow(grRE) 
-    plt.show()
+#    fig, axes = plt.subplots(1, 3, figsize=(16,16)) 
+#    plt.title("Red-Green-Blue Composite") 
+#    axes[0].imshow(rgb) 
+#    plt.title("Color Infrared (CIR) Composite") 
+#    axes[1].imshow(cir) 
+#    plt.title("Red edge-Green-Red (ReGR) Composite") 
+#    axes[2].imshow(grRE) 
+#    plt.show()
     
     prevList = [rgb, cir, grRE]
     nmList = ['rgb.jpg', 'cir.jpg', 'grRE.jpg']
@@ -171,77 +189,53 @@ def align_template(imAl, mx, reflFolder, ref_ind=rf):
         img8 = bytescale(p)
         imageio.imwrite(names[ind], img8)
     
-    return warp_matrices, alignment_pairs, dist_coeffs, cam_mats, cropped_dimensions
+    return warp_matrices, alignment_pairs#, dist_coeffs, cam_mats, cropped_dimensions
 
-warp_matrices, alignment_pairs, dist_coeffs, cam_mats, cropped_dimensions = align_template(imAl, args.mxiter)
+warp_matrices, alignment_pairs = align_template(imAl, args.mxiter,reflFolder,
+                                                ref_ind=rf)
 
+    
+# prep work dir
 
-for i in imgset.captures: 
+bndNames = ['Blue', 'Green', 'Red', 'NIR', 'Red edge']
+
+bndFolders = [os.path.join(reflFolder, b) for b in bndNames]
+
+[os.mkdir(bf) for bf in bndFolders]
+
+# Main func to  write bands to their respective directory
+
+def proc_imgs(i, warp_matrices, bndFolders):#, reflFolder):
+
+#    for i in imgset.captures: 
+    
     i.compute_reflectance(panel_irradiance) 
     #i.plot_undistorted_reflectance(panel_irradiance)  
-    #warp_matrices, alignment_pairs = imageutils.align_capture(i, max_iterations=1000)
-    for x,mat in enumerate(warp_matrices):
-        print("Band {}:\n{}".format(x,mat))
-    dist_coeffs = []
-    cam_mats = []
-    # create lists of the distortion coefficients and camera matricies
-    for im,img in enumerate(i.images):
-        dist_coeffs.append(img.cv2_distortion_coeff())
-        cam_mats.append(img.cv2_camera_matrix())
-    # cropped_dimensions is of the form:
-    # (first column with overlapping pixels present in all images, 
-    #  first row with overlapping pixels present in all images, 
-    #  number of columns with overlapping pixels in all images, 
-    #  number of rows with overlapping pixels in all images   )
-    cropped_dimensions = imageutils.find_crop_bounds(i.images[0].size(), 
-                                                     warp_matrices, 
-                                                     dist_coeffs, 
-                                                     cam_mats)
 
-    im_aligned = imageutils.aligned_capture(warp_matrices, alignment_pairs, cropped_dimensions)
-    #im_display = np.zeros((im_aligned.shape[0],im_aligned.shape[1],5), dtype=np.float32)
-    #im = Image.fromarray(flightReflectanceImage)
-    #im.save(outfile)
+
+    cropped_dimensions, edges = imageutils.find_crop_bounds(i, warp_matrices)
+    
+    im_aligned = imageutils.aligned_capture(i, warp_matrices,
+                                            cv2.MOTION_HOMOGRAPHY,
+                                            cropped_dimensions,
+                                            None, img_type="reflectance")
+    
     
     for k in range(0,im_aligned.shape[2]):
-         img8 = bytescale = im_aligned[:,:,k]
+         im = i.images[k]
+         hd, nm = os.path.split(im.path)
+         
+         img8 = bytescale(im_aligned[:,:,k])
+         
+         outfile = os.path.join(bndFolders[k], nm)
          imageio.imwrite(outfile, img8)
-    
-    cmd = ["exiftool", "-tagsFromFile", image,  "-file:all", "-iptc:all",
-           "-exif:all",  "-xmp", "-Composite:all", outfile, 
-           "-overwrite_original"]
-    call(cmd)
+        
+         cmd = ["exiftool", "-tagsFromFile", im.path,  "-file:all", "-iptc:all",
+               "-exif:all",  "-xmp", "-Composite:all", outfile, 
+               "-overwrite_original"]
+         call(cmd)
+# for ref
+#[proc_imgs(imCap, warp_matrices, reflFolder) for imCap in imgset]
 
-    #for k in range(0,im_aligned.shape[2]):
-        #im_display[:,:,k] =  imageutils.normalize(im_aligned[:,:,k])
-# Only here for experimentation
-#    rgb = im_display[:,:,[2,1,0]]
-#    cir = im_display[:,:,[3,2,1]]
-#    fig, axes = plt.subplots(1, 2, figsize=(16,16))
-#    plt.title("Red-Green-Blue Composite")
-#    axes[0].imshow(rgb)
-#    plt.title("Color Infrared (CIR) Composite")
-#    axes[1].imshow(cir)
-#    plt.show()
-#    rows, cols, bands = im_display.shape
-#    driver = gdal.GetDriverByName('GTiff')
-#    outRaster = driver.Create("bgren.tiff", 
-#                              cols, rows, bands, gdal.GDT_Float32)
-#    
-#    
-#    for ras in range(0,bands):
-#        outband = outRaster.GetRasterBand(ras+1)
-#        outband.WriteArray(im_aligned[:,:,ras])
-#        outband.FlushCache()
-#    
-#    outRaster = None
-#im = Image.fromarray(flightReflectanceImage)
-#    #im.save(outfile)
-#    
-#    img8 = bytescale(flightReflectanceImage)
-#    imageio.imwrite(outfile, img8)
-#    
-#    cmd = ["exiftool", "-tagsFromFile", image,  "-file:all", "-iptc:all",
-#           "-exif:all",  "-xmp", "-Composite:all", outfile, 
-#           "-overwrite_original"]
-#    call(cmd)
+Parallel(n_jobs=args.noT, verbose=2)(delayed(proc_imgs)(imCap, 
+         warp_matrices, bndFolders) for imCap in imgset.captures)

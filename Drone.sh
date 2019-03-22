@@ -20,9 +20,10 @@ DEQ=1
 obliqueFolder=none
 proc=16 
 win=2
-gpu=none
-sz=none
-CSV=none
+gpu_set=false
+size_set=false
+csv_set=false
+
 
  
 while getopts "e:m:x:y:u:sz:r:z:eq:g:w:proc:csv:h" opt; do  
@@ -59,6 +60,7 @@ while getopts "e:m:x:y:u:sz:r:z:eq:g:w:proc:csv:h" opt; do
       ;;
  	sz)
       size=$OPTARG
+      size_set=true
       ;;        
 	r) 
       RESOL=$OPTARG
@@ -78,6 +80,7 @@ while getopts "e:m:x:y:u:sz:r:z:eq:g:w:proc:csv:h" opt; do
       ;;
 	g)
       gpu=$OPTARG
+      gpu_set=true
       ;;
 	w)
       win=$OPTARG
@@ -86,14 +89,15 @@ while getopts "e:m:x:y:u:sz:r:z:eq:g:w:proc:csv:h" opt; do
       proc=$OPTARG  
       ;; 
     csv)
-      CSV=$OPTARG 
+      CSV=$OPTARG
+      csv_set=true 
       ;;         
     \?)
-      echo "DroneNadir.sh: Invalid option: -$OPTARG" >&1
+      echo "Drone.sh: Invalid option: -$OPTARG" >&1
       exit 1
       ;;
     :)
-      echo "DroneNadir.sh: Option -$OPTARG requires an argument." >&1
+      echo "Drone.sh: Option -$OPTARG requires an argument." >&1
       exit 1
       ;;
   esac
@@ -104,11 +108,10 @@ if [ "$utm_set" = false ]; then
 fi
 
 
-if [ "$gpu" = 0 ]; then
+if [ "$gpu_set" = true ]; then
 	echo "Using CPU only"
 	echo "$proc CPU threads to be used during dense matching"
-fi
-if [ "$gpu" = 1 ]; then
+else
     echo "$proc CPU threads to be used during dense matching"
 	echo "Using GPU support" 
 fi 
@@ -117,14 +120,14 @@ fi
 # magick mogrify -resize 50%
 
 
-if [  "$CSV" != none  ]; then 
+if [  "$csv_set" = none  ]; then 
     Orientation.sh -e JPG -u $UTMZONE -cal Fraser -sz $size -csv $CSV
 else
     Orientation.sh -e JPG -u $UTMZONE -cal Fraser -sz $size
 
 #Correlation into DEM 
  
-if [ "$gpu" != none ]; then 
+if [ "$gpu_set" = true ]; then 
     	/home/ciaran/MicMacGPU/micmac/bin/mm3d Malt UrbanMNE ".*.$EXTENSION" Ground_UTM UseGpu=1 EZA=1 DoOrtho=1 SzW=$win ZoomF=$ZoomF NbProc=$proc
 else
 	mm3d Malt UrbanMNE ".*.$EXTENSION" Ground_UTM UseGpu=0 EZA=1 DoOrtho=1 SzW=$win ZoomF=$ZoomF NbProc=$proc

@@ -16,11 +16,10 @@ X_OFF=0;
 Y_OFF=0;
 utm_set=false
 obliqueFolder=none
-size=3000
-CSV=none
+size_set=false
+csv_set=false
+cal_sub=false
 CALIB=Fraser
-match=0
-SUB=none 
 
 while getopts "e:m:x:y:u:sz:cal:csv:sub:h" opt; do  
   case $opt in
@@ -32,7 +31,7 @@ while getopts "e:m:x:y:u:sz:cal:csv:sub:h" opt; do
       echo "	-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
       echo "	-sz size         : resize of imagery eg - 2000"
       echo "	-cal CALIB        : Camera calibration model - e.g. RadialBasic, Fraser etc"
-      echo " -csv -CSV        : The path to a csv if used"
+      echo " -csv -CSV        : if true csv will be used"
       echo " -sub -SUB        : a subset  csv for pre-calibration of orientation"      
       echo "	-h	             : displays this message and exits."
       echo " "  
@@ -50,15 +49,18 @@ while getopts "e:m:x:y:u:sz:cal:csv:sub:h" opt; do
       ;;
  	sz)
       size=$OPTARG
+      size_set=true
       ;; 
  	cal)
       CALIB=$OPTARG
       ;;        
     csv)
-      CSV=$OPTARG 
+      CSV=$OPTARG
+      csv_set=true
       ;; 
     sub)
-      SUB=$OPTARG 
+      SUB=$OPTARG
+      cal_sub=true 
       ;;            
     \?)
       echo "Orientation.sh: Invalid option: -$OPTARG" >&1
@@ -76,7 +78,7 @@ if [ "$utm_set" = false ]; then
 fi
 
 
-#mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
+#mm3d SetExif ."*EXTENSION" F35=45 F=30 Cam=ILCE-6000  
 # magick mogrify -resize 50%
 
 #create UTM file (after deleting any existing one)
@@ -97,7 +99,7 @@ echo "</SystemeCoord>                                                           
 # mogrify -resize 30% *.JPG
 #mogrify -resize 2000 *.JPG
 #Get the GNSS data out of the images and convert it to a txt file (GpsCoordinatesFromExif.txt)
-if [  "$CSV" != none  ]; then 
+if [  "$csv_set" = true  ]; then 
     echo "using csv file"  
     #cs=*.csv   
     mm3d OriConvert OriTxtInFile $CSV RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
@@ -113,18 +115,19 @@ fi
 #Use the GpsCoordinatesFromExif.txt file to create a xml orientation folder (Ori-RAWGNSS_N), and a file (FileImagesNeighbour.xml) detailing what image sees what other image (if camera is <50m away with option DN=50)
 
 
-if [  "$size" != none ]; then
+if [  "$size_set" = true ]; then
     echo "resizing to $size for tie point detection"
     # mogrify -path Sharp -sharpen 0x3  *.JPG # this sharpens very well worth doing
-    mogrify -resize $size *.JPG
-else
-    echo "using a default re-size of 3000 long axis on imgs"
-    mogrify -resize 3000 *.JPG 
-fi 
+    mogrify -resize $size *.$EXTENSION
+fi
+#else
+#    echo "using a default re-size of 3000 long axis on imgs"
+#    mogrify -resize 3000 *.$EXTENSION 
+#fi 
 
 #if [  "$match" = 1 ]; then
    # echo "exaustive matching"
-   # mm3d Tapioca All ".*JPG" -1 InOri=Martini @SFS
+   # mm3d Tapioca All .*$EXTENSION -1 InOri=Martini @SFS
 #else
 
     echo "matching based on gps"
@@ -136,7 +139,7 @@ mm3d Schnaps .*$EXTENSION MoveBadImgs=1
 
 #Compute Relative orientation (Arbitrary system)
 
-if [  "$SUB"!=none ]; then
+if [  "$cal_sub" = true  ]; then
     echo "using calibration subset"
     calib_subset.py -folder $PWD -algo $CALIB  -csv $SUB
 
@@ -160,7 +163,7 @@ mm3d CenterBascule .*$EXTENSION Arbitrary RAWGNSS_N Ground_Init_RTL
 mm3d AperiCloud .*$EXTENSION Ori-Ground_Init_RTL SH=_mini
 
 #Change system to final cartographic system  
-if [  "$CSV" != none  ]; then 
+if [  "$csv_set" = true  ]; then 
     mm3d Campari .*$EXTENSION Ground_Init_RTL Ground_UTM EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini | tee GnssBundle.txt
     # For reasons unknown this screws it up from csv
     #mm3d ChgSysCo  .*$EXTENSION Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
