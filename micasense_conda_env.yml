@@ -1,0 +1,21 @@
+name: micasense
+
+dependencies:
+  - python=3.6
+  - opencv
+  - numpy
+  - jupyter
+  - matplotlib
+  - gdal
+  - scikit-image
+  - pytest
+  - git
+  - pandas
+  - imageio
+  - ipywidgets
+  - nb_conda
+  - pip:
+    - pyzbar
+    - pysolar
+    - mapboxgl
+    - git+https://github.com/smarnach/pyexiftool.git#egg=pyexiftoolpy

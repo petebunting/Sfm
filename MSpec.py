@@ -239,3 +239,40 @@ def proc_imgs(i, warp_matrices, bndFolders):#, reflFolder):
 
 Parallel(n_jobs=args.noT, verbose=2)(delayed(proc_imgs)(imCap, 
          warp_matrices, bndFolders) for imCap in imgset.captures)
+
+#from osgeo import gdal, gdal_array
+#rows, cols, bands = im_display.shape
+#driver = gdal.GetDriverByName('GTiff')
+#filename = "bgrne" #blue,green,red,nir,redEdge
+#
+#if im_aligned.shape[2] == 6:
+#    filename = filename + "t" #thermal
+#outRaster = driver.Create(filename+".tiff", cols, rows, 6, gdal.GDT_UInt16)
+#normalize = False
+
+# Output a 'stack' in the same band order as RedEdge/Alutm
+# Blue,Green,Red,NIR,RedEdge[,Thermal]
+
+# NOTE: NIR and RedEdge are not in wavelength order!
+
+#capture.compute_reflectance(panel_irradiance+[0])
+#
+#for i in range(0,5):
+#    outband = outRaster.GetRasterBand(i+1)
+#    if normalize:
+#        outband.WriteArray(imageutils.normalize(im_aligned[:,:,i])*65535)
+#    else:
+#        outdata = im_aligned[:,:,i]
+#        outdata[outdata<0] = 0
+#        outdata[outdata>1] = 1
+#        outband.WriteArray(outdata*65535)
+#    outband.FlushCache()
+#
+#if im_aligned.shape[2] == 6:
+#    outband = outRaster.GetRasterBand(6)
+#    outdata = im_aligned[:,:,5] * 100 # scale to centi-C to fit into uint16
+#    outdata[outdata<0] = 0
+#    outdata[outdata>65535] = 65535
+#    outband.WriteArray(outdata)
+#    outband.FlushCache()
+outRaster = None

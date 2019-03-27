@@ -25,7 +25,7 @@ from subprocess import call
 from glob2 import glob
 from os import path, mkdir, remove
 from shutil import rmtree, move
-from joblib import Parallel, delayed
+#from joblib import Parallel, delayed
 parser = argparse.ArgumentParser()
 
 parser.add_argument("-folder", "--fld", type=str, required=True, 
@@ -177,7 +177,7 @@ for subList in txtList:
     mnt = ['mm3d', 'PIMs2MNT', algo, 'DoOrtho=1', zregu]
     call(mnt)
   
-    tawny = ['mm3d', 'Tawny', 'PIMs-ORTHO/', 'RadiomEgal=1',# 'DegRap=4',
+    tawny = ['mm3d', 'Tawny', 'PIMs-ORTHO/', 'RadiomEgal=0',# 'DegRap=4',
              'Out=Orthophotomosaic.tif']
     call(tawny)
     
