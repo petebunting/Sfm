@@ -27,13 +27,13 @@ import micasense.capture as capture
 #from micasense.panel import Panel
 #from micasense.image import Image as MImage
 import numpy as np
-import micasense_old.imageset as imageset
+import micasense.imageset as imageset
 from glob2 import glob
 import imageio
 import argparse
 from scipy.misc import bytescale
 import cv2
-from tqdm import tqdm
+#from tqdm import tqdm
 from subprocess import call
 from joblib import Parallel, delayed
 #import gdal, gdal_array
@@ -220,12 +220,16 @@ def proc_imgs(i, warp_matrices, bndFolders):#, reflFolder):
                                             cropped_dimensions,
                                             None, img_type="reflectance")
     
+    im_display = np.zeros((im_aligned.shape[0],im_aligned.shape[1],5), dtype=np.float32 )
     
-    for k in range(0,im_aligned.shape[2]):
+    for iM in range(0,im_aligned.shape[2]):
+        im_display[:,:,iM] =  imageutils.normalize(im_aligned[:,:,iM])
+    
+    for k in range(0,im_display.shape[2]):
          im = i.images[k]
          hd, nm = os.path.split(im.path)
          
-         img8 = bytescale(im_aligned[:,:,k])
+         img8 = bytescale(im_display[:,:,k])
          
          outfile = os.path.join(bndFolders[k], nm)
          imageio.imwrite(outfile, img8)
@@ -275,4 +279,4 @@ Parallel(n_jobs=args.noT, verbose=2)(delayed(proc_imgs)(imCap,
 #    outdata[outdata>65535] = 65535
 #    outband.WriteArray(outdata)
 #    outband.FlushCache()
-outRaster = None
+#outRaster = None
