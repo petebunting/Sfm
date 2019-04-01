@@ -16,154 +16,106 @@
 # A parallel processing tool for large scale Malt processing, uses single threads per tile with optional GPU support
 
 
-# Contains elements of L.Girod script - thanks 
-
 # example:
-# ./gridproc.sh -e JPG -u "30 +north" -g 6,6 -w 2 -gpu 1 -b 6
+# ./gridproc.sh -e JPG -u "30 +north" -x 6,6 -w 2 -gpu 1 -b 6
 
 
  
-# add default values  
-EXTENSION=JPG 
-X_OFF=0;
-Y_OFF=0;
-utm_set=false
-do_ply=true
-do_AperiCloud=true
-size=2000
-resol_set=false
-ZoomF=1
-DEQ=1
-obliqueFolder=none
-grd=6 
-win=1
-batch=4
-gpu=none
-sz=none
-csv_set=false
-gpu_set=false
+# add default values 
 
 
  
-while getopts "e:x:y:u:sz:spao:r:z:eq:g:gpu:b:w:prc:csv:h" opt; do  
-  case $opt in
+while getopts ":e:u:s:r:z:e:x:g:b:w:p:t:h" opt; do  
+  case ${opt} in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
-      echo "gridproc.sh -e JPG -u '30 +north' -g 6 -w 2 -prc 4 -b 4"
+      echo "gridproc.sh -e JPG -u '30 +north' -x 6 -w 2 -p 4 -b 4"
       echo "	-e EXTENSION     : image file type (JPG, jpg, TIF, png..., default=JPG)."
-      echo "	-x X_OFF         : X (easting) offset for ply file overflow issue (default=0)."
-      echo "	-y Y_OFF         : Y (northing) offset for ply file overflow issue (default=0)."
       echo "	-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
-      echo "	-sz size         : resize of imagery eg - 2000"
-      echo "	-p do_ply        : use to NOT export ply file."
-      echo "	-a do_AperiCloud : use to NOT export AperiCloud file."
-      echo "	-o obliqueFolder : Folder with oblique imagery to help orientation (will be entierely copied then deleted during process)."
+      echo "	-s size         : resize of imagery eg - 2000"
       echo "	-r RESOL         : Ground resolution (in meters)"
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
-      echo "	-eq DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
-      echo " -g grd           : Grid dimension x and y"
-      echo " -gpu gp          : GPU support 1 for use"
+      echo " -x grd           : Grid dimensions x and y - eg 3,3"
+      echo " -g gp          : GPU support 1 for use"
       echo " -b batch         : no of jobs at any one time"
       echo " -w win           : Correl window size"
-      echo " -csv CSV         : a csv file of gnsss etc - default none - something if needed"
+      echo " -t CSV         : a txt or csv file of gnsss etc in correct mm3d format"
       echo "	-h	             : displays this message and exits."
       echo " " 
       exit 0
       ;;    
 	e)
-      EXTENSION=$OPTARG 
+      EXTENSION=${OPTARG} 
       ;;
 	u)
-      UTM=$OPTARG
-      utm_set=true
+      UTM=${OPTARG}
       ;;
- 	sz)
-      size=$OPTARG
+ 	s)
+      size=${OPTARG}
       ;;        
 	r) 
-      RESOL=$OPTARG
-      resol_set=true
+      RESOL=${OPTARG}
       ;;  
-	o)
-      obliqueFolder=$OPTARG
+	z)
+      ZoomF=${OPTARG}
       ;;
 	x)
-      X_OFF=$OPTARG
-      ;;	
-	y)
-      Y_OFF=$OPTARG
-      ;;	
-	z)
-      ZoomF=$OPTARG
+      grd=${OPTARG}
       ;;
-	g)
-      grd=$OPTARG
-      ;;
-    gpu)
-      gp=$OPTARG
-      gpu_set=true
+    g)
+      gp=${OPTARG}
       ;;
 	w)
-      win=$OPTARG
+      win=${OPTARG}
       ;;
-	prc)
-      proc=$OPTARG  
+	p)
+      proc=${OPTARG}  
       ;;
-     csv)
-      CSV=$OPTARG
-      csv_set=true 
+     t)
+      CSV=${OPTARG}
       ;; 
      b)
-      batch=$OPTARG 
+      batch=${OPTARG} 
       ;;              
     \?)
-      echo "gpymicmac.sh: Invalid option: -$OPTARG" >&1
+      echo "gpymicmac.sh: Invalid option: -${OPTARG}" >&1
       exit 1
       ;;
     :)
-      echo "gpymicmac.sh: Option -$OPTARG requires an argument." >&1
+      echo "gpymicmac.sh: Option -${OPTARG} requires an argument." >&1
       exit 1
       ;;
   esac
 done
-if [ "$utm_set" = false ]; then
-	echo "UTM zone not set"
-	exit 1
-fi
+
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
 # mogrify -resize 2000 *.JPG
 
 
-echo "$proc CPU threads to be used during dense matching, be warned that this has limitations with respect to amount of images processed at a time"
+echo "${proc} CPU threads to be used during dense matching, be warned that this has limitations with respect to amount of images processed at a time"
 echo "Using GPU support" 
 
 
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
 # magick convert .*$EXTENSION -resize 50% .*$EXTENSION 
 
-if [  "$csv_set" = true  ]; then 
-    Orientation.sh -e JPG -u $UTMZONE -cal Fraser -sz $size -csv $CSV
+if [  "${csv_set}" = true  ]; then 
+    Orientation.sh -e JPG -u ${UTMZONE} -c Fraser -s ${size} -t ${CSV}
 else
-    Orientation.sh -e JPG -u $UTMZONE -cal Fraser -sz $size
-
+    Orientation.sh -e JPG -u ${UTMZONE} -c Fraser -s ${size}
+fi
  
  
 # Parallel processing - best for a decent ortho later 
-if [ "$gpu_set" = true ]; then
-    MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd -zr 0.02 -g 1 -nt $batch -zoom $ZoomF 
+if [ -n "${gp}" ]; then
+    MaltBatch.py -folder $PWD -algo UrbanMNE -num ${grd} -zr 0.02 -g 1 -nt ${batch} -zoom ${ZoomF} 
 else
-    MaltBatch.py -folder $PWD -algo UrbanMNE -num $grd -zr 0.02 -nt $batch -zoom $ZoomF
+    MaltBatch.py -folder $PWD -algo UrbanMNE -num ${grd} -zr 0.02 -nt ${batch} -zoom ${ZoomF}
+fi
 
-#correct_mosaics.py -folder DistGpu
  
-orthomosaic.sh -f $PWD -u $UTM -mt ossimFeatherMosaic
+orthomosaic.sh -f $PWD -u ${UTM} -mt ossimFeatherMosaic
 
-dsmmosaic.sh -f $PWD -u $UTM -mt ossimMaxMosaic
-
-#choices
-#ossimBlendMosaic ossimMaxMosaic ossimImageMosaic ossimClosestToCenterCombiner ossimBandMergeSource ossimFeatherMosaic 
- 
-
-
+dsmmosaic.sh -f $PWD -u ${UTM} -mt ossimMaxMosaic
 
 
