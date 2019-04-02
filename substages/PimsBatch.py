@@ -73,7 +73,7 @@ else:
     numChunks = args.noCh
 
 if args.zrg is None:
-   zregu='ZReg=0.01'
+   zregu='ZReg=0.02'
 else:
     zregu = 'ZReg='+args.zrg
     
@@ -171,7 +171,7 @@ for subList in txtList:
     
     
     mm3d = [mmgpu, "PIMs", algo, sub,  gOri, "DefCor=0",
-        "SzW=1", zoomF, zregu, 'SH=_mini']
+        zoomF, zregu, 'SH=_mini']
     call(mm3d)
     
     mnt = ['mm3d', 'PIMs2MNT', algo, 'DoOrtho=1', zregu]

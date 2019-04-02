@@ -6,34 +6,29 @@
 #https://github.com/Ciaran1981/Sfm
 
 # example:
-# ./DronePIMs.sh -e JPG -a Forest -u "30 +north" -t mycsv.csv -z = 0.03 -x 1 -p 2,2
+# ./DronePIMs.sh -e JPG -a Forest -u "30 +north" -t mycsv.csv -z 0.03 -x 1 -p 2,2
 
 # Important NOTE - MicMac CPU based is FAR quicker than using the GPU,
 #  as it's memory management limits GPU processing to small chunks
  
 # add default values
-EXTENSION=JPG
-X_OFF=0;
-Y_OFF=0;
-utm_set=false
-do_ply=true
-do_AperiCloud=true
-resol_set=false
-ZoomF=2  
-DEQ=1
-gpu=0
-Algorithm=Forest  
-zreg=0.01
-size=none 
-prc=3,3
-gpu_set=false
-tile_set=false
-csv_set=false
-CSV=0
-match=none
-EG=0
- 
-while getopts ":e:a:m:c:x:y:u:s:p:z:e:d:g:p:z:t:h" opt; do
+#EXTENSION=JPG
+#X_OFF=0;
+#Y_OFF=0;
+#utm_set=false
+#resol_set=false
+#ZoomF=2  
+#DEQ=1
+#gpu=0
+#Algorithm=Forest  
+#zreg=0.01
+#size=none 
+#prc=3,3
+#CSV=0
+#match=none
+#EG=0
+#win=2 
+while getopts ":e:a:m:c:x:y:u:s:p:z:e:d:g:p:z:t:w:h" opt; do
   case $opt in
     h)  
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -52,6 +47,7 @@ while getopts ":e:a:m:c:x:y:u:s:p:z:e:d:g:p:z:t:h" opt; do
       echo " -g gpu           : Whether to use GPU support, default false"
       echo " -p            : no chunks to split the data into for gpu processing"
       echo " -z              : zreg term - context dependent - def is 0.02" 
+      echo " -w win           : Correl window size"      
       echo "	-h	             : displays this message and exits."
       echo " "
       exit 0 
@@ -90,6 +86,9 @@ while getopts ":e:a:m:c:x:y:u:s:p:z:e:d:g:p:z:t:h" opt; do
     t)
       tile=${OPTARG}
       ;;
+    w)
+      w=${OPTARG}
+      ;;      
     \?)
       echo "DronePIMs.sh: Invalid option: -${OPTARG}" >&1
       exit 1
@@ -184,7 +183,7 @@ if [ -n "${tile}" ]; then
     fi
 else
 
-    mm3d PIMs $Algorithm .*${EXTENSION} Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF ZReg=$zreg SH=_mini  
+    mm3d PIMs $Algorithm .*${EXTENSION} Ground_UTM DefCor=0 ZoomF=$ZoomF ZReg=$zreg SH=_mini  
 
     mm3d Pims2MNT $Algorithm ZReg=$zreg DoOrtho=1
     
