@@ -34,7 +34,7 @@ import argparse
 from scipy.misc import bytescale
 import cv2
 #from tqdm import tqdm
-from subprocess import call
+from subprocess import call, check_call
 from joblib import Parallel, delayed
 from osgeo import gdal, gdal_array
 
@@ -351,6 +351,17 @@ def write_log(capture, outputPath):
     return fullCsvPath
         
 
+def write_exif(outputPath, fullCsvPath):
+
+    old_dir = os.getcwd()
+    os.chdir(outputPath)
+    cmd = 'exiftool -csv="{}" -overwrite_original .'.format(fullCsvPath)
+    print(cmd)
+    try:
+        check_call(cmd)
+    finally:
+        os.chdir(old_dir)
+
          
 if args.stack == True:
     
@@ -358,7 +369,7 @@ if args.stack == True:
              warp_matrices, bndFolders, 
              panel_irradiance) for imCap in imgset.captures)
     
-    write_log(capture, reflFolder)
+    csvPath = write_log(capture, reflFolder)
 
 else:
     Parallel(n_jobs=args.noT, verbose=2)(delayed(proc_stack)(imCap, 
