@@ -187,6 +187,8 @@ else
     mm3d PIMs $Algorithm .*${EXTENSION} Ground_UTM DefCor=0 SzW=1 ZoomF=$ZoomF ZReg=$zreg SH=_mini  
 
     mm3d Pims2MNT $Algorithm ZReg=$zreg DoOrtho=1
+    
+    mask_dsm.py -folder $PWD -pims 1
 	 
 
     mm3d Tawny PIMs-ORTHO/ RadiomEgal=0 Out=Orthophotomosaic.tif
@@ -200,7 +202,9 @@ else
     cp PIMs-TmpBasc/PIMs-Merged_Prof.tif OUTPUT/DSM.tif
     cp PIMs-TmpBasc/PIMs-Merged_Masq.tif OUTPUT/Mask.tif
     cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/Mask.tfw
-
+    cp PIMs-TmpBasc/PIMs-Merged_Correl.tif OUTPUT/Correl.tfw
+    cp PIMs-TmpBasc/PIMs-Merged_Correl.tif OUTPUT/Correl.tif
+    
     gdal_edit.py -a_srs "+proj=utm +zone=${UTM}  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" DSM.tif
     gdal_edit.py -a_srs "+proj=utm +zone=${UTM}  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Mask.tif
    

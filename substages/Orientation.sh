@@ -109,7 +109,7 @@ if [  -n "${SUB}" ]; then
     echo "using calibration subset"
     calib_subset.py -folder $PWD -algo ${CALIB}  -csv ${SUB}
 else
-    mm3d Tapas ${CALIB} .*${EXTENSION} Out=Arbitrary SH=_mini | tee RelBundle.txt
+    mm3d Tapas ${CALIB} .*${EXTENSION} Out=Arbitrary SH=_mini | tee ${CALIB}RelBundle.txt
     echo " orientation using whole dataset"
 fi    
 
@@ -130,11 +130,11 @@ mm3d AperiCloud .*${EXTENSION} Ori-Ground_Init_RTL SH=_mini
  
 #Change system to final cartographic system  
 if [  -n "${CSV}" ]; then 
-    mm3d Campari .*${EXTENSION} Ground_Init_RTL Ground_UTM EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini | tee GnssBundle.txt
+    mm3d Campari .*${EXTENSION} Ground_Init_RTL Ground_UTM EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini | tee ${CALIB}GnssBundle.txt
     # For reasons unknown this screws it up from csv
     #mm3d ChgSysCo  .*${EXTENSION} Ground_RTL SysCoRTL.xml@SysUTM.xml Ground_UTM
 else
-    mm3d Campari .*${EXTENSION} Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini | tee GnssBundle.txt
+    mm3d Campari .*${EXTENSION} Ground_Init_RTL Ground_RTL EmGPS=[RAWGNSS_N,1] AllFree=1 SH=_mini | tee ${CALIB}GnssBundle.txt
     mm3d ChgSysCo  .*${EXTENSION} Ground_RTL RTLFromExif.xml@SysUTM.xml Ground_UTM
     mm3d OriExport Ori-Ground_UTM/.*xml CameraPositionsUTM.txt AddF=1
 fi

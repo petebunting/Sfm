@@ -13,7 +13,7 @@
 
 
  
-while getopts "e:m:x:y:u:sz:r:z:eq:g:w:proc:csv:h" opt; do  
+while getopts "e:m:x:y:u:sz:r:z:d:g:w:p:t:h" opt; do  
   case ${opt} in
     h)
       echo "Run the workflow for drone acquisition at nadir (and pseudo nadir) angles)."
@@ -23,14 +23,14 @@ while getopts "e:m:x:y:u:sz:r:z:eq:g:w:proc:csv:h" opt; do
       echo "	-x X_OFF         : X (easting) offset for ply file overflow issue (default=0)."
       echo "	-y Y_OFF         : Y (northing) offset for ply file overflow issue (default=0)."
       echo "	-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
-      echo "	-sz size         : resize of imagery eg - 2000"
+      echo "	-s size         : resize of imagery eg - 2000"
       echo "	-r RESOL         : Ground resolution (in meters)"
       echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
       echo "	-d DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
       echo " -g gpu           : Whether to use GPU support -g 1 for use exclude otherwise
       echo " -w win           : Correl window size"
       echo " -p proc        : no of CPU thread used (needed even when using GPU)"
-      echo " -t -CSV        : whether to use a separate csv "
+      echo " -t -CSV        : a txt file or csvwithh coords in mm3d format "
       echo "	-h	             : displays this message and exits."
       echo " "  
       exit 0
@@ -101,7 +101,7 @@ else
 fi
 
 
-mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 DegRap=4
+mm3d Tawny Ortho-MEC-Malt RadiomEgal=1 
 
 
 
