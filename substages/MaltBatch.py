@@ -197,7 +197,7 @@ def proc_malt(subList, subName, bFolder, gP='1', bbox=True):
     # Outputting mm3d output to txt as it is better to keep track of multi process log
     if bbox ==True:
         mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
-                "SzW=1", "DirMEC="+subName, 
+                "SzW="+args.win, "DirMEC="+subName, 
                 "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1", box]
     else:
         mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",

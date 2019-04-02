@@ -36,7 +36,7 @@ import cv2
 #from tqdm import tqdm
 from subprocess import call
 from joblib import Parallel, delayed
-#import gdal, gdal_array
+from osgeo import gdal, gdal_array
 
 
 exiftoolPath=None
@@ -66,6 +66,10 @@ parser.add_argument("-mx", "--mxiter", type=int, required=False, default=100,
 
 parser.add_argument("-nt", "--noT", type=int, required=False, default=-1,
                     help="no of tiles at a time")
+
+parser.add_argument("-stk", "--stack", type=bool, required=False, default=False,
+                    help="no of tiles at a time")
+
 
 args = parser.parse_args() 
 
@@ -205,7 +209,7 @@ bndFolders = [os.path.join(reflFolder, b) for b in bndNames]
 
 # Main func to  write bands to their respective directory
 
-def proc_imgs(i, warp_matrices, bndFolders):#, reflFolder):
+def proc_imgs(i, warp_matrices, bndFolders, panel_irradiance):#, reflFolder):
 
 #    for i in imgset.captures: 
     
@@ -240,43 +244,125 @@ def proc_imgs(i, warp_matrices, bndFolders):#, reflFolder):
          call(cmd)
 # for ref
 #[proc_imgs(imCap, warp_matrices, reflFolder) for imCap in imgset]
+def proc_stack(i, warp_matrices, panel_irradiance):
+    
+    i.compute_reflectance(panel_irradiance) 
+        #i.plot_undistorted_reflectance(panel_irradiance)  
+    
+    
+    cropped_dimensions, edges = imageutils.find_crop_bounds(i, warp_matrices)
+    
+    im_aligned = imageutils.aligned_capture(i, warp_matrices,
+                                            cv2.MOTION_HOMOGRAPHY,
+                                            cropped_dimensions,
+                                            None, img_type="reflectance")
+    
+    im_display = np.zeros((im_aligned.shape[0],im_aligned.shape[1],5), 
+                          dtype=np.float32)
+    
+    rows, cols, bands = im_display.shape
+    driver = gdal.GetDriverByName('GTiff')
+    
+    im = i.images[1]
+    hd, nm = os.path.split(im.path[:-4])
 
-Parallel(n_jobs=args.noT, verbose=2)(delayed(proc_imgs)(imCap, 
-         warp_matrices, bndFolders) for imCap in imgset.captures)
+    filename = "bgrne" #blue,green,red,nir,redEdge
+    #
+    
+    outRaster = driver.Create(filename+".tiff", cols, rows, 5, gdal.GDT_UInt16)
+    normalize = False
+    
+    # Output a 'stack' in the same band order as RedEdge/Alutm
+    # Blue,Green,Red,NIR,RedEdge[,Thermal]
+    
+    # NOTE: NIR and RedEdge are not in wavelength order!
+    
+    i.compute_reflectance(panel_irradiance+[0])
+    
+    for i in range(0,5):
+        outband = outRaster.GetRasterBand(i+1)
+        if normalize:
+            outband.WriteArray(imageutils.normalize(im_aligned[:,:,i])*65535)
+        else:
+            outdata = im_aligned[:,:,i]
+            outdata[outdata<0] = 0
+            outdata[outdata>1] = 1
+            outband.WriteArray(outdata*65535)
+        outband.FlushCache()
+    
+    if im_aligned.shape[2] == 6:
+        outband = outRaster.GetRasterBand(6)
+        outdata = im_aligned[:,:,5] * 100 # scale to centi-C to fit into uint16
+        outdata[outdata<0] = 0
+        outdata[outdata>65535] = 65535
+        outband.WriteArray(outdata)
+        outband.FlushCache()
+    outRaster = None         
 
-#from osgeo import gdal, gdal_array
-#rows, cols, bands = im_display.shape
-#driver = gdal.GetDriverByName('GTiff')
-#filename = "bgrne" #blue,green,red,nir,redEdge
-#
-#if im_aligned.shape[2] == 6:
-#    filename = filename + "t" #thermal
-#outRaster = driver.Create(filename+".tiff", cols, rows, 6, gdal.GDT_UInt16)
-#normalize = False
+def decdeg2dms(dd):
+   is_positive = dd >= 0
+   dd = abs(dd)
+   minutes,seconds = divmod(dd*3600,60)
+   degrees,minutes = divmod(minutes,60)
+   degrees = degrees if is_positive else -degrees
+   return (degrees,minutes,seconds)
 
-# Output a 'stack' in the same band order as RedEdge/Alutm
-# Blue,Green,Red,NIR,RedEdge[,Thermal]
+def write_log(capture, outputPath):
+    header = "SourceFile,\
+    GPSDateStamp,GPSTimeStamp,\
+    GPSLatitude,GpsLatitudeRef,\
+    GPSLongitude,GPSLongitudeRef,\
+    GPSAltitude,GPSAltitudeRef,\
+    FocalLength,\
+    XResolution,YResolution,ResolutionUnits\n"
+    
+    lines = [header]
+    for capture in imgset.captures:
+        #get lat,lon,alt,time
+        outputFilename = capture.uuid+'.tif'
+        fullOutputPath = os.path.join(outputPath, outputFilename)
+        lat,lon,alt = capture.location()
+        #write to csv in format:
+        # IMG_0199_1.tif,"33 deg 32' 9.73"" N","111 deg 51' 1.41"" W",526 m Above Sea Level
+        latdeg, latmin, latsec = decdeg2dms(lat)
+        londeg, lonmin, lonsec = decdeg2dms(lon)
+        latdir = 'North'
+        if latdeg < 0:
+            latdeg = -latdeg
+            latdir = 'South'
+        londir = 'East'
+        if londeg < 0:
+            londeg = -londeg
+            londir = 'West'
+        resolution = capture.images[0].focal_plane_resolution_px_per_mm
+    
+        linestr = '"{}",'.format(fullOutputPath)
+        linestr += capture.utc_time().strftime("%Y:%m:%d,%H:%M:%S,")
+        linestr += '"{:d} deg {:d}\' {:.2f}"" {}",{},'.format(int(latdeg),int(latmin),latsec,latdir[0],latdir)
+        linestr += '"{:d} deg {:d}\' {:.2f}"" {}",{},{:.1f} m Above Sea Level,Above Sea Level,'.format(int(londeg),int(lonmin),lonsec,londir[0],londir,alt)
+        linestr += '{}'.format(capture.images[0].focal_length)
+        linestr += '{},{},mm'.format(resolution,resolution)
+        linestr += '\n' # when writing in text mode, the write command will convert to os.linesep
+        lines.append(linestr)
 
-# NOTE: NIR and RedEdge are not in wavelength order!
+    fullCsvPath = os.path.join(outputPath,'log.csv')
+    with open(fullCsvPath, 'w') as csvfile: #create CSV
+        csvfile.writelines(lines)
+    return fullCsvPath
+        
 
-#capture.compute_reflectance(panel_irradiance+[0])
-#
-#for i in range(0,5):
-#    outband = outRaster.GetRasterBand(i+1)
-#    if normalize:
-#        outband.WriteArray(imageutils.normalize(im_aligned[:,:,i])*65535)
-#    else:
-#        outdata = im_aligned[:,:,i]
-#        outdata[outdata<0] = 0
-#        outdata[outdata>1] = 1
-#        outband.WriteArray(outdata*65535)
-#    outband.FlushCache()
-#
-#if im_aligned.shape[2] == 6:
-#    outband = outRaster.GetRasterBand(6)
-#    outdata = im_aligned[:,:,5] * 100 # scale to centi-C to fit into uint16
-#    outdata[outdata<0] = 0
-#    outdata[outdata>65535] = 65535
-#    outband.WriteArray(outdata)
-#    outband.FlushCache()
-#outRaster = None
+         
+if args.stack == True:
+    
+    Parallel(n_jobs=args.noT, verbose=2)(delayed(proc_imgs)(imCap, 
+             warp_matrices, bndFolders, 
+             panel_irradiance) for imCap in imgset.captures)
+    
+    write_log(capture, reflFolder)
+
+else:
+    Parallel(n_jobs=args.noT, verbose=2)(delayed(proc_stack)(imCap, 
+             warp_matrices, panel_irradiance) for imCap in imgset.captures)
+    
+
+    
