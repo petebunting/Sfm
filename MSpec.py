@@ -36,7 +36,7 @@ import cv2
 #from tqdm import tqdm
 from subprocess import call, check_call
 from joblib import Parallel, delayed
-from osgeo import gdal, gdal_array
+import gdal#, gdal_array
 
 
 exiftoolPath=None
@@ -68,7 +68,7 @@ parser.add_argument("-nt", "--noT", type=int, required=False, default=-1,
                     help="no of tiles at a time")
 
 parser.add_argument("-stk", "--stack", type=bool, required=False, default=False,
-                    help="no of tiles at a time")
+                    help="no of tiles atls a time")
 
 
 args = parser.parse_args() 
@@ -200,12 +200,12 @@ warp_matrices, alignment_pairs = align_template(imAl, args.mxiter,reflFolder,
 
     
 # prep work dir
-
-bndNames = ['Blue', 'Green', 'Red', 'NIR', 'Red edge']
-
-bndFolders = [os.path.join(reflFolder, b) for b in bndNames]
-
-[os.mkdir(bf) for bf in bndFolders]
+if args.stack == False:
+    bndNames = ['Blue', 'Green', 'Red', 'NIR', 'Red edge']
+    
+    bndFolders = [os.path.join(reflFolder, b) for b in bndNames]
+    
+    [os.mkdir(bf) for bf in bndFolders]
 
 # Main func to  write bands to their respective directory
 
@@ -263,13 +263,13 @@ def proc_stack(i, warp_matrices, panel_irradiance):
     rows, cols, bands = im_display.shape
     driver = gdal.GetDriverByName('GTiff')
     
-    im = i.images[1]
-    hd, nm = os.path.split(im.path[:-4])
+    im = i.images[1].path
+    hd, nm = os.path.split(im[:-6])
 
-    filename = "bgrne" #blue,green,red,nir,redEdge
+    filename = os.path.join(reflFolder, nm+'.tif') #blue,green,red,nir,redEdge
     #
     
-    outRaster = driver.Create(filename+".tiff", cols, rows, 5, gdal.GDT_UInt16)
+    outRaster = driver.Create(filename, cols, rows, 5, gdal.GDT_UInt16)
     normalize = False
     
     # Output a 'stack' in the same band order as RedEdge/Alutm
@@ -297,7 +297,12 @@ def proc_stack(i, warp_matrices, panel_irradiance):
         outdata[outdata>65535] = 65535
         outband.WriteArray(outdata)
         outband.FlushCache()
-    outRaster = None         
+    outRaster = None
+    cmd = ["exiftool", "-tagsFromFile", im,  "-file:all", "-iptc:all",
+               "-exif:all",  "-xmp", "-Composite:all", filename, 
+               "-overwrite_original"]
+    call(cmd)
+            
 
 def decdeg2dms(dd):
    is_positive = dd >= 0
@@ -307,73 +312,78 @@ def decdeg2dms(dd):
    degrees = degrees if is_positive else -degrees
    return (degrees,minutes,seconds)
 
-def write_log(capture, outputPath):
-    header = "SourceFile,\
-    GPSDateStamp,GPSTimeStamp,\
-    GPSLatitude,GpsLatitudeRef,\
-    GPSLongitude,GPSLongitudeRef,\
-    GPSAltitude,GPSAltitudeRef,\
-    FocalLength,\
-    XResolution,YResolution,ResolutionUnits\n"
-    
-    lines = [header]
-    for capture in imgset.captures:
-        #get lat,lon,alt,time
-        outputFilename = capture.uuid+'.tif'
-        fullOutputPath = os.path.join(outputPath, outputFilename)
-        lat,lon,alt = capture.location()
-        #write to csv in format:
-        # IMG_0199_1.tif,"33 deg 32' 9.73"" N","111 deg 51' 1.41"" W",526 m Above Sea Level
-        latdeg, latmin, latsec = decdeg2dms(lat)
-        londeg, lonmin, lonsec = decdeg2dms(lon)
-        latdir = 'North'
-        if latdeg < 0:
-            latdeg = -latdeg
-            latdir = 'South'
-        londir = 'East'
-        if londeg < 0:
-            londeg = -londeg
-            londir = 'West'
-        resolution = capture.images[0].focal_plane_resolution_px_per_mm
-    
-        linestr = '"{}",'.format(fullOutputPath)
-        linestr += capture.utc_time().strftime("%Y:%m:%d,%H:%M:%S,")
-        linestr += '"{:d} deg {:d}\' {:.2f}"" {}",{},'.format(int(latdeg),int(latmin),latsec,latdir[0],latdir)
-        linestr += '"{:d} deg {:d}\' {:.2f}"" {}",{},{:.1f} m Above Sea Level,Above Sea Level,'.format(int(londeg),int(lonmin),lonsec,londir[0],londir,alt)
-        linestr += '{}'.format(capture.images[0].focal_length)
-        linestr += '{},{},mm'.format(resolution,resolution)
-        linestr += '\n' # when writing in text mode, the write command will convert to os.linesep
-        lines.append(linestr)
-
-    fullCsvPath = os.path.join(outputPath,'log.csv')
-    with open(fullCsvPath, 'w') as csvfile: #create CSV
-        csvfile.writelines(lines)
-    return fullCsvPath
+#def write_log(capture, outputPath):
+#    header = "SourceFile,\
+#    GPSDateStamp,GPSTimeStamp,\
+#    GPSLatitude,GpsLatitudeRef,\
+#    GPSLongitude,GPSLongitudeRef,\
+#    GPSAltitude,GPSAltitudeRef,\
+#    FocalLength,\
+#    XResolution,YResolution,ResolutionUnits\n"
+#    
+#    lines = [header]
+#    for capture in imgset.captures:
+#        #get lat,lon,alt,time
+#        outputFilename = capture.uuid+'.tif'
+#        fullOutputPath = os.path.join(outputPath, outputFilename)
+#        lat,lon,alt = capture.location()
+#        #write to csv in format:
+#        # IMG_0199_1.tif,"33 deg 32' 9.73"" N","111 deg 51' 1.41"" W",526 m Above Sea Level
+#        latdeg, latmin, latsec = decdeg2dms(lat)
+#        londeg, lonmin, lonsec = decdeg2dms(lon)
+#        latdir = 'North'
+#        if latdeg < 0:
+#            latdeg = -latdeg
+#            latdir = 'South'
+#        londir = 'East'
+#        if londeg < 0:
+#            londeg = -londeg
+#            londir = 'West'
+#        resolution = capture.images[0].focal_plane_resolution_px_per_mm
+#    
+#        linestr = '"{}",'.format(outputFilename)
+#        linestr += capture.utc_time().strftime("%Y:%m:%d,%H:%M:%S,")
+#        linestr += '"{:d} deg {:d}\' {:.2f}"" {}",{},'.format(int(latdeg),int(latmin),latsec,latdir[0],latdir)
+#        linestr += '"{:d} deg {:d}\' {:.2f}"" {}",{},{:.1f} m Above Sea Level,Above Sea Level,'.format(int(londeg),int(lonmin),lonsec,londir[0],londir,alt)
+#        linestr += '{}'.format(capture.images[0].focal_length)
+#        linestr += '{},{},mm'.format(resolution,resolution)
+#        linestr += '\n' # when writing in text mode, the write command will convert to os.linesep
+#        lines.append(linestr)
+#
+#    fullCsvPath = os.path.join(outputPath,'log.csv')
+#    with open(fullCsvPath, 'w') as csvfile: #create CSV
+#        csvfile.writelines(lines)
+#    return fullCsvPath
         
 
-def write_exif(outputPath, fullCsvPath):
-
-    old_dir = os.getcwd()
-    os.chdir(outputPath)
-    cmd = 'exiftool -csv="{}" -overwrite_original .'.format(fullCsvPath)
-    print(cmd)
-    try:
-        check_call(cmd)
-    finally:
-        os.chdir(old_dir)
+#def write_exif(outputPath, fullCsvPath):
+#
+##    old_dir = os.getcwd()
+#    os.chdir(outputPath)
+#    
+#    cmd = ["exiftool", "-csv=log.csv", "-overwrite_original", "$PWD"]
+#    print(cmd)
+##    try:
+#    check_call(cmd)
+##    finally:
+##        os.chdir(old_dir)
 
          
 if args.stack == True:
+    
+
+    [proc_stack(imCap ,warp_matrices,
+                panel_irradiance) for imCap in imgset.captures]
+    
+#    csvPath = write_log(capture, reflFolder)
+#    write_exif(reflFolder, csvPath)
+
+else:
     
     Parallel(n_jobs=args.noT, verbose=2)(delayed(proc_imgs)(imCap, 
              warp_matrices, bndFolders, 
              panel_irradiance) for imCap in imgset.captures)
     
-    csvPath = write_log(capture, reflFolder)
-
-else:
-    Parallel(n_jobs=args.noT, verbose=2)(delayed(proc_stack)(imCap, 
-             warp_matrices, panel_irradiance) for imCap in imgset.captures)
     
 
     
