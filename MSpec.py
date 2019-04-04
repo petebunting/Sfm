@@ -70,6 +70,8 @@ parser.add_argument("-nt", "--noT", type=int, required=False, default=-1,
 parser.add_argument("-stk", "--stack", type=bool, required=False, default=False,
                     help="no of tiles atls a time")
 
+#parser.add_argument("-plots", "--plts", type=bool, required=False, default=False,
+#                    help="no of tiles atls a time")
 
 args = parser.parse_args() 
 
@@ -176,14 +178,18 @@ def align_template(imAl, mx, reflFolder, ref_ind=rf):
     rgb = im_display[:,:,[2,1,0]] 
     cir = im_display[:,:,[3,2,1]] 
     grRE = im_display[:,:,[4,2,1]] 
-#    fig, axes = plt.subplots(1, 3, figsize=(16,16)) 
-#    plt.title("Red-Green-Blue Composite") 
-#    axes[0].imshow(rgb) 
-#    plt.title("Color Infrared (CIR) Composite") 
-#    axes[1].imshow(cir) 
-#    plt.title("Red edge-Green-Red (ReGR) Composite") 
-#    axes[2].imshow(grRE) 
-#    plt.show()
+    
+    
+#    if args.plts == True:
+#        
+#        fig, axes = plt.subplots(1, 3, figsize=(16,16)) 
+#        plt.title("Red-Green-Blue Composite") 
+#        axes[0].imshow(rgb) 
+#        plt.title("Color Infrared (CIR) Composite") 
+#        axes[1].imshow(cir) 
+#        plt.title("Red edge-Green-Red (ReGR) Composite") 
+#        axes[2].imshow(grRE) 
+#        plt.show()
     
     prevList = [rgb, cir, grRE]
     nmList = ['rgb.jpg', 'cir.jpg', 'grRE.jpg']
@@ -298,85 +304,18 @@ def proc_stack(i, warp_matrices, panel_irradiance):
         outband.WriteArray(outdata)
         outband.FlushCache()
     outRaster = None
+    
     cmd = ["exiftool", "-tagsFromFile", im,  "-file:all", "-iptc:all",
                "-exif:all",  "-xmp", "-Composite:all", filename, 
                "-overwrite_original"]
     call(cmd)
             
 
-def decdeg2dms(dd):
-   is_positive = dd >= 0
-   dd = abs(dd)
-   minutes,seconds = divmod(dd*3600,60)
-   degrees,minutes = divmod(minutes,60)
-   degrees = degrees if is_positive else -degrees
-   return (degrees,minutes,seconds)
-
-#def write_log(capture, outputPath):
-#    header = "SourceFile,\
-#    GPSDateStamp,GPSTimeStamp,\
-#    GPSLatitude,GpsLatitudeRef,\
-#    GPSLongitude,GPSLongitudeRef,\
-#    GPSAltitude,GPSAltitudeRef,\
-#    FocalLength,\
-#    XResolution,YResolution,ResolutionUnits\n"
-#    
-#    lines = [header]
-#    for capture in imgset.captures:
-#        #get lat,lon,alt,time
-#        outputFilename = capture.uuid+'.tif'
-#        fullOutputPath = os.path.join(outputPath, outputFilename)
-#        lat,lon,alt = capture.location()
-#        #write to csv in format:
-#        # IMG_0199_1.tif,"33 deg 32' 9.73"" N","111 deg 51' 1.41"" W",526 m Above Sea Level
-#        latdeg, latmin, latsec = decdeg2dms(lat)
-#        londeg, lonmin, lonsec = decdeg2dms(lon)
-#        latdir = 'North'
-#        if latdeg < 0:
-#            latdeg = -latdeg
-#            latdir = 'South'
-#        londir = 'East'
-#        if londeg < 0:
-#            londeg = -londeg
-#            londir = 'West'
-#        resolution = capture.images[0].focal_plane_resolution_px_per_mm
-#    
-#        linestr = '"{}",'.format(outputFilename)
-#        linestr += capture.utc_time().strftime("%Y:%m:%d,%H:%M:%S,")
-#        linestr += '"{:d} deg {:d}\' {:.2f}"" {}",{},'.format(int(latdeg),int(latmin),latsec,latdir[0],latdir)
-#        linestr += '"{:d} deg {:d}\' {:.2f}"" {}",{},{:.1f} m Above Sea Level,Above Sea Level,'.format(int(londeg),int(lonmin),lonsec,londir[0],londir,alt)
-#        linestr += '{}'.format(capture.images[0].focal_length)
-#        linestr += '{},{},mm'.format(resolution,resolution)
-#        linestr += '\n' # when writing in text mode, the write command will convert to os.linesep
-#        lines.append(linestr)
-#
-#    fullCsvPath = os.path.join(outputPath,'log.csv')
-#    with open(fullCsvPath, 'w') as csvfile: #create CSV
-#        csvfile.writelines(lines)
-#    return fullCsvPath
-        
-
-#def write_exif(outputPath, fullCsvPath):
-#
-##    old_dir = os.getcwd()
-#    os.chdir(outputPath)
-#    
-#    cmd = ["exiftool", "-csv=log.csv", "-overwrite_original", "$PWD"]
-#    print(cmd)
-##    try:
-#    check_call(cmd)
-##    finally:
-##        os.chdir(old_dir)
-
          
 if args.stack == True:
     
-
     [proc_stack(imCap ,warp_matrices,
                 panel_irradiance) for imCap in imgset.captures]
-    
-#    csvPath = write_log(capture, reflFolder)
-#    write_exif(reflFolder, csvPath)
 
 else:
     
