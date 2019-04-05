@@ -96,19 +96,15 @@ These process the entire Sfm workflow
 - A script to process photographs with complete exif information outputting orthomosaic, DSM and point cloud (.ply) file
 Typically a DJI phantom or other such platform. This uses Malt for dense matching
 
+**DronePIMs.sh**
+
+- A script like the previous but using the PIMs algorithm
+
+
 **gridproc.sh**
 
 - Process a large dataset (typically 100s-1000s of images) in tiles (this appears to be best for large ortho-mosaics)
 
-**MaltBatch.py**
-
-- This processes data in tiles/chunks using the Malt algorithm, where GPU support is optional
-
-- It is internal to gridproc
-
-**DronePIMs.sh**
-
-- A script like the previous but using the PIMs algorithm
 
 Sub-stage scripts
 ~~~~~~~~~~~~~~~~~
@@ -123,6 +119,11 @@ All areinternal to the complete workflows.
 
 - outputs the orientation results as .txt files and the sparse cloud 
 
+**MaltBatch.py**
+
+- This processes data in tiles/chunks using the Malt algorithm, where GPU support is optional
+
+- It is internal to gridproc
 
 **PimsBatch.py**
 

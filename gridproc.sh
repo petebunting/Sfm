@@ -3,7 +3,7 @@
 #Created on Mon Oct  1 14:40:35 2018
 # Author Ciaran Robb
 # Aberystwyth University
-#""" 
+
 
 # This is a workflow intended for processing very large UAV datasets (eg > 500 images) with MicMac
 # Upon testing various configurations with the current version of MicMac,
@@ -39,7 +39,7 @@ while getopts ":e:u:s:r:z:e:x:g:b:w:p:t:h" opt; do
       echo " -g gp          : GPU support 1 for use"
       echo " -b batch         : no of jobs at any one time"
       echo " -w win           : Correl window size"
-      echo " -t CSV         : a txt or csv file of gnsss etc in correct mm3d format"
+      echo " -t CSV         : a txt or csv file of gnsss etc - default none - something if needed"
       echo "	-h	             : displays this message and exits."
       echo " " 
       exit 0
@@ -99,7 +99,7 @@ echo "Using GPU support"
 #mm3d SetExif ."*JPG" F35=45 F=30 Cam=ILCE-6000  
 # magick convert .*$EXTENSION -resize 50% .*$EXTENSION 
 
-if [  "${csv_set}" = true  ]; then 
+if [  -n "${CSV}" ]; then 
     Orientation.sh -e JPG -u ${UTMZONE} -c Fraser -s ${size} -t ${CSV}
 else
     Orientation.sh -e JPG -u ${UTMZONE} -c Fraser -s ${size}
