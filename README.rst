@@ -136,6 +136,12 @@ All areinternal to the complete workflows.
 
 - this script is an internal option in DronePIMs.sh
 
+**MSpec.py**
+
+- This calculates surface reflectance and aligns the offset band imagery for the MicaSense RedEdge
+
+- Outputs can be either single-band or stacked depending on preference
+
 **MicMac-LocalChantierDescripteur.xml**
 - This is a local descriptor of the camera in the C-Astral Bramor - alter the params for your own camera
 
