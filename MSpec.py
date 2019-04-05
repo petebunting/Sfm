@@ -70,8 +70,8 @@ parser.add_argument("-nt", "--noT", type=int, required=False, default=-1,
 parser.add_argument("-stk", "--stack", type=bool, required=False, default=False,
                     help="no of tiles atls a time")
 
-#parser.add_argument("-plots", "--plts", type=bool, required=False, default=False,
-#                    help="no of tiles atls a time")
+parser.add_argument("-plots", "--plts", type=bool, required=False, default=False,
+                    help="no of tiles atls a time")
 
 args = parser.parse_args() 
 
@@ -96,16 +96,17 @@ Right so each capture means each set of bands 1-5
 This requires the image list to be sorted in a way that can be aligned
 It appears as though micasense have done this with their lib
 
-The git site author claims the warp can be applied to whole image set after choosing a decent calib image
-I doubt this based on results!!! Just using using unwarped images results in non-aligned images
 
 '''
+
+
 
 # RP03-1731303-SC
 #panel_ref = [0.56, 0.56, 0.56, 0.51, 0.55]
 
 # RP03-1731271-SC
 panel_ref = [0.55, 0.56, 0.55, 0.50, 0.54]
+
 
 
 
@@ -131,7 +132,7 @@ else:
 # can be applied to the whole dataset
  
 wildCrd = "IMG_"+args.alg+"*.tif"
-algList = glob(os.path.join('000', wildCrd))
+algList = glob(os.path.join(imagesFolder, wildCrd))
 #algList.sort()
 imAl = capture.Capture.from_filelist(algList) 
 imAl.compute_reflectance(panel_irradiance)
@@ -184,16 +185,16 @@ def align_template(imAl, mx, reflFolder, ref_ind=rf):
     grRE = im_display[:,:,[4,2,1]] 
     
     
-#    if args.plts == True:
-#        
-#        fig, axes = plt.subplots(1, 3, figsize=(16,16)) 
-#        plt.title("Red-Green-Blue Composite") 
-#        axes[0].imshow(rgb) 
-#        plt.title("Color Infrared (CIR) Composite") 
-#        axes[1].imshow(cir) 
-#        plt.title("Red edge-Green-Red (ReGR) Composite") 
-#        axes[2].imshow(grRE) 
-#        plt.show()
+    if args.plts == True:
+        
+        fig, axes = plt.subplots(1, 3, figsize=(16,16)) 
+        plt.title("Red-Green-Blue Composite") 
+        axes[0].imshow(rgb) 
+        plt.title("Color Infrared (CIR) Composite") 
+        axes[1].imshow(cir) 
+        plt.title("Red edge-Green-Red (ReGR) Composite") 
+        axes[2].imshow(grRE) 
+        plt.show()
     
     prevList = [rgb, cir, grRE]
     nmList = ['rgb.jpg', 'cir.jpg', 'grRE.jpg']
