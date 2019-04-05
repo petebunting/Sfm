@@ -101,9 +101,13 @@ I doubt this based on results!!! Just using using unwarped images results in non
 
 '''
 
+# RP03-1731303-SC
+#panel_ref = [0.56, 0.56, 0.56, 0.51, 0.55]
+
+# RP03-1731271-SC
+panel_ref = [0.55, 0.56, 0.55, 0.50, 0.54]
 
 
-panel_ref = [0.67, 0.69, 0.68, 0.61, 0.67]
 
 imgset = imageset.ImageSet.from_directory(imagesFolder)
 
