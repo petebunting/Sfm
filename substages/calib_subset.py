@@ -24,6 +24,9 @@ parser.add_argument("-folder", "--fld", type=str, required=True,
 parser.add_argument("-algo", "--algotype", type=str, required=False, 
                     help="Micmac algo type eg Fraser, RadialBasic")
 
+parser.add_argument("-ext", "--extension", type=str, required=False, 
+                    help="image extention .tif, .jpg")
+
 helpMecsv = ("csv of subset - you should have produced this from main dataset\n"
              "This must be formatted in micmac convention #F=N X Y Z K W P"
              " with spaces as delimiter\n Hint: \n Save a selection of the csv"
@@ -62,7 +65,7 @@ sub2 = sub2.replace(", ", "|")
 
 mm3d = ["mm3d", "Tapas", "Fraser", sub2,  "Out=Calib", "SH=_mini"]
 
-mm3dFinal = ["mm3d", "Tapas", "Fraser", ".*JPG", "Out=Arbitrary", "InCal=Calib", "SH=_mini"]
+mm3dFinal = ["mm3d", "Tapas", "Fraser", args.extenstion, "Out=Arbitrary", "InCal=Calib", "SH=_mini"]
 
 call(mm3d)
 
