@@ -26,7 +26,8 @@ parser.add_argument("-algo", "--algotype", type=str, required=False,
 
 helpMecsv = ("csv of subset - you should have produced this from main dataset\n"
              "This must be formatted in micmac convention #F=N X Y Z K W P"
-             " with spaces as delimiter")
+             " with spaces as delimiter\n Hint: \n Save a selection of the csv"
+             "in QGIS remembering to make the delimiter TAB")
              
 parser.add_argument("-csv", "--csV", type=str, required=False, 
                     help=helpMecsv)
@@ -61,7 +62,7 @@ sub2 = sub2.replace(", ", "|")
 
 mm3d = ["mm3d", "Tapas", "Fraser", sub2,  "Out=Calib", "SH=_mini"]
 
-mm3dFinal = ["mm3d", "Tapas", "Fraser" ".*JPG", "Out=Arbitrary", "InCal=Calib", "SH=_mini"]
+mm3dFinal = ["mm3d", "Tapas", "Fraser", ".*JPG", "Out=Arbitrary", "InCal=Calib", "SH=_mini"]
 
 call(mm3d)
 
