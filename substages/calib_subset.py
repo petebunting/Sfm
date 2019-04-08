@@ -28,7 +28,7 @@ helpMecsv = ("csv of subset - you should have produced this from main dataset\n"
              "This must be formatted in micmac convention #F=N X Y Z K W P"
              " with spaces as delimiter")
              
-parser.add_argument("-csv", "--csV", type=int, required=False, 
+parser.add_argument("-csv", "--csV", type=str, required=False, 
                     help=helpMecsv)
 #
 #parser.add_argument("-end", "--noIm2", type=int, required=False, 
@@ -61,8 +61,8 @@ sub2 = sub2.replace(", ", "|")
 
 mm3d = ["mm3d", "Tapas", "Fraser", sub2,  "Out=Calib", "SH=_mini"]
 
-#mm3dFinal = ["mm3d", "Tapas", "Fraser" ".*JPG", "Out=Arbitrary", "InCal=Sample4Calib-Rel", "SH=_mini"]
+mm3dFinal = ["mm3d", "Tapas", "Fraser" ".*JPG", "Out=Arbitrary", "InCal=Calib", "SH=_mini"]
 
 call(mm3d)
 
-#call(mm3dFinal)
+call(mm3dFinal)
