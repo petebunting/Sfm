@@ -68,10 +68,10 @@ parser.add_argument("-nt", "--noT", type=int, required=False, default=-1,
                     help="no of tiles at a time")
 
 parser.add_argument("-stk", "--stack", type=bool, required=False, default=False,
-                    help="no of tiles atls a time")
+                    help="output stacked rasters")
 
 parser.add_argument("-plots", "--plts", type=bool, required=False, default=False,
-                    help="no of tiles atls a time")
+                    help="whether to plot the alignment")
 
 args = parser.parse_args() 
 
