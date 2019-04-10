@@ -67,8 +67,8 @@ parser.add_argument("-mx", "--mxiter", type=int, required=False, default=100,
 parser.add_argument("-nt", "--noT", type=int, required=False, default=-1,
                     help="no of tiles at a time")
 
-parser.add_argument("-stk", "--stack", type=bool, required=False, default=False,
-                    help="output stacked rasters")
+parser.add_argument("-stk", "--stack", type=int, required=False, default=None,
+                    help="1 = 5 band stack,\n 2 = 2x 3 band images ordered RGB, RedReNir ")
 
 parser.add_argument("-plots", "--plts", type=bool, required=False, default=False,
                     help="whether to plot the alignment")
@@ -211,17 +211,13 @@ warp_matrices, alignment_pairs = align_template(imAl, args.mxiter,reflFolder,
 
     
 # prep work dir
-if args.stack == False:
-    bndNames = ['Blue', 'Green', 'Red', 'NIR', 'Red edge']
-    
-    bndFolders = [os.path.join(reflFolder, b) for b in bndNames]
-    
-    [os.mkdir(bf) for bf in bndFolders]
+
 
 # Main func to  write bands to their respective directory
 
-def proc_imgs(i, warp_matrices, bndFolders, panel_irradiance):#, reflFolder):
-
+def proc_imgs(i, warp_matrices, bndFolders, panel_irradiance):
+    
+    
 #    for i in imgset.captures: 
     
     i.compute_reflectance(panel_irradiance) 
@@ -253,9 +249,51 @@ def proc_imgs(i, warp_matrices, bndFolders, panel_irradiance):#, reflFolder):
                "-exif:all",  "-xmp", "-Composite:all", outfile, 
                "-overwrite_original"]
          call(cmd)
+
+def proc_imgs_comp(i, warp_matrices, bndFolders, panel_irradiance):
+    
+    
+    
+    i.compute_reflectance(panel_irradiance) 
+    #i.plot_undistorted_reflectance(panel_irradiance)  
+
+
+    cropped_dimensions, edges = imageutils.find_crop_bounds(i, warp_matrices)
+    
+    im_aligned = imageutils.aligned_capture(i, warp_matrices,
+                                            cv2.MOTION_HOMOGRAPHY,
+                                            cropped_dimensions,
+                                            None, img_type="reflectance")
+    
+    im_display = np.zeros((im_aligned.shape[0],im_aligned.shape[1],5), dtype=np.float32 )
+    
+    for iM in range(0,im_aligned.shape[2]):
+        im_display[:,:,iM] =  imageutils.normalize(im_aligned[:,:,iM])
+    
+    rgb = im_display[:,:,[2,1,0]] 
+    #cir = im_display[:,:,[3,2,1]] 
+    RRENir = im_display[:,:,[4,3,2]] 
+    
+    imoot = [rgb, RRENir]
+    imtags = ["rgb.tif", "RRENir.tif"]
+    im = i.images[1]
+    hd, nm = os.path.split(im.path[:-5])
+    
+    for ind, k in enumerate(bndFolders):
+         
+         img8 = bytescale(imoot[ind])
+         
+         outfile = os.path.join(k, nm+imtags[ind])
+         
+         imageio.imwrite(outfile, img8)
+        
+         cmd = ["exiftool", "-tagsFromFile", im.path,  "-file:all", "-iptc:all",
+               "-exif:all",  "-xmp", "-Composite:all", outfile, 
+               "-overwrite_original"]
+         call(cmd)
 # for ref
 #[proc_imgs(imCap, warp_matrices, reflFolder) for imCap in imgset]
-def proc_stack(i, warp_matrices, panel_irradiance):
+def proc_stack(i, warp_matrices, bndFolders, panel_irradiance):
     
     i.compute_reflectance(panel_irradiance) 
         #i.plot_undistorted_reflectance(panel_irradiance)  
@@ -317,15 +355,40 @@ def proc_stack(i, warp_matrices, panel_irradiance):
             
 
          
-if args.stack == True:
+if args.stack != None:
     
-    [proc_stack(imCap ,warp_matrices,
-                panel_irradiance) for imCap in imgset.captures]
+    if args.stack == 1:
+        print("Producing 5-band composites")
+        bndNames = ['B', 'G', 'R', 'NIR', 'RE' ]
+        bndFolders = [os.path.join(reflFolder, b) for b in bndNames]
+        [os.mkdir(bf) for bf in bndFolders]
+    
+        [proc_stack(imCap ,warp_matrices,
+                    panel_irradiance) for imCap in imgset.captures]
+        
+    elif args.stack == 2:
+        print("Producing pairs of 3-band composites")
+        #prep the dir
+        bndNames = ['RGB', 'RRENir']
+        bndFolders = [os.path.join(reflFolder, b) for b in bndNames]
+        [os.mkdir(bf) for bf in bndFolders]
+        
+        Parallel(n_jobs=args.noT,
+                 verbose=2)(delayed(proc_imgs_comp)(imCap, warp_matrices,
+                           bndFolders,
+                           panel_irradiance) for imCap in imgset.captures)
+        
 
 else:
+    print("Producing single band images")
     
-    Parallel(n_jobs=args.noT, verbose=2)(delayed(proc_imgs)(imCap, 
-             warp_matrices, bndFolders, 
+    bndNames = ['Blue', 'Green', 'Red', 'NIR', 'Red edge']
+    bndFolders = [os.path.join(reflFolder, b) for b in bndNames]
+    [os.mkdir(bf) for bf in bndFolders]
+    Parallel(n_jobs=args.noT,
+             verbose=2)(delayed(proc_imgs)(imCap,
+             warp_matrices,
+             bndFolders,
              panel_irradiance) for imCap in imgset.captures)
     
     
