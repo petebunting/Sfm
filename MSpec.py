@@ -215,7 +215,7 @@ warp_matrices, alignment_pairs = align_template(imAl, args.mxiter,reflFolder,
 
 # Main func to  write bands to their respective directory
 
-def proc_imgs(i, warp_matrices, bndFolders, panel_irradiance):
+def proc_imgs(i, warp_matrices, bndFolders, panel_irradiance, normalize=None):
     
     
 #    for i in imgset.captures: 
@@ -234,16 +234,17 @@ def proc_imgs(i, warp_matrices, bndFolders, panel_irradiance):
     im_display = np.zeros((im_aligned.shape[0],im_aligned.shape[1],5), dtype=np.float32 )
     
     for iM in range(0,im_aligned.shape[2]):
-        im_display[:,:,iM] =  imageutils.normalize(im_aligned[:,:,iM])
+        im_display[:,:,iM] =  imageutils.normalize(im_aligned[:,:,iM])*65535
     
     for k in range(0,im_display.shape[2]):
          im = i.images[k]
          hd, nm = os.path.split(im.path)
-         
-         img8 = bytescale(im_display[:,:,k])
+         outdata = im_aligned[:,:,i]
+         outdata[outdata<0] = 0
+         outdata[outdata>1] = 1
          
          outfile = os.path.join(bndFolders[k], nm)
-         imageio.imwrite(outfile, img8)
+         imageio.imwrite(outfile, outdata)
         
          cmd = ["exiftool", "-tagsFromFile", im.path,  "-file:all", "-iptc:all",
                "-exif:all",  "-xmp", "-Composite:all", outfile, 
@@ -268,7 +269,7 @@ def proc_imgs_comp(i, warp_matrices, bndFolders, panel_irradiance):
     im_display = np.zeros((im_aligned.shape[0],im_aligned.shape[1],5), dtype=np.float32 )
     
     for iM in range(0,im_aligned.shape[2]):
-        im_display[:,:,iM] =  imageutils.normalize(im_aligned[:,:,iM])
+        im_display[:,:,iM] =  imageutils.normalize(im_aligned[:,:,iM]*65535)
     
     rgb = im_display[:,:,[2,1,0]] 
     #cir = im_display[:,:,[3,2,1]] 
@@ -281,7 +282,7 @@ def proc_imgs_comp(i, warp_matrices, bndFolders, panel_irradiance):
     
     for ind, k in enumerate(bndFolders):
          
-         img8 = bytescale(imoot[ind])
+         img8 = imoot[ind]
          
          outfile = os.path.join(k, nm+imtags[ind])
          

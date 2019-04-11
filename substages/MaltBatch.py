@@ -77,7 +77,7 @@ parser.add_argument("-bbox", "--bb", type=bool, required=False, default=True,
                     help="whether or not to box terrain - default is True")
 
 parser.add_argument("-w", "--wind", type=str, required=False, default='5', 
-                    help="whether or not to box terrain - default is True")
+                    help="The correlation window size - default is 5")
 
 args = parser.parse_args() 
 

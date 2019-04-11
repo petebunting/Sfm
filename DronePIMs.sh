@@ -189,8 +189,11 @@ else
     
     mask_dsm.py -folder $PWD -pims 1
 	 
-
-    mm3d Tawny PIMs-ORTHO/ RadiomEgal=0 Out=Orthophotomosaic.tif
+    if [ -n "${DEQ}" ]; then
+        mm3d Tawny PIMs-ORTHO/ RadiomEgal=${DEQ} Out=Orthophotomosaic.tif
+    else
+        mm3d Tawny PIMs-ORTHO/ RadiomEgal=0 Out=Orthophotomosaic.tif
+   
     #TawnyBatch.py -folder $PWD -num 20,20 -nt -1
 
 
