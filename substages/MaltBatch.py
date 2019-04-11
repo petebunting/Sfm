@@ -121,7 +121,7 @@ else:
 if args.wind is None:
     wnd= 5
 else:
-    wnd = args.win
+    wnd = args.wind
 
 
 fld = args.fld
@@ -200,7 +200,7 @@ def proc_malt(subList, subName, bFolder, gP='1', window='5', bbox=True):
     # Outputting mm3d output to txt as it is better to keep track of multi process log
     if bbox ==True:
         mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
-                "SzW="+args.win, "DirMEC="+subName, 
+                "SzW="+window, "DirMEC="+subName, 
                 "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1", box]
     else:
         mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
@@ -212,7 +212,7 @@ def proc_malt(subList, subName, bFolder, gP='1', window='5', bbox=True):
         print(subName+" missed, will pick it up later")
         pass
     else:       
-        tawny = [mmgpu, 'Tawny', "Ortho-"+subName+'/', 'RadiomEgal=1', 
+        tawny = [mmgpu, 'Tawny', "Ortho-"+subName+'/', 'RadiomEgal=0', 
                  'Out=Orthophotomosaic.tif']
         tf = open(subName+'Tawnylog.txt', "w")  
         call(tawny, stdout=tf)

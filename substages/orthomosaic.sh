@@ -40,11 +40,11 @@ while getopts "f:u:mt:o:h" opt; do
       OUT=$OPTARG
       ;;        
     \?)
-      echo "gpymicmac.sh: Invalid option: -$OPTARG" >&1
+      echo "orthomosaic.sh: Invalid option: -$OPTARG" >&1
       exit 1
       ;;
     :)
-      echo "gpymicmac.sh: Option -$OPTARG requires an argument." >&1
+      echo "orthomosaic.sh: Option -$OPTARG requires an argument." >&1
       exit 1
       ;;
   esac
