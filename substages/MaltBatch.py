@@ -182,9 +182,9 @@ finalList = list(zip(txtList, nameList))
 def proc_malt(subList, subName, bFolder, gP='1', window='5', bbox=True):
     # Yes all this string mucking about is not great but it is better than 
     # dealing with horrific xml, when the info is so simple
-#    tLog = path.join(bFolder, "TawnyLogs")
+    tLog = path.join(bFolder, "TawnyLogs")
 #    mkdir(tLog)
-#    mLog = path.join(bFolder, "MaltLogs")
+    mLog = path.join(bFolder, "MaltLogs")
 #    mkdir(mLog)
     flStr = open(subList).read()
     # first we need the box terrain line
@@ -206,15 +206,15 @@ def proc_malt(subList, subName, bFolder, gP='1', window='5', bbox=True):
         mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
                 "SzW="+window, "DirMEC="+subName, 
                 "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1"]
-    mf = open(subName+'Mlog.txt', "w")            
+    mf = open(path.join(mLog, subName+'Mlog.txt'), "w")            
     ret = call(mm3d, stdout=mf)
     if ret != 0:        
         print(subName+" missed, will pick it up later")
         pass
     else:       
-        tawny = [mmgpu, 'Tawny', "Ortho-"+subName+'/', 'RadiomEgal=0', 
+        tawny = [mmgpu, 'Tawny', "Ortho-"+subName+'/', 'RadiomEgal=1', 
                  'Out=Orthophotomosaic.tif']
-        tf = open(subName+'Tawnylog.txt', "w")  
+        tf = open(path.join(tLog, subName+'Tlog.txt'), "w")  
         call(tawny, stdout=tf)
         mDir = path.join(fld, subName)
         oDir = path.join(fld, "Ortho-"+subName) 
