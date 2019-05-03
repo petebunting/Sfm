@@ -63,7 +63,6 @@ while getopts ":e:a:m:c:x:y:u:s:p:z:e:d:g:p:z:t:w:h" opt; do
       ;;    
 	u)
       UTM=${OPTARG}
-
       ;;
  	s)
       size=${OPTARG} 
@@ -213,7 +212,7 @@ else
     #for f in TawnyBatch/**Orthophotomosaic*.tif; do     
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" OUTPUT/OrthFinal.tif
 
- 
+    mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif Out=pointcloud.ply
     # Create some image histograms for ossim  
     #
     #find TawnyBatch/**Orthophotomosaic*.tif | parallel "ossim-create-histo -i {}" 

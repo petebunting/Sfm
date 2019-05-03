@@ -83,7 +83,7 @@ def _copy_dataset_config(inDataset, FMT = 'Gtiff', outMap = 'copy',
     return outDataset
 
 def stack_rasters(inRas1, inRas2, outRas, blocksize=256):
-    rasterList1 = [1,2,3]
+    rasterList1 = [3,2,1]
     rasterList2 = [2, 3]
     
     inDataset1 = gdal.Open(inRas1)

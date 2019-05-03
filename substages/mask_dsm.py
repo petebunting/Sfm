@@ -251,6 +251,13 @@ if pim is True:
     wildCard2 = "PIMsBatch/*tile*/PIMs-TmpBasc/PIMs-Merged_Masq.tif"
     fileListIm = glob(os.path.join(fl, wildCard1))
     fileListMsk = glob(os.path.join(fl, wildCard2))
+    
+    if len(fileListIm) == 0:
+        wildCard1 = "PIMs-TmpBasc/PIMs-Merged_Prof.tif"
+        wildCard2 = "PIMs-TmpBasc/PIMs-Merged_Masq.tif"
+        fileListIm = glob(os.path.join(fl, wildCard1))
+        fileListMsk = glob(os.path.join(fl, wildCard2))
+        
 
     fileListIm.sort()
     fileListMsk.sort()
