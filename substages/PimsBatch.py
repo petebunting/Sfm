@@ -47,7 +47,7 @@ parser.add_argument("-ori", "--oRI", type=str, required=False,
                     help="ori folder if not the default name of Ground_UTM")
 
 parser.add_argument("-g", "--gp", type=bool, required=False, 
-                    help="gpu use yes or no")
+                    help="gpu use true or false")
 
 parser.add_argument("-nt", "--noT", type=int, required=False, 
                     help="no of tiles at a time")
@@ -182,6 +182,11 @@ for subList in txtList:
     call(tawny)
     
     # sooooo ugly I am getting very lazy
+    outpsm = path.join(subDir, "psm.ply")
+    nuage = ["mm3d", "Nuage2Ply", "PIMs-TmpBasc/PIMs-Merged.xml",  
+             "Attr=PIMs-ORTHO/Orthophotomosaic.tif", "Out="+outpsm.ply]
+    call(nuage)
+    
     newPIMs = path.join(subDir, 'PIMs-'+algo)
     newBasc = path.join(subDir, 'PIMs-TmpBasc')
     newOrtho = path.join(subDir, 'PIMs-ORTHO')

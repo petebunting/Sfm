@@ -68,7 +68,7 @@ mkdir OUTPUT
 
 mm3d PIMs $Algorithm .*${EXTENSION} Ground_UTM DefCor=0 ZoomF=$ZoomF ZReg=$zreg SH=_mini  
 
-mm3d Pims2MNT $Algorithm ZReg=$zreg DoOrtho=1
+mm3d Pims2MNT $Algorithm DoMnt=1 DoOrtho=1
 
 mask_dsm.py -folder $PWD -pims 1
 	 
