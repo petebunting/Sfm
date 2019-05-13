@@ -15,7 +15,7 @@ This uses pymicmac functionality to tile the datset into a grid then processes i
 
 Usage: 
     
-PimsBatch.py -folder $PWD -algo Forest -num 3,3 -zr 0.01 -g 1 
+PimsBatch.py -folder $PWD -algo Forest -num 3,3 -zr 0.02 -zoom 4 
 
 """
 
@@ -25,7 +25,7 @@ from subprocess import call
 from glob2 import glob
 from os import path, mkdir, remove
 from shutil import rmtree, move
-#from joblib import Parallel, delayed
+from joblib import Parallel, delayed
 parser = argparse.ArgumentParser()
 
 parser.add_argument("-folder", "--fld", type=str, required=True, 
@@ -35,7 +35,7 @@ parser.add_argument("-algo", "--algotype", type=str, required=False,
                     help="Micmac algo type eg Forest")
 
 parser.add_argument("-num", "--noCh", type=str, required=False, 
-                    help="number of chunks in grid form eg 2,2")
+                    help="number of chunks in grid form eg 2,2 which is x,y")
 
 parser.add_argument("-zoom", "--zmF", type=str, required=False, 
                     help="Zoom level - eg 1=1 point per pixel, 2 = 1 point per  4 pixels")
@@ -45,6 +45,9 @@ parser.add_argument("-zr", "--zrg", type=str, required=False,
 
 parser.add_argument("-ori", "--oRI", type=str, required=False, 
                     help="ori folder if not the default name of Ground_UTM")
+
+parser.add_argument("-eq", "--egal", type=str, required=False, default='0', 
+                    help="Radiometric equalisation either 0 (default) or 1")
 
 parser.add_argument("-g", "--gp", type=bool, required=False, 
                     help="gpu use true or false")
@@ -177,7 +180,7 @@ for subList in txtList:
     mnt = ['mm3d', 'PIMs2MNT', algo, 'DoOrtho=1', zregu]
     call(mnt)
   
-    tawny = ['mm3d', 'Tawny', 'PIMs-ORTHO/', 'RadiomEgal=0',# 'DegRap=4',
+    tawny = ['mm3d', 'Tawny', 'PIMs-ORTHO/', 'RadiomEgal='+args.egal,# 'DegRap=4',
              'Out=Orthophotomosaic.tif']
     call(tawny)
     
@@ -196,6 +199,11 @@ for subList in txtList:
     toGo = list(zip(origList, mvList))
     [move(f[0], f[1]) for f in toGo] 
     print(mvList)
+    # mm3d does not remove it's leftovers in forest mode.....
+    if algo == 'Forest':
+        trashList = glob(path.join(args.fld, '*MTD*.JPG'))
+        Parallel(n_jobs=-1, verbose=5)(delayed(rmtree)(trash) for trash in trashList)
+
     
 
 
