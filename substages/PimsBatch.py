@@ -60,6 +60,8 @@ parser.add_argument("-max", "--mx", type=int, required=False,
 
 args = parser.parse_args() 
 
+
+# Get round to removing this pish and add defaults in argparse
 if args.oRI is None:
    gOri= "Ground_UTM"
 else:
