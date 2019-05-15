@@ -185,12 +185,6 @@ All are internal to the complete workflows.
 
 - this script is an internal option in DronePIMs.sh
 
-**TawnyBatch.py - DO NOT USE -NOT FINISHED**
-
-- This will process mosaic data in tiles/chunks in preparation for using ossim for a near-seamless mosaic
-
-- this script is an internal option in DronePIMs.sh
-
 **MSpec.py**
 
 - This calculates surface reflectance and aligns the offset band imagery for the MicaSense RedEdge and is to be used prior to the usual processing
