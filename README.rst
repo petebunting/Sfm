@@ -24,11 +24,12 @@ Installation
     export PATH=/my/path/Sfm:$PATH
     
     export PATH=/my/path/Sfm/substages:$PATH
+    
 3. Make them executable
 
 .. code-block:: bash
    
-   chmod +x Sfm/*.sh Sfm/*.py 
+   chmod +x Sfm/*.sh Sfm/*.py Sfm/substages/*.py Sfm/substages/*.sh
 
 4. Update your paths
 
