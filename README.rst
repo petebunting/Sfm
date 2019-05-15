@@ -3,8 +3,49 @@
 Structure from Motion workflows
 ============
 
-A series of python and shell scripts for processing data from drones, originally for the the C-Astral Bramour PPX platform
+A series of python and shell scripts for processing data from drones, originally for the the C-Astral Bramour PPX platform, but will work with most imagery.
 
+Installation
+~~~~~~~~~~~~~~~~~
+
+
+**The scripts**
+
+1. Clone/download/unzip this repo to wherever you wish
+
+2. Add the script folders to your path e.g your .bashrc or .bash_profile
+
+.. code-block:: bash
+    
+    #micmac
+    export PATH=/my/path/micmac/bin:$PATH
+    
+    #sfm scripts
+    export PATH=/my/path/Sfm:$PATH
+    
+    export PATH=/my/path/Sfm/substages:$PATH
+3. Make them executable
+
+.. code-block:: bash
+   
+   chmod +x Sfm/*.sh Sfm/*.py 
+
+4. Update your paths
+
+.. code-block:: bash
+    . ~/.bashrc
+
+**QGIS plugin**
+
+To enable use of MicMac and scripts for those who fear the command line...
+
+This is just a front-end for the native MicMac QT menus at present. The scaled versions that utilise the script functionality are not done as yet, but will be added in due course. 
+
+NOT FINISHED!!! Please wait until I upload to the repo.....
+
+(Unles you wish to manually paste it into your plugin folder and alter the mm3d variable to your own micmac bin path)
+
+5. Copy the micasense libray folder to your python site-packages
 
 Dependencies
 ~~~~~~~~~~~~
@@ -22,7 +63,7 @@ Sfm requires:
 
 https://micmac.ensg.eu/index.php/Accueil
 
-User installation
+Dependency installation
 ~~~~~~~~~~~~~~~~~
 
 **MicMac**
@@ -69,25 +110,27 @@ Install OSSIM via tha ubuntu GIS or equivalent repo
 
 - see here https://trac.osgeo.org/ossim/wiki/ossimPreferenceFile
 
-**The scripts**
-Clone or download then make the folder or files executable in a terminal
+**micasense**
+
+cd into the micasense folder and type 
+
+.. code-block:: python
+
+    python setup.py install
+    
+You will then see the instructions but anyway - activate when using the multspec scripts
 
 .. code-block:: bash
-   
-   chmod +x Sfm/*.sh Sfm/*.py 
 
-Add to your .bashrc or .bash_profile if you wish to execute anywhere
+    conda activate micasense_Sfm
+or
 
+.. code-block:: bash
 
-**QGIS plugin**
+    source activate micasense_Sfm
+    
+This is my own fork of micasense but only has a couple of lines changed as well as getting its dependencies from the official conda
 
-To enable use of MicMac and scripts for those who fear the command line...
-
-This is just a front-end for the native MicMac QT menus at present. The scaled versions that utilise the script functionality are not done as yet, but will be added in due course. 
-
-NOT FINISHED!!! Please wait until I upload to the repo.....
-
-(Unles you wish to manually paste it into your plugin folder and alter the mm3d variable to your own micmac bin path)
 
 Contents
 ~~~~~~~~~~~~~~~~~
