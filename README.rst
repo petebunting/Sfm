@@ -31,6 +31,12 @@ See MicMac install instructions here:
 
 https://micmac.ensg.eu/index.php/Install
 
+If you have a lot of CPU cores, it is almost always better not to bother with GPU aided processing on MicMac in its current state as with lots of jobs/images it will overload the GPU memory.
+
+The only case in which I have found GPU processing to be any use is with my MaltBatch.py script - but you have to manage the no of CPU cores and watch image size/numbers.
+
+If you have relatively few CPU cores, then GPU accerallation is probably more meritful.  
+
 - I have found it is best to install MicMac wthout the GPU as my main install and add it to the path 
 
 - Then I install a separate micmac with GPU support and add it as a variable in shell scripts or the absoulute path when needed
@@ -81,7 +87,7 @@ This is just a front-end for the native MicMac QT menus at present. The scaled v
 
 NOT FINISHED!!! Please wait until I upload to the repo.....
 
-... Unles you wish to manually paste it into your plugin folder and alter the mm3d variable to your own micmac bin path
+(Unles you wish to manually paste it into your plugin folder and alter the mm3d variable to your own micmac bin path)
 
 Contents
 ~~~~~~~~~~~~~~~~~
