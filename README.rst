@@ -116,7 +116,7 @@ Sub-stage scripts
 ~~~~~~~~~~~~~~~~~
 
 These divide the workflow into Orientation, dense cloud/DSM processing and mosaic generation. 
-All areinternal to the complete workflows.
+All are internal to the complete workflows.
 
 
 **Orientation.sh**
@@ -124,6 +124,11 @@ All areinternal to the complete workflows.
 - This performs feature detection, relative orientation, orienation with GNSS and sparse cloud generation
 
 - outputs the orientation results as .txt files and the sparse cloud 
+
+**dense_cloud.sh**
+
+- Processes dense cloud using the PIMs-based algorithms, ortho-mosaic, point-cloud and georefs everything
+
 
 **MaltBatch.py**
 
@@ -145,9 +150,16 @@ All areinternal to the complete workflows.
 
 **MSpec.py**
 
-- This calculates surface reflectance and aligns the offset band imagery for the MicaSense RedEdge
+- This calculates surface reflectance and aligns the offset band imagery for the MicaSense RedEdge and is to be used prior to the usual processing
 
 - Outputs can be either single-band or stacked depending on preference
+
+
+MStack.py
+
+- This uses functionality borrowed from my lib geospatial_learn to stack the 3-band results of processing Micasense red-edge imagery. 
+- As MicMac only supports 3-band images, the most efficient solution I currently have is to dense match RGB and RReNir sperately then merge results (more efficient solution to follow!)
+
 
 **MicMac-LocalChantierDescripteur.xml**
 - This is a local descriptor of the camera in the C-Astral Bramor - alter the params for your own camera
