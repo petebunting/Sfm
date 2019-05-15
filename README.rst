@@ -46,7 +46,6 @@ NOT FINISHED!!! Please wait until I upload to the repo.....
 
 (Unles you wish to manually paste it into your plugin folder and alter the mm3d variable to your own micmac bin path)
 
-5. Copy the micasense libray folder to your python site-packages
 
 Dependencies
 ~~~~~~~~~~~~
