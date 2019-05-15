@@ -1,4 +1,4 @@
-name: micasense
+name: micasense_Sfm
 
 dependencies:
   - python=3.6
