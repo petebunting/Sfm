@@ -189,7 +189,7 @@ for subList in txtList:
     # sooooo ugly I am getting very lazy
     outpsm = path.join(subDir, "psm.ply")
     nuage = ["mm3d", "Nuage2Ply", "PIMs-TmpBasc/PIMs-Merged.xml",  
-             "Attr=PIMs-ORTHO/Orthophotomosaic.tif", "Out="+outpsm.ply]
+             "Attr=PIMs-ORTHO/Orthophotomosaic.tif", "Out="+outpsm]
     call(nuage)
     
     newPIMs = path.join(subDir, 'PIMs-'+algo)
