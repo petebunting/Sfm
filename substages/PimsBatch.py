@@ -24,7 +24,7 @@ import argparse
 from subprocess import call
 from glob2 import glob
 from os import path, mkdir, remove
-from shutil import rmtree, move
+from shutil import rmtree, move, copyfile
 from joblib import Parallel, delayed
 parser = argparse.ArgumentParser()
 
@@ -174,7 +174,7 @@ for subList in txtList:
     
     #orDir = path.join(fld, '"'+sub+'"')
     
-    
+    # This much subprocess calling is all a hack for now....
     mm3d = [mmgpu, "PIMs", algo, sub,  gOri, "DefCor=0",
         zoomF, zregu, 'SH=_mini']
     call(mm3d)
@@ -186,10 +186,14 @@ for subList in txtList:
              'Out=Orthophotomosaic.tif']
     call(tawny)
     
+    conIm = ['mm3d', 'ConvertIm', 'PIMs-ORTHO/Orthophotomosaic.tif', 'Out=PIMs-ORTHO/OrthFinal.tif']
+    call(conIm)
+    copyfile('PIMs-ORTHO/Orthophotomosaic.tfw', 'PIMs-ORTHO/OrthFinal.tfw')
+    
     # sooooo ugly I am getting very lazy
     outpsm = path.join(subDir, "psm.ply")
     nuage = ["mm3d", "Nuage2Ply", "PIMs-TmpBasc/PIMs-Merged.xml",  
-             "Attr=PIMs-ORTHO/Orthophotomosaic.tif", "Out="+outpsm]
+             "Attr=PIMs-ORTHO/OrthFinal.tif", "Out="+outpsm]
     call(nuage)
     
     newPIMs = path.join(subDir, 'PIMs-'+algo)
