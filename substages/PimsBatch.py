@@ -188,7 +188,10 @@ for subList in txtList:
     
     conIm = ['mm3d', 'ConvertIm', 'PIMs-ORTHO/Orthophotomosaic.tif', 'Out=PIMs-ORTHO/OrthFinal.tif']
     call(conIm)
-    copyfile('PIMs-ORTHO/Orthophotomosaic.tfw', 'PIMs-ORTHO/OrthFinal.tfw')
+    
+    
+    copyfile(path.join(args.fld, 'PIMs-ORTHO',  'Orthophotomosaic.tfw'),
+             path.join(args.fld, 'PIMs-ORTHO',  'OrthFinal.tfw'))
     
     # sooooo ugly I am getting very lazy
     outpsm = path.join(subDir, "psm.ply")
