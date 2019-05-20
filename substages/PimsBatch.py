@@ -208,7 +208,8 @@ for subList in txtList:
     toGo = list(zip(origList, mvList))
     [move(f[0], f[1]) for f in toGo] 
     print(mvList)
-    binMe = ['PIMs-Forest', 'PIMs-TmpBasc', 'PIMs-TmpMnt', 'PIMs-TmpMntOrtho']
+    binMe = ['PIMs-Forest', 'PIMs-TmpBasc', 'PIMs-TmpMnt', 'PIMs-TmpMntOrtho',
+             'PIMs-ORTHO']
     Parallel(n_jobs=-1, verbose=5)(delayed(rmtree)(b) for b in binMe)
     # mm3d does not remove it's leftovers in forest mode.....
     if algo == 'Forest':
