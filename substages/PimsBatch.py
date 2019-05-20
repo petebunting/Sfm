@@ -199,19 +199,23 @@ for subList in txtList:
              "Attr=PIMs-ORTHO/OrthFinal.tif", "Out="+outpsm]
     call(nuage)
     
-    newPIMs = path.join(subDir, 'PIMs-'+algo)
-    newBasc = path.join(subDir, 'PIMs-TmpBasc')
-    newOrtho = path.join(subDir, 'PIMs-ORTHO')
-    newTmpM = path.join(subDir, 'PIMs-TmpMnt')
-    newTmpMO = path.join(subDir, 'PIMs-TmpMntOrtho')
-    mvList = [newBasc, newOrtho, newTmpM, newTmpMO, newPIMs]
+    newPIMs = path.join(subDir, 'DSM-'+algo+'.tif')
+    newMasc = path.join(subDir, 'Masq-'+algo+'.tif')
+    newOrtho = path.join(subDir, 'OrthFinal-'+algo+'.tif')
+#    newTmpM = path.join(subDir, 'PIMs-TmpMnt')
+#    newTmpMO = path.join(subDir, 'PIMs-TmpMntOrtho')
+    mvList = [newMasc, newOrtho, newPIMs] #newTmpM, newTmpMO, ]
     toGo = list(zip(origList, mvList))
     [move(f[0], f[1]) for f in toGo] 
     print(mvList)
+    binMe = ['PIMs-Forest', 'PIMs-TmpBasc', 'PIMs-TmpMnt', 'PIMs-TmpMntOrtho']
+    Parallel(n_jobs=-1, verbose=5)(delayed(rmtree)(b) for b in binMe)
     # mm3d does not remove it's leftovers in forest mode.....
     if algo == 'Forest':
         trashList = glob(path.join(args.fld, '*MTD*.JPG'))
         Parallel(n_jobs=-1, verbose=5)(delayed(rmtree)(trash) for trash in trashList)
+        
+    
 
     
 
