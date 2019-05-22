@@ -7,11 +7,13 @@ Created on Tue May 29 16:20:58 2018
 
 https://github.com/Ciaran1981/Sfm
 
-This scripts calls the MicMac PIMs function in chunks for large datasets - gpu use is optional
+This scripts calls the MicMac PIMs function in chunks for large datasets - gpu use is optional 
 
 Tends to overload 11gb GPU with around 30 images+
 
-This uses pymicmac functionality to tile the datset into a grid then processes in sequence
+This uses pymicmac functionality to tile the datset into a grid then processes in sequence.
+As Micmac produces a lot of ancillary data - it is often best with 1000s of images to tile the datset
+to avoid filling your hard disk
 
 Usage: 
     
@@ -136,12 +138,18 @@ tileIt = ['tile.py', '-i', 'Ori-'+gOri, '-e',
 call(tileIt)
 
 
-origList = [path.join(fld, 'PIMs-'+algo), 
+pishList = [path.join(fld, 'PIMs-'+algo), 
             path.join(fld, 'PIMs-TmpBasc'),
             path.join(fld, 'PIMs-ORTHO'),
             path.join(fld, 'PIMs-TmpMnt'),
             path.join(fld, 'PIMs-TmpMntOrtho')]
-#
+
+origList = [path.join(fld, 'PIMs-ORTHO', 'OrthFinal.tif'),
+            path.join(fld, 'PIMs-TmpBasc', 'PIMs-Merged_Prof.tif'),
+            path.join(fld, 'PIMs-TmpBasc', 'PIMs-Merged_Prof.tfw'),
+            path.join(fld, 'PIMs-TmpBasc', 'PIMs-Merged_Masq.tif'),
+            path.join(fld, 'PIMs-TmpBasc', 'PIMs-Merged_Correl.tif')]
+
 txtList = glob(path.join(DMatch,'*.list'))
 nameList = [path.split(i)[1] for i in txtList]
 txtList.sort()
@@ -191,7 +199,7 @@ for subList in txtList:
     
     
     copyfile(path.join(args.fld, 'PIMs-ORTHO',  'Orthophotomosaic.tfw'),
-             path.join(args.fld, 'PIMs-ORTHO',  'OrthFinal.tfw'))
+             path.join(args.fld, subDir,  'OrthFinal.tfw'))
     
     # sooooo ugly I am getting very lazy
     outpsm = path.join(subDir, "psm.ply")
@@ -200,17 +208,18 @@ for subList in txtList:
     call(nuage)
     
     newPIMs = path.join(subDir, 'DSM-'+algo+'.tif')
-    newMasc = path.join(subDir, 'Masq-'+algo+'.tif')
+    newPIMsw = path.join(subDir, 'DSM-'+algo+'.tfw')
     newOrtho = path.join(subDir, 'OrthFinal-'+algo+'.tif')
+    newMasc = path.join(subDir, 'Masq-'+algo+'.tif')
+    newCor = path.join(subDir, 'Correl-'+algo+'.tif')
 #    newTmpM = path.join(subDir, 'PIMs-TmpMnt')
 #    newTmpMO = path.join(subDir, 'PIMs-TmpMntOrtho')
-    mvList = [newMasc, newOrtho, newPIMs] #newTmpM, newTmpMO, ]
+    mvList = [newOrtho, newPIMs, newPIMsw, newMasc, newCor] #newTmpM, newTmpMO, ]
     toGo = list(zip(origList, mvList))
     [move(f[0], f[1]) for f in toGo] 
     print(mvList)
-    binMe = ['PIMs-Forest', 'PIMs-TmpBasc', 'PIMs-TmpMnt', 'PIMs-TmpMntOrtho',
-             'PIMs-ORTHO']
-    Parallel(n_jobs=-1, verbose=5)(delayed(rmtree)(b) for b in binMe)
+    
+    Parallel(n_jobs=-1, verbose=5)(delayed(rmtree)(pish) for pish in pishList)
     # mm3d does not remove it's leftovers in forest mode.....
     if algo == 'Forest':
         trashList = glob(path.join(args.fld, '*MTD*.JPG'))
