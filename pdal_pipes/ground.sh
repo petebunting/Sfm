@@ -1,10 +1,11 @@
 
 
 # this is better
-pdal ground 
+#pdal ground 
 
+source activate pdal
 
-
+pdal translate $1 -o psm.las
 
 pdal translate -i psm.las -o grnd.las outlier smrf range\
    --filters.outlier.method="statistical"\ 

@@ -33,25 +33,25 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-folder", "--fld", type=str, required=True, 
                     help="path to wrkspace")
 
-parser.add_argument("-algo", "--algotype", type=str, required=False, 
+parser.add_argument("-algo", "--algotype", type=str, required=False, default="BigMac",
                     help="Micmac algo type eg Forest")
 
-parser.add_argument("-num", "--noCh", type=str, required=False, 
+parser.add_argument("-num", "--noCh", type=str, required=False, default='2,2',
                     help="number of chunks in grid form eg 2,2 which is x,y")
 
-parser.add_argument("-zoom", "--zmF", type=str, required=False, 
+parser.add_argument("-zoom", "--zmF", type=str, required=False, default='2', 
                     help="Zoom level - eg 1=1 point per pixel, 2 = 1 point per  4 pixels")
 
-parser.add_argument("-zr", "--zrg", type=str, required=False, 
+parser.add_argument("-zr", "--zrg", type=str, required=False, default='0.02',
                     help="z reg term context dependent")
 
-parser.add_argument("-ori", "--oRI", type=str, required=False, 
+parser.add_argument("-ori", "--oRI", type=str, required=False, default="Ground_UTM", 
                     help="ori folder if not the default name of Ground_UTM")
 
 parser.add_argument("-eq", "--egal", type=str, required=False, default='0', 
                     help="Radiometric equalisation either 0 (default) or 1")
 
-parser.add_argument("-g", "--gp", type=bool, required=False, 
+parser.add_argument("-g", "--gp", type=bool, required=False, default=False, 
                     help="gpu use true or false")
 
 parser.add_argument("-nt", "--noT", type=int, required=False, 
@@ -63,41 +63,28 @@ parser.add_argument("-max", "--mx", type=int, required=False,
 args = parser.parse_args() 
 
 
-# Get round to removing this pish and add defaults in argparse
-if args.oRI is None:
-   gOri= "Ground_UTM"
-else:
-    gOri = args.oRI
+# These are just vars for convenience and testing
 
-if args.algotype is None:
-   algo= "BigMac"
-else:
-    algo = args.algotype
+gOri = args.oRI
 
-if args.noCh is None:
-    numChunks = '3,3'
-else:       
-    numChunks = args.noCh
+algo = args.algotype
 
-if args.zrg is None:
-   zregu='ZReg=0.02'
-else:
-    zregu = 'ZReg='+args.zrg
+numChunks = args.noCh
+
+zregu = 'ZReg='+args.zrg
     
-if args.zmF is None:
-   zoomF='ZoomF=2'
-else:
-    zoomF = 'ZoomF='+args.zmF
-    
+zoomF = 'ZoomF='+args.zmF
+ 
+# This will likely become redundant   
 if args.gp is None:
     mmgpu = 'mm3d'
 else:
     mmgpu = '/home/ciaran/MicMacGPU/micmac/bin/mm3d'
     
-if args.noT is None:
-    mp = 4 
-else:
-    mp = args.noT
+#if args.noT is None:
+#    mp = 4 
+#else:
+#    mp = args.noT
 
                         
 #maxIm = args.noIm2
@@ -207,11 +194,11 @@ for subList in txtList:
              "Attr=PIMs-ORTHO/OrthFinal.tif", "Out="+outpsm]
     call(nuage)
     
-    newPIMs = path.join(subDir, 'DSM-'+algo+'.tif')
-    newPIMsw = path.join(subDir, 'DSM-'+algo+'.tfw')
-    newOrtho = path.join(subDir, 'OrthFinal-'+algo+'.tif')
-    newMasc = path.join(subDir, 'Masq-'+algo+'.tif')
-    newCor = path.join(subDir, 'Correl-'+algo+'.tif')
+    newPIMs = path.join(subDir, 'DSM.tif')
+    newPIMsw = path.join(subDir, 'DSM.tfw')
+    newOrtho = path.join(subDir, 'OrthFinal.tif')
+    newMasc = path.join(subDir, 'Masq.tif')
+    newCor = path.join(subDir, 'Correl.tif')
 #    newTmpM = path.join(subDir, 'PIMs-TmpMnt')
 #    newTmpMO = path.join(subDir, 'PIMs-TmpMntOrtho')
     mvList = [newOrtho, newPIMs, newPIMsw, newMasc, newCor] #newTmpM, newTmpMO, ]
