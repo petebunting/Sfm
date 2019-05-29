@@ -174,6 +174,11 @@ for subList in txtList:
         zoomF, zregu, 'SH=_mini']
     call(mm3d)
     
+    # This should come here as the PIMs2MNT command doesn't require the mtd files
+    if algo == 'Forest':
+        trashList = glob(path.join(args.fld, '*MTD*.JPG'))
+        Parallel(n_jobs=-1, verbose=5)(delayed(rmtree)(trash) for trash in trashList)
+    
     mnt = ['mm3d', 'PIMs2MNT', algo, 'DoOrtho=1', zregu]
     call(mnt)
   
@@ -208,9 +213,7 @@ for subList in txtList:
     
     Parallel(n_jobs=-1, verbose=5)(delayed(rmtree)(pish) for pish in pishList)
     # mm3d does not remove it's leftovers in forest mode.....
-    if algo == 'Forest':
-        trashList = glob(path.join(args.fld, '*MTD*.JPG'))
-        Parallel(n_jobs=-1, verbose=5)(delayed(rmtree)(trash) for trash in trashList)
+   
         
     
 

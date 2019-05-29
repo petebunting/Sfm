@@ -73,11 +73,15 @@ parser.add_argument("-max", "--mx", type=int, required=False,
 parser.add_argument("-ovLap", "--ov", type=str, required=False, default='50', 
                     help="tile overlap")
 
+
+parser.add_argument("-p", "--prc", type=str, required=False, default='1', 
+                    help="number of threads - default 1")
+
 parser.add_argument("-bbox", "--bb", type=bool, required=False, default=True, 
                     help="whether or not to box terrain - default is True")
 
-parser.add_argument("-w", "--wind", type=str, required=False, default='5', 
-                    help="The correlation window size - default is 5")
+#parser.add_argument("-w", "--wind", type=str, required=False, default='5', 
+#                    help="The correlation window size - default is 5")
 
 args = parser.parse_args() 
 
@@ -118,15 +122,15 @@ if args.noT is None:
 else:
     mp = args.noT
 
-if args.wind is None:
-    wnd= 5
-else:
-    wnd = args.wind
+#if args.wind is None:
+#    wnd= 5
+#else:
+#    wnd = args.wind
 
 
 fld = args.fld
 
-
+proc = args.prc
 DMatch = path.join(fld, 'DMatch')
 bFolder = path.join(fld, 'MaltBatch')
 
@@ -179,7 +183,7 @@ finalList = list(zip(txtList, nameList))
 #rejectListB = []
 
 # May revert to another way but lets see.....
-def proc_malt(subList, subName, bFolder, gP='1', window='5', bbox=True):
+def proc_malt(subList, subName, bFolder, gP='1', window='2', bbox=True):
     # Yes all this string mucking about is not great but it is better than 
     # dealing with horrific xml, when the info is so simple
     tLog = path.join(bFolder, "TawnyLogs")
@@ -201,11 +205,11 @@ def proc_malt(subList, subName, bFolder, gP='1', window='5', bbox=True):
     if bbox ==True:
         mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
                 "SzW="+window, "DirMEC="+subName, 
-                "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1", box]
+                "UseGpu="+gP, zoomF, zregu, "NbProc="+proc, "EZA=1", box]
     else:
         mm3d = [mmgpu, "Malt", algo,'"'+sub+'"', 'Ori-'+gOri, "DefCor=0", "DoOrtho=1",
                 "SzW="+window, "DirMEC="+subName, 
-                "UseGpu="+gP, zoomF, zregu, "NbProc=1", "EZA=1"]
+                "UseGpu="+gP, zoomF, zregu, "NbProc="+proc, "EZA=1"]
     mf = open(path.join(mLog, subName+'Mlog.txt'), "w")            
     ret = call(mm3d, stdout=mf)
     if ret != 0:        
@@ -240,11 +244,11 @@ def proc_malt(subList, subName, bFolder, gP='1', window='5', bbox=True):
 
 if args.mx is None:
     todoList = Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0], 
-         i[1], bFolder, window=wnd, bbox=args.bb) for i in finalList) 
+         i[1], bFolder, window='2', bbox=args.bb) for i in finalList) 
 else:
     subFinal = finalList[0:args.mx]
     todoList = Parallel(n_jobs=mp,verbose=5)(delayed(proc_malt)(i[0], 
-             i[1], bFolder, window=wnd, bbox=args.bb) for i in subFinal) 
+             i[1], bFolder, window='2', bbox=args.bb) for i in subFinal) 
 
 
 # This is here so we have some account of anything missed due to thread/gpu mem overload issues

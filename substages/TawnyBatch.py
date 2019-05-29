@@ -105,9 +105,6 @@ tileIt = ['tile.py', '-i', 'Ori-'+gOri, '-e',
 
 call(tileIt)
 
-# To avoid the inevitable problems with pyramids not being read
-# This is a sub step in PIMs, so it is assumed the simalr(ish) principle here,
-# it will solve the problem
 #
 txtList = glob(path.join(DMatch,'*.list'))
 nameList = [path.split(i)[1] for i in txtList]
@@ -147,7 +144,7 @@ def proc_tawny(subList, subName, bFolder):#), gP='1', bbox=True):
     inMtd = path.join('PIMs-ORTHO', 'MTDOrtho.xml')
     outMtd = path.join(oDir,'MTDOrtho.xml')        
     copy(inMtd, outMtd) 
-    tawny = ['mm3d', 'Tawny', oDir+'/', 'RadiomEgal=1',# 'DegRap=4',
+    tawny = ['mm3d', 'Tawny', oDir+'/', 'RadiomEgal=0',# 'DegRap=4',
              'Out=Orthophotomosaic.tif']
     ret = call(tawny)
     if ret != 0:        
