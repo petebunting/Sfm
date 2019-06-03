@@ -181,9 +181,16 @@ All are internal to the complete workflows.
 
 **PimsBatch.py**
 
-- This processes data in tiles/chunks using the PIMs algorithm, where GPU support is optional
+- This processes data in tiles/chunks using the PIMs algorithm
 
 - this script is an internal option in DronePIMs.sh
+
+**MntBatch.py**
+
+- This processes data in tiles/chunks using the PIMs2MNT algorithm
+
+With a big dataset - I have found the Ortho generation fills up the HD with 1000s of images.
+Hence, this tiles the ortho generation, assuming you have already globbaly processed the data with PIMs algorithm, and potentially the DSM with PIMs2MNT (without the ortho option).
 
 **MSpec.py**
 
