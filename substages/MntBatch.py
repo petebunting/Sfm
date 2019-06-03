@@ -7,13 +7,13 @@ Created on Tue May 29 16:20:58 2018
 
 https://github.com/Ciaran1981/Sfm
 
-This scripts calls the MicMac PIMs function in chunks for large datasets - gpu use is optional 
+This scripts calls the MicMac PIMs2MNT function in chunks for large datasets
 
-Tends to overload 11gb GPU with around 30 images+
+This assumes you have done PIMs first on the whole dataset and simply wish to tile the Ortho photos - which is the storage heavy operation
 
-This uses pymicmac functionality to tile the datset into a grid then processes in sequence.
+This tiles the datset into a grid then processes in sequence.
 As Micmac produces a lot of ancillary data - it is often best with 1000s of images to tile the datset
-to avoid filling your hard disk
+to avoid filling your hard disk.
 
 Usage: 
     
@@ -34,10 +34,10 @@ parser.add_argument("-folder", "--fld", type=str, required=True,
                     help="path to wrkspace")
 
 parser.add_argument("-algo", "--algotype", type=str, required=False, default="BigMac",
-                    help="Micmac algo type eg Forest")
+                    help="Micmac algo type eg Forest, BigMac, MicMac, QuickMac")
 
 parser.add_argument("-num", "--noCh", type=str, required=False, default='2,2',
-                    help="number of chunks in grid form eg 2,2 which is x,y")
+                    help="number of tiles in grid form eg 2,2 which is x,y")
 
 parser.add_argument("-zoom", "--zmF", type=str, required=False, default='2', 
                     help="Zoom level - eg 1=1 point per pixel, 2 = 1 point per  4 pixels")
@@ -49,10 +49,10 @@ parser.add_argument("-ori", "--oRI", type=str, required=False, default="Ground_U
                     help="ori folder if not the default name of Ground_UTM")
 
 parser.add_argument("-eq", "--egal", type=str, required=False, default='0', 
-                    help="Radiometric equalisation either 0 (default) or 1")
+                    help="Radiometric equalisation either 0 (default) or 1 - entirely context dependent")
 
-parser.add_argument("-g", "--gp", type=bool, required=False, default=False, 
-                    help="gpu use true or false")
+#parser.add_argument("-g", "--gp", type=bool, required=False, default=False, 
+#                    help="gpu use true or false")
 
 parser.add_argument("-nt", "--noT", type=int, required=False, 
                     help="no of tiles at a time")
