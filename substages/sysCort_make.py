@@ -37,7 +37,7 @@ def make_xml(csvFile):
     f3 = E.AuxRUnite
 
     
-    csv = pd.read_table(csvFile, delimiter=" ")
+    csv = pd.read_table(csvFile)#, delimiter=" ")
 #    if len(csv.columns) == 1:
 #        csv = pd.read_table(csvFile, delimiter=" ")
         
