@@ -6,7 +6,7 @@
 
 #https://github.com/Ciaran1981/Sfm
 # example:
-# ./Orientation.sh -e JPG -u "30 +north" -c Fraser -i 3000 -t mycsv.csv
+# Orientation.sh -e JPG -u "30 +north" -i 3000 -c Fraser -t Log.csv -s sub.csv
 
 
 
