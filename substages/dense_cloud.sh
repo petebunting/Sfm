@@ -11,9 +11,9 @@
 
 
 
-while getopts ":e:a:u:z:d:r:o:h" opt; do
-  case $opt in
-    h)  
+while getopts ":e:a:u:z:d:r:o:h:" o; do
+  case ${o} in
+    h) 
       echo "Process dense cloud."
       echo "Usage: dense_cloud.sh -e JPG -a Forest -z 4 -r 0.02"
       echo "-e EXTENSION     : image file type (JPG, jpg, TIF, png..., default=JPG)."
@@ -49,23 +49,25 @@ while getopts ":e:a:u:z:d:r:o:h" opt; do
       orth=${OPTARG}
       ;;
     \?)
-      echo "DronePIMs.sh: Invalid option: -${OPTARG}" >&1
+      echo "dense_cloud.sh: Invalid option: -${OPTARG}" >&1
       exit 1
       ;;
     :)
-      echo "DronePIMs.sh: Option -${OPTARG} requires an argument." >&1
+      echo "dense_cloud.sh: Option -${OPTARG} requires an argument." >&1
       exit 1
       ;;
   esac
 done
 
+shift $((OPTIND-1))
+ 
 mkdir OUTPUT
 
 
 mm3d PIMs $Algorithm .*${EXTENSION} Ground_UTM DefCor=0 ZoomF=$ZoomF ZReg=$zreg SH=_mini  
 
 
-if  [ -o ${orth} ]; then
+if  [ -n "${orth}" ]; then
     echo "Doing ortho imagery"
     mm3d PIMs2MNT $Algorithm DoMnt=1 DoOrtho=1
 
