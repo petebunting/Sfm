@@ -11,7 +11,7 @@
 
 
 
-while getopts ":e:a:u:z:d:g:p:r:o:h" opt; do
+while getopts ":e:a:u:z:d:g:p:r:o:s:h" opt; do
   case $opt in
     h)  
       echo "Process dense cloud."
@@ -25,6 +25,7 @@ while getopts ":e:a:u:z:d:g:p:r:o:h" opt; do
       echo " -p            : no chunks to split the data into for gpu processing"
       echo " -r              : zreg term - context dependent "     
       echo " -o              : do ortho - 0 or 1 "           
+      echo " -s              : do ortho - 0 or 1 "    
       echo "	-h	             : displays this message and exits."
       echo " "
       exit 0 
@@ -56,6 +57,9 @@ while getopts ":e:a:u:z:d:g:p:r:o:h" opt; do
     o)
       orth=${OPTARG}
       ;;
+    s)
+      samp=${OPTARG}
+      ;;
     \?)
       echo "DronePIMs.sh: Invalid option: -${OPTARG}" >&1
       exit 1
@@ -72,11 +76,8 @@ mkdir OUTPUT
 
 mm3d PIMs $Algorithm .*${EXTENSION} Ground_UTM DefCor=0 ZoomF=$ZoomF ZReg=$zreg SH=_mini  
 
-mm3d Pims2MNT $Algorithm DoMnt=1 DoOrtho=1
-
-
-
 if [ -n "${orth}" ]
+    mm3d PIMs2MNT $Algorithm DoMnt=1 DoOrtho=1
 	 
     if [ -n "${DEQ}" ]; then
         mm3d Tawny PIMs-ORTHO/ RadiomEgal=${DEQ} Out=Orthophotomosaic.tif
@@ -88,6 +89,9 @@ if [ -n "${orth}" ]
     cp PIMs-ORTHO/Orthophotomosaic.tfw OUTPUT/OrthFinal.tfw
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" OUTPUT/OrthFinal.tif
     mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/pointcloud.ply
+else
+    mm3d PIMs2MNT $Algorithm DoMnt=1 
+fi
 
 mask_dsm.py -folder $PWD -pims 1
 
@@ -102,6 +106,6 @@ cp PIMs-TmpBasc/PIMs-Merged_Correl.tif OUTPUT/Corr.tif
 gdal_edit.py -a_srs "+proj=utm +zone=${UTM}  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" DSM.tif
 gdal_edit.py -a_srs "+proj=utm +zone=${UTM}  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Mask.tif
 gdal_edit.py -a_srs "+proj=utm +zone=${UTM}  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Corr.tif   
-#for f in TawnyBatch/**Orthophotomosaic*.tif; do     
+ 
 
 
