@@ -11,22 +11,19 @@
 
 
 
-while getopts ":e:a:u:z:d:g:p:r:o:s:h" opt; do
+while getopts ":e:a:u:z:d:r:o:h" opt; do
   case $opt in
     h)  
       echo "Process dense cloud."
       echo "Usage: dense_cloud.sh -e JPG -a Forest -z 4 -r 0.02"
-      echo "	-e EXTENSION     : image file type (JPG, jpg, TIF, png..., default=JPG)."
-      echo "	-a Algorithm     : type of algo eg BigMac, MicMac, Forest, Statue etc"
-      echo "	-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
-      echo "	-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
-      echo "	-d DEQ          : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
-      echo " -g gpu           : Whether to use GPU support, default false"
-      echo " -p            : no chunks to split the data into for gpu processing"
+      echo "-e EXTENSION     : image file type (JPG, jpg, TIF, png..., default=JPG)."
+      echo "-a Algorithm     : type of algo eg BigMac, MicMac, Forest, Statue etc"
+      echo "-u UTMZONE       : UTM Zone of area of interest. Takes form 'NN +north(south)'"
+      echo "-z ZoomF         : Last step in pyramidal dense correlation (default=2, can be in [8,4,2,1])"
+      echo "-d DEQ           : Degree of equalisation between images during mosaicing (See mm3d Tawny)"
       echo " -r              : zreg term - context dependent "     
-      echo " -o              : do ortho - 0 or 1 "           
-      echo " -s              : do ortho - 0 or 1 "    
-      echo "	-h	             : displays this message and exits."
+      echo " -o              : do ortho -True or False "           
+      echo " -h	             : displays this message and exits."
       echo " "
       exit 0 
       ;;    
@@ -44,21 +41,12 @@ while getopts ":e:a:u:z:d:g:p:r:o:s:h" opt; do
       ;;
 	d)
       DEQ=${OPTARG}  
-      ;;
-	g)
-      gpu=${OPTARG}
-      ;; 
-    p)
-      prc=${OPTARG}
       ;; 
     r)
       zreg=${OPTARG}
       ;;
     o)
       orth=${OPTARG}
-      ;;
-    s)
-      samp=${OPTARG}
       ;;
     \?)
       echo "DronePIMs.sh: Invalid option: -${OPTARG}" >&1
@@ -76,13 +64,12 @@ mkdir OUTPUT
 
 mm3d PIMs $Algorithm .*${EXTENSION} Ground_UTM DefCor=0 ZoomF=$ZoomF ZReg=$zreg SH=_mini  
 
-if [ -n "${orth}" ]
+
+if  [ -o ${orth} ]; then
+    echo "Doing ortho imagery"
     mm3d PIMs2MNT $Algorithm DoMnt=1 DoOrtho=1
-	 
-    if [ -n "${DEQ}" ]; then
-        mm3d Tawny PIMs-ORTHO/ RadiomEgal=${DEQ} Out=Orthophotomosaic.tif
-    else
-        mm3d Tawny PIMs-ORTHO/ RadiomEgal=0 Out=Orthophotomosaic.tif
+
+    mm3d Tawny PIMs-ORTHO/ RadiomEgal=0 Out=Orthophotomosaic.tif
    
 
     mm3d ConvertIm PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/OrthFinal.tif
@@ -90,6 +77,7 @@ if [ -n "${orth}" ]
     gdal_edit.py -a_srs "+proj=utm +zone=$UTM +ellps=WGS84 +datum=WGS84 +units=m +no_defs" OUTPUT/OrthFinal.tif
     mm3d Nuage2Ply PIMs-TmpBasc/PIMs-Merged.xml Attr=PIMs-ORTHO/Orthophotomosaic.tif Out=OUTPUT/pointcloud.ply
 else
+    echo "Doing DSM only"
     mm3d PIMs2MNT $Algorithm DoMnt=1 
 fi
 
