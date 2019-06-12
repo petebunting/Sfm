@@ -17,12 +17,25 @@ https://github.com/Ciaran1981/Sfm
 from subprocess import call
 from os import path, chdir
 #import gdal
-import imageio
+#import imageio
 import sys
-#from glob2 import glob
+from glob2 import glob
 #import osr
 from PIL import Image
 from pycmac.utilities import calib_subset, make_sys_utm, make_xml
+from joblib import Parallel, delayed
+
+
+
+def _imresize(image, width):
+    
+    img = Image.open(image)
+    wpercent = (width / float(img.size[0]))
+    hsize = int((float(img.size[1]) * float(wpercent)))
+    
+    img2 = img.resize((width, hsize), Image.ANTIALIAS)
+    
+    img2.save(image)
 
 def _callit(cmd, log=None):
     ret = call(cmd, stdout=log)
@@ -97,8 +110,12 @@ def feature_match(folder, csv=None, proj="30 +north", resize=None, ext="JPG", sc
                  "ChSys=DegreeWGS84@SysUTM.xml", "MTD1=1",  
                  "NameCple=FileImagesNeighbour.xml", "CalcV=1"]
         _callit(oriCon, featlog)
-        
     
+    imList = glob(path.join(folder, "*"+ext))
+    
+
+    
+    Parallel(n_jobs=-1, verbose=5)(delayed(_imresize)(i, resize) for i in imList)
         
     tapi = ["mm3d", "Tapioca", "File", "FileImagesNeighbour.xml", "-1", "@SFS"]
     _callit(tapi)
