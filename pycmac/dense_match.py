@@ -7,6 +7,11 @@ Created on Mon Jun 10 10:52:56 2019
 
 A module which calls Micmac dense matching commands
 
+This is just for convenince  to keep everything in python - MicMac has an
+excellent command line
+
+It does also georef the files
+
 https://github.com/Ciaran1981/Sfm
 
 @author: ciaran
@@ -20,7 +25,8 @@ import sys
 from glob2 import glob
 import osr
 from pycmac.utilities import mask_raster_multi
-
+from shutil import rmtree
+from joblib import Parallel, delayed
 
 
 
@@ -34,7 +40,8 @@ def Malt(folder, proj="30 +north", mode='Ortho', ext="JPG", orientation="Ground_
     Notes
     -----------
     
-    Purely for convenience within python - not really necessary - 
+    Purely for convenience within python - not  necessary - the mm3d cmd line
+    is perfectly good
     
     
     see MicMac tools link for further possible kwargs - just put the module cmd as a kwarg
@@ -124,7 +131,8 @@ def PIMs(folder, mode='BigMac', ext="JPG", orientation="Ground_UTM",
     Notes
     -----------
     
-    Purely for convenience within python - not really necessary - 
+    Purely for convenience within python - not  necessary - the mm3d cmd line
+    is perfectly good
     
     
     see MicMac tools link for further possible args - just put the module cmd as a kwarg
@@ -178,6 +186,14 @@ def PIMs(folder, mode='BigMac', ext="JPG", orientation="Ground_UTM",
     if ret !=0:
         print('A micmac error has occured - check the log file')
         sys.exit() 
+    
+    if mode == 'Forest':
+        pishList = [path.join(folder, 'PIMs-TmpBasc'),
+                    path.join(folder, 'PIMs-ORTHO'),
+                    path.join(folder, 'PIMs-TmpMnt'),
+                    path.join(folder, 'PIMs-TmpMntOrtho')]
+        
+        Parallel(n_jobs=-1, verbose=5)(delayed(rmtree)(pish) for pish in pishList)
 #    
 #    
 def PIMs2MNT(folder, proj="30 +north", mode='BigMac',  DoOrtho='1',  **kwargs):
@@ -188,7 +204,8 @@ def PIMs2MNT(folder, proj="30 +north", mode='BigMac',  DoOrtho='1',  **kwargs):
     Notes
     -----------
     
-    Purely for convenience within python - not really necessary - 
+    Purely for convenience within python - not  necessary - the mm3d cmd line
+    is perfectly good
     
     
     see MicMac tools link for further possible args - just put the module cmd as a kwarg
@@ -251,8 +268,8 @@ def Tawny(folder, proj="30 +north", mode='PIMs', **kwargs):
     Notes
     -----------
     
-    Purely for convenience within python - not really necessary - 
-    
+    Purely for convenience within python - not  necessary - the mm3d cmd line
+    is perfectly good
     
     see MicMac tools link for further possible args - just put the module cmd as a kwarg
     The kwargs must be exactly the same case as the mm3d cmd options

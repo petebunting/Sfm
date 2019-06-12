@@ -18,7 +18,7 @@ import glob2
 from joblib import Parallel, delayed
 import lxml.etree
 import lxml.builder    
-
+from os import path
 from shutil import copy
 from subprocess import call
 import gdal
@@ -84,9 +84,9 @@ def calib_subset(folder, csv, ext="JPG",  algo="Fraser"):
     sub2 = sub2.replace("'", "") 
     sub2 = sub2.replace(", ", "|")                 
     
-    mm3d = ["mm3d", "Tapas", "Fraser", sub2,  "Out=Calib", "SH=_mini"]
+    mm3d = ["mm3d", "Tapas", algo, sub2,  "Out=Calib", "SH=_mini"]
     
-    mm3dFinal = ["mm3d", "Tapas", "Fraser", ".*"+ext, "Out=Arbitrary", 
+    mm3dFinal = ["mm3d", "Tapas", algo, ".*"+ext, "Out=Arbitrary", 
                  "InCal=Calib", "SH=_mini"]
     
     call(mm3d)
@@ -177,7 +177,7 @@ def mv_subset(csv, inFolder, outfolder):
     Parallel(n_jobs=-1,verbose=5)(delayed(copy)(file, 
             outfolder) for file in dfList)
     
-def make_xml(csvFile):
+def make_xml(csvFile, folder):
     
     """
     Make an xml based for the rtl system in micmac
@@ -229,7 +229,30 @@ def make_xml(csvFile):
                            f3('eUniteAngleDegre'))))
     
     et = lxml.etree.ElementTree(xmlDoc)
-    et.write('SysCoRTL.xml', pretty_print=True)
+    ootXml = path.join(folder, 'SysCoRTL.xml')
+    et.write(ootXml, pretty_print=True)
+
+def make_sys_utm(folder, proj):
+    
+    E = lxml.builder.ElementMaker()
+    
+    root = E.SystemeCoord
+    doc = E.BSC
+    f1 = E.TypeCoord
+    f2 = E.AuxR
+    f3 = E.AuxStr
+    
+
+    xmlDoc = (root(doc(f1('eTC_Proj4'),
+                   f2('1'),
+                   f2('1'), 
+                   f2('1'),
+                   f3(proj))))
+    et = lxml.etree.ElementTree(xmlDoc)
+    
+    ootXml = path.join(folder,'SysUTM.xml')
+    et.write(ootXml, pretty_print=True)
+    
     
 def _copy_dataset_config(inDataset, FMT = 'Gtiff', outMap = 'copy',
                           bands = 1):
