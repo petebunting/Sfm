@@ -114,8 +114,8 @@ def feature_match(folder, csv=None, proj="30 +north", resize=None, ext="JPG", sc
     imList = glob(path.join(folder, "*"+ext))
     
 
-    
-    Parallel(n_jobs=-1, verbose=5)(delayed(_imresize)(i, resize) for i in imList)
+    if resize != None:
+        Parallel(n_jobs=-1, verbose=5)(delayed(_imresize)(i, resize) for i in imList)
         
     tapi = ["mm3d", "Tapioca", "File", "FileImagesNeighbour.xml", "-1", "@SFS"]
     _callit(tapi)
