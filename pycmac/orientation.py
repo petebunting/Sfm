@@ -129,7 +129,7 @@ def feature_match(folder, csv=None, proj="30 +north", resize=None, ext="JPG", sc
        
 
 def bundle_adjust(folder, algo="Fraser", csv=None, proj="30 +north",
-                  ext="JPG", calib=None, SH="_mini"):
+                  ext="JPG", calib=None, SH="_mini", gpsAcc='1', exif=False):
     """
     
     A function running the relative orientation/bundle adjustment with micmac 
@@ -150,15 +150,22 @@ def bundle_adjust(folder, algo="Fraser", csv=None, proj="30 +north",
     proj : string
            a UTM zone eg "30 +north" 
     csv : string
-            a csv file of image coordinates in micmac format
+            a csv file of image coordinates in micmac format for a calibration subset
+            needed regardless of whether or not the exif has GPS embedded
     calib : string
             a calibration subset (optional)
     ext : string
                  image extention e.g JPG, tif
-    SH : a reduced set of tie points (output of schnaps command)
-                 image extention e.g JPG, tif
-    
-       
+    SH : string
+        a reduced set of tie points (output of schnaps command)
+                 
+    gpsAcc : string
+        an estimate in metres of the onboard GPS accuracy
+                 
+    exif : bool
+        if the GPS info is embedded in the image exif check this as True to 
+        convert back to geographic coordinates, 
+        If previous steps always used a csv for img coords ignore this          
     """
     if SH is None:
         shFin=""
@@ -173,4 +180,36 @@ def bundle_adjust(folder, algo="Fraser", csv=None, proj="30 +north",
         tlog = open(path.join(folder, algo+'log.txt'), "w")
         tapas = ["mm3d", "Tapas", extFin, "Out=Arbitrary",  shFin]
         _callit(tapas, tlog)
+    
+        
+    basc = ["mm3d", "CenterBascule", extFin, "Arbitrary",  "RAWGNSS_N",
+            "Ground_Init_RTL"]
+    
+    _callit(basc)
+    
+    glog = open(path.join(folder, algo+'GPSlog.txt'), "w")
+    
 
+    
+    if exif is True:
+        
+        campari =["mm3d", "Campari", extFin, "Ground_Init_RTL",
+                  "Ground_RTL", "EmGPS=[RAWGNSS_N,"+gpsAcc+"]", "AllFree=1",
+                  shFin]
+        
+        _callit(campari, glog)
+    
+        sysco = ["mm3d", "ChgSysCo",  extFin, "Ground_RTL",
+                 "RTLFromExif.xml@SysUTM.xml", "Ground_UTM"]
+        _callit(sysco)
+        
+        oriex = ["mm3d", "OriExport", "Ori-Ground_UTM/.*xml",
+                 "CameraPositionsUTM.txt", "AddF=1"]
+        _callit(oriex)
+    else:
+        campari =["mm3d", "Campari", extFin, "Ground_Init_RTL", "Ground_RTL",
+              "EmGPS=[RAWGNSS_N,"+gpsAcc+"]", "AllFree=1", shFin]
+        _callit(campari, glog)
+    
+    
+    
