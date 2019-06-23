@@ -83,7 +83,7 @@ def feature_match(folder, csv=None, proj="30 +north", resize=None, ext="JPG", sc
     projF = "+proj=utm +zone="+proj+"+ellps=WGS84 +datum=WGS84 +units=m +no_defs"
     make_sys_utm(folder, projF)
     
-    make_xml(csv, folder)
+    
     
     featlog = open(path.join(folder, 'Featlog.txt'), "w")
     
@@ -101,12 +101,14 @@ def feature_match(folder, csv=None, proj="30 +north", resize=None, ext="JPG", sc
         oriCon = ["mm3d", "OriConvert", '"#F=N X Y Z"', 
                   "GpsCoordinatesFromExif.txt","RAWGNSS_N",
                   "ChSys=DegreeWGS84@RTLFromExif.xml", "MTD1=1",
-                  "NameCple=FileImagesNeighbour.xml" "CalcV=1"]
+                  "NameCple=FileImagesNeighbour.xml", "CalcV=1"]
         _callit(oriCon, featlog)
         
 
     else:
-        oriCon= ["mm3d", "OriConvert", "OriTxtInFile", csv, "RAWGNSS_N",
+        
+        make_xml(csv, folder)
+        oriCon= ["mm3d", '"#F=N X Y Z"', "OriConvert", "OriTxtInFile", csv, "RAWGNSS_N",
                  "ChSys=DegreeWGS84@SysUTM.xml", "MTD1=1",  
                  "NameCple=FileImagesNeighbour.xml", "CalcV=1"]
         _callit(oriCon, featlog)

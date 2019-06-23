@@ -1,7 +1,7 @@
 name: micasense_Sfm
 
 dependencies:
-  - python=3.6
+  - python=3
   - opencv
   - numpy
   - jupyter
@@ -14,6 +14,8 @@ dependencies:
   - imageio
   - ipywidgets
   - nb_conda
+  - joblib
+  - glob2
   - pip:
     - pyzbar
     - pysolar
