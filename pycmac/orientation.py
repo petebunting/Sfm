@@ -176,11 +176,15 @@ def bundle_adjust(folder, algo="Fraser", csv=None, proj="30 +north",
     
     extFin = '.*'+ext  
     
+    
+    chdir(folder)
+    
     if calib != None:
         calib_subset(folder, csv, ext="JPG",  algo="Fraser")
     else: 
+        #['mm3d', 'Tapas', 'Fraser', '.*tif', 'Out=Arbitrary', 'SH=_mini']
         tlog = open(path.join(folder, algo+'log.txt'), "w")
-        tapas = ["mm3d", "Tapas", extFin, "Out=Arbitrary",  shFin]
+        tapas = ["mm3d",  "Tapas", "Fraser", extFin, "Out=Arbitrary",  shFin]
         _callit(tapas, tlog)
     
         

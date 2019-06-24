@@ -269,20 +269,20 @@ def proc_imgs_comp(i, warp_matrices, bndFolders, panel_irradiance):
     im_display = np.zeros((im_aligned.shape[0],im_aligned.shape[1],5), dtype=np.float32 )
     
     for iM in range(0,im_aligned.shape[2]):
-        im_display[:,:,iM] =  imageutils.normalize(im_aligned[:,:,iM]*65535)
+        im_display[:,:,iM] =  imageutils.normalize(im_aligned[:,:,iM])
     
     rgb = im_display[:,:,[2,1,0]] 
     #cir = im_display[:,:,[3,2,1]] 
     RRENir = im_display[:,:,[4,3,2]] 
     
     imoot = [rgb, RRENir]
-    imtags = ["rgb.tif", "RRENir.tif"]
+    imtags = ["RGB.tif", "RRENir.tif"]
     im = i.images[1]
     hd, nm = os.path.split(im.path[:-5])
     
     for ind, k in enumerate(bndFolders):
          
-         img8 = imoot[ind]
+         img8 = bytescale(imoot[ind])
          
          outfile = os.path.join(k, nm+imtags[ind])
          
@@ -319,7 +319,7 @@ def proc_stack(i, warp_matrices, bndFolders, panel_irradiance):
     filename = os.path.join(reflFolder, nm+'.tif') #blue,green,red,nir,redEdge
     #
     
-    outRaster = driver.Create(filename, cols, rows, 5, gdal.GDT_UInt16)
+    outRaster = driver.Create(filename, cols, rows, 5, gdal.GDT_Byte)
     normalize = False
     
     # Output a 'stack' in the same band order as RedEdge/Alutm
@@ -337,6 +337,7 @@ def proc_stack(i, warp_matrices, bndFolders, panel_irradiance):
             outdata = im_aligned[:,:,i]
             outdata[outdata<0] = 0
             outdata[outdata>1] = 1
+            
             outband.WriteArray(outdata*65535)
         outband.FlushCache()
     
@@ -360,6 +361,13 @@ if args.stack != None:
     
     if args.stack == 1:
         print("Producing 5-band composites")
+        bndNames = ['RGB', 'RRENir']
+        bndFolders = [os.path.join(reflFolder, b) for b in bndNames]
+        [os.mkdir(bf) for bf in bndFolders]
+        [proc_imgs_comp(imCap, warp_matrices, bndFolders, panel_irradiance) for imCap in imgset.captures]
+    
+    if args.stack == 2:
+        print("Producing 5-band composites")
         bndNames = ['B', 'G', 'R', 'NIR', 'RE' ]
         bndFolders = [os.path.join(reflFolder, b) for b in bndNames]
         [os.mkdir(bf) for bf in bndFolders]
@@ -367,7 +375,7 @@ if args.stack != None:
         [proc_stack(imCap ,warp_matrices,
                     panel_irradiance) for imCap in imgset.captures]
         
-    elif args.stack == 2:
+    elif args.stack == 3:
         print("Producing pairs of 3-band composites")
         #prep the dir
         bndNames = ['RGB', 'RRENir']
