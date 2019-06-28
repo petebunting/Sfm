@@ -1,4 +1,4 @@
-#!/home/ciaran/anaconda3/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Tue Nov 13 15:06:06 2018
@@ -15,7 +15,19 @@ import lxml.etree
 import lxml.builder    
 import argparse
 
-def make_xml(csvFile):
+parser = argparse.ArgumentParser()
+
+parser.add_argument("-csv", "--cs", type=str, required=True, 
+                    help="input csv")
+
+parser.add_argument("-d", "--delim", type=str, required=False, default=None, 
+                    help="delimeter for csv")
+parser.add_argument("-kwp", "--ypr", type=str, required=False, default=None, 
+                    help="inclusion of yaw pitch roll - not required")
+
+args = parser.parse_args()
+
+def make_xml(csvFile, delim=args.delim, yaw=args.ypr):
     
     """
     Make an xml based for the rtl system in micmac
@@ -37,7 +49,7 @@ def make_xml(csvFile):
     f3 = E.AuxRUnite
 
     
-    csv = pd.read_table(csvFile)#, delimiter=" ")
+    csv = pd.read_table(csvFile, delimiter=delim)
 #    if len(csv.columns) == 1:
 #        csv = pd.read_table(csvFile, delimiter=" ")
         
@@ -46,7 +58,7 @@ def make_xml(csvFile):
     z = str(csv.Z[0])
     
     # if we are including yaw pitch and roll (k,w,p)
-    if len(csv.columns) == 7:            
+    if yaw !=None:            
         k = str(csv.K[0])
         w = str(csv.W[0])
         p = str(csv.Z[0])          
@@ -69,12 +81,10 @@ def make_xml(csvFile):
     et = lxml.etree.ElementTree(xmlDoc)
     et.write('SysCoRTL.xml', pretty_print=True)
     
-parser = argparse.ArgumentParser()
 
 
-parser.add_argument("-csv", "--cs", type=str, required=True, 
-                    help="input dsm")
-args = parser.parse_args()
+
+
 
 make_xml(args.cs)
 

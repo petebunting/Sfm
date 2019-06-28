@@ -177,7 +177,7 @@ def mv_subset(csv, inFolder, outfolder):
     Parallel(n_jobs=-1,verbose=5)(delayed(copy)(file, 
             outfolder) for file in dfList)
     
-def make_xml(csvFile, folder):
+def make_xml(csvFile, folder, yaw=None):
     
     """
     Make an xml based for the rtl system in micmac
@@ -208,7 +208,7 @@ def make_xml(csvFile, folder):
     z = str(csv.Z[0])
     
     # if we are including yaw pitch and roll (k,w,p)
-    if len(csv.columns) == 7:            
+    if yaw != None:            
         k = str(csv.K[0])
         w = str(csv.W[0])
         p = str(csv.Z[0])          

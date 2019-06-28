@@ -1,4 +1,4 @@
-#!/home/ciaran/anaconda3/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Tue May 29 16:20:58 2018
@@ -27,6 +27,10 @@ parser.add_argument("-algo", "--algotype", type=str, required=False,
 parser.add_argument("-ext", "--extension", type=str, required=False, 
                     help="image extention tif, jpg")
 
+parser.add_argument("-d", "--delim", type=str, required=False, default='" "',  
+                    help="csv delimiter")
+
+    
 helpMecsv = ("csv of subset - you should have produced this from main dataset\n"
              "This must be formatted in micmac convention #F=N X Y Z K W P"
              " with spaces as delimiter\n Hint: \n Save a selection of the csv"
@@ -48,7 +52,7 @@ else:
 
 fld = args.fld
 
-dF = pd.read_table(args.csV)
+dF = pd.read_table(args.csV, sep=args.delim)
 
 imList = list(dF['#F=N'])
 imList.sort()

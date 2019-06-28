@@ -13,16 +13,17 @@ So had to crop everything
 
 """
 
-from PIL import  Image
+#from PIL import  Image
 from glob2 import glob
 from os import path, mkdir
 import argparse
 from subprocess import call
 from joblib import Parallel, delayed
 from shutil import rmtree
-from skimage.io import imread, imsave
+from skimage.io import imread#, imsave
 from skimage.util import crop
 from scipy.misc import bytescale
+import imageio
 
 parser = argparse.ArgumentParser()
 
@@ -52,13 +53,13 @@ def clipper(i, outFolder):
     hd, tl = path.split(i)
     im = imread(i)
     cropped = crop(im, ((120, 0), (0, 0), (0,0)), copy=False)
-    cropped = bytescale(cropped)
+    img8 = bytescale(cropped)
 
 #    cropped =im.crop((120, 0, 1227, 909))
     outFile = path.join(outFolder, tl)
 #    cropped.save(outFile)
-    
-    imsave(outFile, cropped)
+    imageio.imwrite(outFile, img8)
+
     cmd = ["exiftool", "-tagsFromFile", i,  "-file:all", "-iptc:all",
            "-exif:all",  "-xmp", "-Composite:all", outFile, 
            "-overwrite_original"]

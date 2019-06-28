@@ -6,7 +6,7 @@
 
 #https://github.com/Ciaran1981/Sfm
 # example:
-# Orientation.sh -e JPG -u "30 +north" -i 3000 -c Fraser -t Log.csv -s sub.csv
+# Orientation.sh -e JPG -u "30 +north" -i 3000 -c Fraser -t Log_edited.csv -s sub.csv
 
 
 
@@ -82,7 +82,7 @@ echo "</SystemeCoord>                                                           
 if [  -n "${CSV}" ]; then 
     echo "using csv file ${CSV}"  
     mm3d OriConvert OriTxtInFile ${CSV} RAWGNSS_N ChSys=DegreeWGS84@SysUTM.xml MTD1=1  NameCple=FileImagesNeighbour.xml CalcV=1
-    sysCort_make.py -csv ${CSV}  
+    sysCort_make.py -csv ${CSV} -d " "  
 else 
     echo "using exif data"
     mm3d XifGps2Txt .*${EXTENSION} 

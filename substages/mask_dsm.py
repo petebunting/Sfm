@@ -277,6 +277,12 @@ else:
     fileListIm = glob(os.path.join(fl, wildCard1))
     fileListMsk = glob(os.path.join(fl, wildCard2))
     
+    if len(fileListIm) == 0:
+        wildCard1 = "MEC-Malt/Z_Num"+extraNum+"_DeZoom"+zoomF +"_STD-MALT.tif"
+        wildCard2 = "MEC-Malt/AutoMask_STD-MALT_Num_"+maskN+".tif"
+        fileListIm = glob(os.path.join(fl, wildCard1))
+        fileListMsk = glob(os.path.join(fl, wildCard2))
+    
     fileListIm.sort()
     fileListMsk.sort()
     
