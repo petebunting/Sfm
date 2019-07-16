@@ -13,7 +13,7 @@ calib_subset.py -folder mydir -algo Fraser  -csv mycsv.csv
 import argparse
 from subprocess import call
 #from glob2 import glob
-#from os import path
+from os import path
 import pandas as pd
 
 parser = argparse.ArgumentParser()
@@ -24,10 +24,10 @@ parser.add_argument("-folder", "--fld", type=str, required=True,
 parser.add_argument("-algo", "--algotype", type=str, required=False, 
                     help="Micmac algo type eg Fraser, RadialBasic")
 
-parser.add_argument("-ext", "--extension", type=str, required=False, 
+parser.add_argument("-ext", "--extension", type=str, required=False,  default="JPG",
                     help="image extention tif, jpg")
 
-parser.add_argument("-d", "--delim", type=str, required=False, default='" "',  
+parser.add_argument("-d", "--delim", type=str, required=False, default='","',  
                     help="csv delimiter")
 
     
@@ -52,7 +52,7 @@ else:
 
 fld = args.fld
 
-dF = pd.read_table(args.csV, sep=args.delim)
+dF = pd.read_csv(path.abspath(args.csV), sep=args.delim)
 
 imList = list(dF['#F=N'])
 imList.sort()
