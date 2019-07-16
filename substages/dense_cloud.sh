@@ -85,6 +85,8 @@ fi
 
 mask_dsm.py -folder $PWD -pims 1
 
+mm3d GrShade PIMs-TmpBasc/PIMs-Merged_Prof.tif ModeOmbre=IgnE Out=/OUTPUT/Shade.tif
+
 
 cp PIMs-TmpBasc/PIMs-Merged_Prof.tfw OUTPUT/DSM.tfw
 cp PIMs-TmpBasc/PIMs-Merged_Prof.tif OUTPUT/DSM.tif
@@ -97,5 +99,4 @@ gdal_edit.py -a_srs "+proj=utm +zone=${UTM}  +ellps=WGS84 +datum=WGS84 +units=m 
 gdal_edit.py -a_srs "+proj=utm +zone=${UTM}  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Mask.tif
 gdal_edit.py -a_srs "+proj=utm +zone=${UTM}  +ellps=WGS84 +datum=WGS84 +units=m +no_defs" Corr.tif   
  
-
 
