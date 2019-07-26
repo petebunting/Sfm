@@ -88,14 +88,14 @@ done
 
 
 if [  -n "${CSV}" ]; then 
-    Orientation.sh -e JPG -u ${UTMZONE} -cal Fraser -sz ${size} -csv ${CSV}
+    Orientation.sh -e JPG -u ${UTMZONE} -c Fraser -sz ${size} -csv ${CSV}
 else
-    Orientation.sh -e JPG -u ${UTMZONE} -cal Fraser -sz ${size}
+    Orientation.sh -e JPG -u ${UTMZONE} -c Fraser -sz ${size}
 fi
 #Correlation into DEM 
  
 if [ -n "${gpu}" = true ]; then 
-    	/home/ciaran/MicMacGPU/micmac/bin/mm3d Malt UrbanMNE ".*.${EXTENSION}" Ground_UTM UseGpu=1 EZA=1 DoOrtho=1 SzW=${win} ZoomF=${ZoomF} NbProc=${proc}
+    mm3d Malt UrbanMNE ".*.${EXTENSION}" Ground_UTM UseGpu=1 EZA=1 DoOrtho=1 SzW=${win} ZoomF=${ZoomF} NbProc=${proc}
 else
 	mm3d Malt UrbanMNE ".*.${EXTENSION}" Ground_UTM UseGpu=0 EZA=1 DoOrtho=1 SzW=${win} ZoomF=${ZoomF} NbProc=${proc}
 fi
